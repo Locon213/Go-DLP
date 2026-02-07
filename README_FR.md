@@ -77,11 +77,12 @@
    ```
 5. Compilez l'application:
    ```bash
-   go build -o go-dlp .
+   wails build
    ```
 6. Exécutez l'application:
+   L'exécutable compilé sera dans le répertoire `build/bin/`:
    ```bash
-   ./go-dlp
+   ./build/bin/go-dlp
    ```
 
 ## 📖 Documentation

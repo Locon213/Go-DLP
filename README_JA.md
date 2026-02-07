@@ -77,11 +77,12 @@
    ```
 5. アプリケーションをビルド：
    ```bash
-   go build -o go-dlp .
+   wails build
    ```
 6. アプリケーションを実行：
+   コンパイルされた実行ファイルは `build/bin/` ディレクトリにあります：
    ```bash
-   ./go-dlp
+   ./build/bin/go-dlp
    ```
 
 ## 📖 ドキュメント
