@@ -14,11 +14,10 @@ on:
         default: false
 
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.25' 
   NODE_VERSION: '20'
 
 jobs:
-  # Шаг 1: Сборка бинарников под каждую ОС
   build-assets:
     name: Build ${{ matrix.platform }}/${{ matrix.arch }}
     runs-on: ${{ matrix.os }}
@@ -26,7 +25,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Windows
           - os: windows-latest
             platform: windows
             arch: amd64
@@ -35,7 +33,6 @@ jobs:
             platform: windows
             arch: arm64
             ext: .exe
-          # Linux
           - os: ubuntu-latest
             platform: linux
             arch: amd64
@@ -44,7 +41,6 @@ jobs:
             platform: linux
             arch: arm64
             ext: ""
-          # MacOS
           - os: macos-latest
             platform: darwin
             arch: amd64
@@ -64,29 +60,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      # Linux Deps
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      # Сборка Wails
+      # ИСПРАВЛЕНИЕ: Явная установка зависимостей фронтенда
+      - name: Install Frontend Dependencies
+        shell: bash
+        run: |
+          cd frontend
+          npm install
+
       - name: Build Binary
         shell: bash
         run: |
-          mkdir -p dist
-          # Формируем имя выходного файла
           OUT_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
-          
-          # Запуск сборки
           wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
           -ldflags "-s -w -X main.version=${{ inputs.version }}" \
           -o "$OUT_NAME"
 
-      # Упаковка в ZIP (для всех)
       - name: Archive Binary (Zip)
         shell: bash
         run: |
@@ -94,14 +92,16 @@ jobs:
           BINARY="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
           ZIP_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.zip"
           
+          # Используем стандартный zip (есть на всех ОС в GitHub Actions)
+          # На Windows 'zip' доступен через Git Bash, который мы используем (shell: bash)
           if [ "${{ matrix.platform }}" == "windows" ]; then
-            compress-archive -Path "$BINARY" -DestinationPath "$ZIP_NAME"
+            # На Windows используем 7z (он предустановлен) для создания zip
+            7z a "$ZIP_NAME" "$BINARY"
           else
             chmod +x "$BINARY"
-            zip -r "$ZIP_NAME" "$BINARY"
+            zip "$ZIP_NAME" "$BINARY"
           fi
 
-      # Создание DEB пакета (Только для Linux)
       - name: Create Debian Package
         if: matrix.platform == 'linux'
         shell: bash
@@ -109,43 +109,31 @@ jobs:
           VERSION="${{ inputs.version }}"
           ARCH="${{ matrix.arch }}"
           BINARY="Go-DLP_${VERSION}_linux_${ARCH}"
-          
-          # Структура папок
           DEB_DIR="go-dlp_${VERSION}_${ARCH}"
           mkdir -p $DEB_DIR/usr/bin
           mkdir -p $DEB_DIR/usr/share/applications
           mkdir -p $DEB_DIR/DEBIAN
-          
-          # Копирование бинарника
           cp "build/bin/$BINARY" "$DEB_DIR/usr/bin/Go-DLP"
           chmod 755 "$DEB_DIR/usr/bin/Go-DLP"
-          
-          # Создание desktop файла
           cat > $DEB_DIR/usr/share/applications/go-dlp.desktop <<EOF
           [Desktop Entry]
           Name=Go-DLP
-          Comment=Modern yt-dlp Desktop Client
           Exec=/usr/bin/Go-DLP
           Icon=go-dlp
           Terminal=false
           Type=Application
           Categories=Network;Video;
           EOF
-          
-          # Создание control файла
           cat > $DEB_DIR/DEBIAN/control <<EOF
           Package: go-dlp
           Version: ${VERSION}
           Section: network
           Priority: optional
           Architecture: ${ARCH}
-          Depends: libc6, libgtk-3-0, libwebkit2gtk-4.0-37
-          Maintainer: Go-DLP <support@go-dlp.app>
+          Depends: libc6, libgtk-3-0, libwebkit2gtk-4.1-0
+          Maintainer: Go-DLP
           Description: Modern yt-dlp Desktop Client
-           A powerful, cross-platform desktop application.
           EOF
-          
-          # Сборка пакета
           dpkg-deb --build "$DEB_DIR"
           mv "${DEB_DIR}.deb" build/bin/
 
@@ -157,7 +145,6 @@ jobs:
             build/bin/*.zip
             build/bin/*.deb
 
-  # Шаг 2: Создание релиза и загрузка файлов
   publish:
     name: Publish Release
     needs: build-assets
@@ -188,15 +175,3 @@ jobs:
             release-dist/checksums.txt
           body: |
             ## Go-DLP v${{ inputs.version }}
-            
-            ### Downloads
-            | Platform | Arch | File |
-            |----------|------|------|
-            | Windows | amd64 | [Download .zip](Go-DLP_${{ inputs.version }}_windows_amd64.zip) |
-            | Linux | amd64 | [Download .zip](Go-DLP_${{ inputs.version }}_linux_amd64.zip) |
-            | macOS | amd64 | [Download .zip](Go-DLP_${{ inputs.version }}_darwin_amd64.zip) |
-            
-            ### Checksums
-            ```
-            $(cat release-dist/checksums.txt)
-            ```
