@@ -2,7 +2,7 @@
 node_modules/
 
 # Build outputs
-build/
+build/bin/
 dist/
 
 # Binary files

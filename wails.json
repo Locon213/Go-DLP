@@ -8,5 +8,12 @@
   "frontend:dev:serverUrl": "http://127.0.0.1:5173",
   "author": {
     "name": "Locon213"
+  },
+  "info": {
+    "companyName": "Go-DLP",
+    "productName": "Go-DLP",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2026 Locon213",
+    "comments": "Modern yt-dlp Desktop Client"
   }
 }

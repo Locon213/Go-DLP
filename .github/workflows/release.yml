@@ -63,10 +63,35 @@ jobs:
 
       - name: Install Linux dependencies
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev imagemagick
 
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: Convert icon to ICO (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # Install ImageMagick using Chocolatey
+          choco install imagemagick -y
+          # Convert PNG to ICO
+          magick convert build/windows/icon.png -define icon:auto-resize=256,128,64,48,32,16 build/windows/icon.ico
+
+      - name: Convert icon to ICNS (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p build/darwin/iconfile.iconset
+          sips -z 16 16 build/appicon.png --out build/darwin/iconfile.iconset/icon_16x16.png
+          sips -z 32 32 build/appicon.png --out build/darwin/iconfile.iconset/icon_16x16@2x.png
+          sips -z 32 32 build/appicon.png --out build/darwin/iconfile.iconset/icon_32x32.png
+          sips -z 64 64 build/appicon.png --out build/darwin/iconfile.iconset/icon_32x32@2x.png
+          sips -z 128 128 build/appicon.png --out build/darwin/iconfile.iconset/icon_128x128.png
+          sips -z 256 256 build/appicon.png --out build/darwin/iconfile.iconset/icon_128x128@2x.png
+          sips -z 256 256 build/appicon.png --out build/darwin/iconfile.iconset/icon_256x256.png
+          sips -z 512 512 build/appicon.png --out build/darwin/iconfile.iconset/icon_256x256@2x.png
+          sips -z 512 512 build/appicon.png --out build/darwin/iconfile.iconset/icon_512x512.png
+          sips -z 1024 1024 build/appicon.png --out build/darwin/iconfile.iconset/icon_512x512@2x.png
+          iconutil -c icns build/darwin/iconfile.iconset -o build/darwin/iconfile.icns
 
       # ИСПРАВЛЕНИЕ: Явная установка зависимостей фронтенда
       - name: Install Frontend Dependencies
@@ -79,9 +104,16 @@ jobs:
         shell: bash
         run: |
           OUT_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
-          wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
-          -ldflags "-s -w -X main.version=${{ inputs.version }}" \
-          -o "$OUT_NAME"
+          if [ "${{ matrix.platform }}" == "linux" ]; then
+            wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
+            -ldflags "-s -w -X main.version=${{ inputs.version }}" \
+            -tags webkit2_41 \
+            -o "$OUT_NAME"
+          else
+            wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
+            -ldflags "-s -w -X main.version=${{ inputs.version }}" \
+            -o "$OUT_NAME"
+          fi
 
       - name: Archive Binary (Zip)
         shell: bash
@@ -110,28 +142,41 @@ jobs:
           DEB_DIR="go-dlp_${VERSION}_${ARCH}"
           mkdir -p $DEB_DIR/usr/bin
           mkdir -p $DEB_DIR/usr/share/applications
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/256x256/apps
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/128x128/apps
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/64x64/apps
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/48x48/apps
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/32x32/apps
+          mkdir -p $DEB_DIR/usr/share/icons/hicolor/16x16/apps
           mkdir -p $DEB_DIR/DEBIAN
           cp "build/bin/$BINARY" "$DEB_DIR/usr/bin/Go-DLP"
           chmod 755 "$DEB_DIR/usr/bin/Go-DLP"
+          # Copy icons in different sizes
+          cp build/appicon.png $DEB_DIR/usr/share/icons/hicolor/256x256/apps/go-dlp.png
+          convert build/appicon.png -resize 128x128 $DEB_DIR/usr/share/icons/hicolor/128x128/apps/go-dlp.png
+          convert build/appicon.png -resize 64x64 $DEB_DIR/usr/share/icons/hicolor/64x64/apps/go-dlp.png
+          convert build/appicon.png -resize 48x48 $DEB_DIR/usr/share/icons/hicolor/48x48/apps/go-dlp.png
+          convert build/appicon.png -resize 32x32 $DEB_DIR/usr/share/icons/hicolor/32x32/apps/go-dlp.png
+          convert build/appicon.png -resize 16x16 $DEB_DIR/usr/share/icons/hicolor/16x16/apps/go-dlp.png
           cat > $DEB_DIR/usr/share/applications/go-dlp.desktop <<EOF
-          [Desktop Entry]
-          Name=Go-DLP
-          Exec=/usr/bin/Go-DLP
-          Icon=go-dlp
-          Terminal=false
-          Type=Application
-          Categories=Network;Video;
-          EOF
+[Desktop Entry]
+Name=Go-DLP
+Exec=/usr/bin/Go-DLP
+Icon=go-dlp
+Terminal=false
+Type=Application
+Categories=Network;Video;
+EOF
           cat > $DEB_DIR/DEBIAN/control <<EOF
-          Package: go-dlp
-          Version: ${VERSION}
-          Section: network
-          Priority: optional
-          Architecture: ${ARCH}
-          Depends: libc6, libgtk-3-0, libwebkit2gtk-4.1-0
-          Maintainer: Go-DLP
-          Description: Modern yt-dlp Desktop Client
-          EOF
+Package: go-dlp
+Version: ${VERSION}
+Section: network
+Priority: optional
+Architecture: ${ARCH}
+Depends: libc6, libgtk-3-0, libwebkit2gtk-4.1-0
+Maintainer: Go-DLP
+Description: Modern yt-dlp Desktop Client
+EOF
           dpkg-deb --build "$DEB_DIR"
           mv "${DEB_DIR}.deb" build/bin/
 

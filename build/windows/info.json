@@ -1,0 +1,15 @@
+{
+  "fixed": {
+    "file_version": "1.0.0.0"
+  },
+  "info": {
+    "0000": {
+      "ProductVersion": "1.0.0",
+      "CompanyName": "Go-DLP",
+      "FileDescription": "Modern yt-dlp Desktop Client",
+      "LegalCopyright": "Copyright © 2026 Locon213",
+      "ProductName": "Go-DLP",
+      "Comments": "A modern desktop client for yt-dlp"
+    }
+  }
+}
