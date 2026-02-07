@@ -129,15 +129,75 @@ export const apiService = {
   // Конвертация видео
   convertVideo: async (sourcePath: string, targetFormat: string): Promise<void> => {
     return await ConvertVideo(sourcePath, targetFormat);
+  },
+
+  // Работа с версиями приложения
+  getCurrentVersion: async (): Promise<string> => {
+    try {
+      // @ts-ignore - временное игнорирование для wails bindings
+      const result = await window.go.main.App.GetCurrentVersion();
+      return result as string;
+    } catch {
+      return 'dev';
+    }
+  },
+
+  getLatestVersion: async (): Promise<string> => {
+    try {
+      // @ts-ignore
+      const result = await window.go.main.App.GetLatestVersion();
+      return result as string;
+    } catch {
+      return '';
+    }
+  },
+
+  checkForUpdate: async (): Promise<string> => {
+    try {
+      // @ts-ignore
+      const result = await window.go.main.App.CheckForUpdate();
+      return result as string;
+    } catch {
+      return '';
+    }
+  },
+
+  shouldUpdate: async (): Promise<[boolean, string]> => {
+    try {
+      // @ts-ignore
+      const result = await window.go.main.App.ShouldUpdate();
+      return result as [boolean, string];
+    } catch {
+      return [false, ''];
+    }
+  },
+
+  getUpdateDownloadUrl: async (): Promise<string> => {
+    try {
+      // @ts-ignore
+      const result = await window.go.main.App.GetUpdateDownloadUrl();
+      return result as string;
+    } catch {
+      return '';
+    }
+  },
+
+  getReleaseNotes: async (): Promise<string> => {
+    try {
+      // @ts-ignore
+      const result = await window.go.main.App.GetReleaseNotes();
+      return result as string;
+    } catch {
+      return '';
+    }
   }
 };
 
 // Функция подписки на события
-export const subscribeToEvents = <T extends keyof AppEventHandlers>(
-  eventName: T,
-  handler: AppEventHandlers[T]
-): (() => void) => {
-  EventsOn(eventName, handler as any);
-  // Возвращаем функцию отписки (в Wails v2 отписка может быть ограничена)
-  return () => {}; // Пока возвращаем пустую функцию, так как в Wails v2 отписка от событий ограничена
-};
+export function subscribeToEvents<K extends keyof AppEventHandlers>(
+  eventName: K,
+  handler: AppEventHandlers[K]
+): () => void {
+  EventsOn(eventName, handler as (...args: unknown[]) => void);
+  return () => {};
+}

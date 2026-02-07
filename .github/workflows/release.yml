@@ -1,0 +1,217 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Is this a prerelease?'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  GO_VERSION: '1.25'
+  NODE_VERSION: '20'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          cd frontend && npm install
+
+      - name: Run Go tests
+        run: go test -v ./...
+
+  build-and-release:
+    name: Build and Release v${{ github.event.inputs.version }}
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          cd frontend && npm install
+
+      - name: Create version file
+        run: echo ${{ github.event.inputs.version }} > version.txt
+
+      - name: Build for all platforms
+        run: |
+          cd frontend && npm run build
+          cd ..
+          
+          # Windows amd64
+          echo "Building Windows amd64..."
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o "Go-DLP_${{ github.event.inputs.version }}_windows_amd64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+          
+          # Windows arm64
+          echo "Building Windows arm64..."
+          CGO_ENABLED=0 GOOS=windows GOARCH=arm64 go build -o "Go-DLP_${{ github.event.inputs.version }}_windows_arm64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+          
+          # Linux amd64
+          echo "Building Linux amd64..."
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o "Go-DLP_${{ github.event.inputs.version }}_linux_amd64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+          
+          # Linux arm64
+          echo "Building Linux arm64..."
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o "Go-DLP_${{ github.event.inputs.version }}_linux_arm64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+          
+          # macOS amd64
+          echo "Building macOS amd64..."
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o "Go-DLP_${{ github.event.inputs.version }}_darwin_amd64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+          
+          # macOS arm64
+          echo "Building macOS arm64..."
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o "Go-DLP_${{ github.event.inputs.version }}_darwin_arm64.zip" -ldflags "-s -w -X main.version=${{ github.event.inputs.version }}" .
+
+      - name: Create Debian packages
+        run: |
+          version=${{ github.event.inputs.version }}
+          
+          # amd64
+          mkdir -p Go-DLP_${version}_amd64/usr/bin
+          cp Go-DLP_${version}_linux_amd64.zip Go-DLP_${version}_amd64/usr/bin/
+          cat > Go-DLP_${version}_amd64/DEBIAN/control <<EOF
+Package: go-dlp
+Version: ${version}
+Section: network
+Priority: optional
+Architecture: amd64
+Depends: libc6
+Maintainer: Go-DLP <support@go-dlp.app>
+Description: Modern yt-dlp Desktop Client
+ A powerful, cross-platform desktop application for downloading videos from YouTube and 1000+ other platforms.
+EOF
+          mkdir -p Go-DLP_${version}_amd64/DEBIAN
+          dpkg-deb --build Go-DLP_${version}_amd64 go-dlp_${version}_amd64.deb
+          
+          # arm64
+          mkdir -p Go-DLP_${version}_arm64/usr/bin
+          cp Go-DLP_${version}_linux_arm64.zip Go-DLP_${version}_arm64/usr/bin/
+          cat > Go-DLP_${version}_arm64/DEBIAN/control <<EOF
+Package: go-dlp
+Version: ${version}
+Section: network
+Priority: optional
+Architecture: arm64
+Depends: libc6
+Maintainer: Go-DLP <support@go-dlp.app>
+Description: Modern yt-dlp Desktop Client
+ A powerful, cross-platform desktop application for downloading videos from YouTube and 1000+ other platforms.
+EOF
+          mkdir -p Go-DLP_${version}_arm64/DEBIAN
+          dpkg-deb --build Go-DLP_${version}_arm64 go-dlp_${version}_arm64.deb
+
+      - name: Create RPM packages
+        run: |
+          version=${{ github.event.inputs.version }}
+          
+          # Create rpmbuild structure
+          mkdir -p rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          
+          # amd64 spec
+          cat > rpmbuild/SPECS/go-dlp-amd64.spec <<EOF
+Name: go-dlp
+Version: ${version}
+Release: 1%{?dist}
+Summary: Modern yt-dlp Desktop Client
+License: GPLv3
+URL: https://github.com/Locon213/Go-DLP
+Source0: %{name}-%{version}-amd64.tar.gz
+
+%description
+Go-DLP is a powerful, cross-platform desktop application for downloading videos from YouTube and 1000+ other platforms.
+
+%install
+mkdir -p %{buildroot}/usr/bin
+cp %{_builddir}/Go-DLP_${version}_linux_amd64.zip %{buildroot}/usr/bin/
+
+%files
+/usr/bin/Go-DLP_${version}_linux_amd64.zip
+EOF
+          
+          # Create tarball for rpm
+          mkdir -p go-dlp-${version}-amd64
+          cp Go-DLP_${version}_linux_amd64.zip go-dlp-${version}-amd64/
+          tar -czf rpmbuild/SOURCES/go-dlp-${version}-amd64.tar.gz go-dlp-${version}-amd64/
+          
+          # Build rpm
+          rpmbuild --define "_topdir $(pwd)/rpmbuild" -bb rpmbuild/SPECS/go-dlp-amd64.spec
+
+      - name: Create checksums
+        run: |
+          echo "Creating checksums..."
+          sha256sum *.zip *.deb *.rpm > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          body: |
+            ## What's Changed in v${{ github.event.inputs.version }}
+
+            See [CHANGELOG](CHANGELOG.md) for details.
+
+            ## Downloads
+
+            | Platform | Architecture | File |
+            |----------|--------------|------|
+            | Windows | amd64 | [Go-DLP_${{ github.event.inputs.version }}_windows_amd64.zip](Go-DLP_${{ github.event.inputs.version }}_windows_amd64.zip) |
+            | Windows | arm64 | [Go-DLP_${{ github.event.inputs.version }}_windows_arm64.zip](Go-DLP_${{ github.event.inputs.version }}_windows_arm64.zip) |
+            | Linux | amd64 | [Go-DLP_${{ github.event.inputs.version }}_linux_amd64.zip](Go-DLP_${{ github.event.inputs.version }}_linux_amd64.zip) |
+            | Linux | arm64 | [Go-DLP_${{ github.event.inputs.version }}_linux_arm64.zip](Go-DLP_${{ github.event.inputs.version }}_linux_arm64.zip) |
+            | macOS | amd64 | [Go-DLP_${{ github.event.inputs.version }}_darwin_amd64.zip](Go-DLP_${{ github.event.inputs.version }}_darwin_amd64.zip) |
+            | macOS | arm64 | [Go-DLP_${{ github.event.inputs.version }}_darwin_arm64.zip](Go-DLP_${{ github.event.inputs.version }}_darwin_arm64.zip) |
+            | Linux (DEB) | amd64 | [go-dlp_${{ github.event.inputs.version }}_amd64.deb](go-dlp_${{ github.event.inputs.version }}_amd64.deb) |
+            | Linux (DEB) | arm64 | [go-dlp_${{ github.event.inputs.version }}_arm64.deb](go-dlp_${{ github.event.inputs.version }}_arm64.deb) |
+            | Linux (RPM) | amd64 | [go-dlp-${{ github.event.inputs.version }}-1.x86_64.rpm](go-dlp-${{ github.event.inputs.version }}-1.x86_64.rpm) |
+
+            ## Checksums
+
+            ```
+            $(cat checksums.txt)
+            ```
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease }}
+          files: |
+            *.zip
+            *.deb
+            *.rpm
+            checksums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

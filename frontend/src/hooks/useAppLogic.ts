@@ -45,6 +45,14 @@ export const useAppLogic = () => {
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [updateStatus, setUpdateStatus] = useState<string>('');
 
+  // Состояния для обновления приложения
+  const [showAppUpdateModal, setShowAppUpdateModal] = useState<boolean>(false);
+  const [currentAppVersion, setCurrentAppVersion] = useState<string>('');
+  const [latestAppVersion, setLatestAppVersion] = useState<string>('');
+  const [releaseNotes, setReleaseNotes] = useState<string>('');
+  const [downloadUrl, setDownloadUrl] = useState<string>('');
+  const [isCheckingAppVersion, setIsCheckingAppVersion] = useState<boolean>(false);
+
   // Состояние для пути загрузки
   const [downloadPath, setDownloadPath] = useState<string>('');
 
@@ -441,6 +449,55 @@ export const useAppLogic = () => {
       showError('Failed to update yt-dlp');
       setShowUpdateProgress(false);
       setIsUpdatingYtDlp(false);
+    }
+  };
+
+  // Функция для проверки версии приложения
+  const checkAppVersion = async () => {
+    setIsCheckingAppVersion(true);
+    try {
+      const [current, latest, notes, url] = await Promise.all([
+        apiService.getCurrentVersion(),
+        apiService.getLatestVersion(),
+        apiService.getReleaseNotes(),
+        apiService.getUpdateDownloadUrl()
+      ]);
+      setCurrentAppVersion(current);
+      setLatestAppVersion(latest);
+      setReleaseNotes(notes);
+      setDownloadUrl(url);
+      
+      if (latest && current && latest !== current) {
+        // Если доступна новая версия, показываем модальное окно
+        setShowAppUpdateModal(true);
+      } else {
+        showSuccess('Вы используете последнюю версию приложения!');
+      }
+    } catch (error) {
+      console.error('Failed to check app version:', error);
+      showError('Не удалось проверить версию приложения');
+    } finally {
+      setIsCheckingAppVersion(false);
+    }
+  };
+
+  // Функция для открытия модального окна обновления приложения
+  const openAppUpdateModal = async () => {
+    try {
+      const [current, latest, notes, url] = await Promise.all([
+        apiService.getCurrentVersion(),
+        apiService.getLatestVersion(),
+        apiService.getReleaseNotes(),
+        apiService.getUpdateDownloadUrl()
+      ]);
+      setCurrentAppVersion(current);
+      setLatestAppVersion(latest);
+      setReleaseNotes(notes);
+      setDownloadUrl(url);
+      setShowAppUpdateModal(true);
+    } catch (error) {
+      console.error('Failed to load app update info:', error);
+      showError('Не удалось загрузить информацию об обновлении');
     }
   };
 
@@ -930,6 +987,12 @@ export const useAppLogic = () => {
     showUpdateProgress, setShowUpdateProgress,
     updateProgress, setUpdateProgress,
     updateStatus, setUpdateStatus,
+    showAppUpdateModal, setShowAppUpdateModal,
+    currentAppVersion,
+    latestAppVersion,
+    releaseNotes,
+    downloadUrl,
+    isCheckingAppVersion,
     queueItems, setQueueItems,
     downloadHistory, setDownloadHistory,
     notification, setNotification,
@@ -940,6 +1003,8 @@ export const useAppLogic = () => {
     saveSettings,
     checkYtDlpVersion,
     updateYtDlp,
+    checkAppVersion,
+    openAppUpdateModal,
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,

@@ -18,6 +18,7 @@ import PlaylistScreen from './components/PlaylistScreen';
 import QueueScreen from './components/QueueScreen';
 import HistoryScreen from './components/HistoryScreen';
 import UpdateProgressModal from './components/UpdateProgressModal';
+import AppUpdateModal from './components/AppUpdateModal';
 
 // Импорты хука и типов
 import { useAppLogic } from './hooks/useAppLogic';
@@ -57,6 +58,12 @@ const App: React.FC = () => {
     showUpdateProgress,
     updateProgress,
     updateStatus,
+    showAppUpdateModal, setShowAppUpdateModal,
+    currentAppVersion,
+    latestAppVersion,
+    releaseNotes,
+    downloadUrl,
+    isCheckingAppVersion,
     notification, setNotification,
     downloadPath,
     queueItems,
@@ -67,6 +74,7 @@ const App: React.FC = () => {
     saveSettings,
     checkYtDlpVersion,
     updateYtDlp,
+    checkAppVersion,
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,
@@ -324,6 +332,20 @@ const App: React.FC = () => {
             saveSettings={saveSettings}
             clearQueue={handleClearQueue}
             clearCache={handleClearCache}
+            currentAppVersion={currentAppVersion}
+            latestAppVersion={latestAppVersion}
+            isCheckingAppVersion={isCheckingAppVersion}
+            checkAppVersion={checkAppVersion}
+          />
+
+          {/* App Update Modal */}
+          <AppUpdateModal
+            open={showAppUpdateModal}
+            currentVersion={currentAppVersion}
+            latestVersion={latestAppVersion}
+            releaseNotes={releaseNotes}
+            downloadUrl={downloadUrl}
+            onClose={() => setShowAppUpdateModal(false)}
           />
         </Container>
   );

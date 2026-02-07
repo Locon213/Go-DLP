@@ -22,6 +22,10 @@ export function CancelDownload() {
   return window['go']['main']['App']['CancelDownload']();
 }
 
+export function CheckForUpdate() {
+  return window['go']['main']['App']['CheckForUpdate']();
+}
+
 export function ConvertVideo(arg1, arg2) {
   return window['go']['main']['App']['ConvertVideo'](arg1, arg2);
 }
@@ -38,12 +42,20 @@ export function GetActualDownloadPath(arg1) {
   return window['go']['main']['App']['GetActualDownloadPath'](arg1);
 }
 
+export function GetCurrentVersion() {
+  return window['go']['main']['App']['GetCurrentVersion']();
+}
+
 export function GetDownloadDirectory() {
   return window['go']['main']['App']['GetDownloadDirectory']();
 }
 
 export function GetDownloadPath(arg1) {
   return window['go']['main']['App']['GetDownloadPath'](arg1);
+}
+
+export function GetLatestVersion() {
+  return window['go']['main']['App']['GetLatestVersion']();
 }
 
 export function GetLatestYtDlpVersion() {
@@ -54,8 +66,16 @@ export function GetPlaylistItems(arg1) {
   return window['go']['main']['App']['GetPlaylistItems'](arg1);
 }
 
+export function GetReleaseNotes() {
+  return window['go']['main']['App']['GetReleaseNotes']();
+}
+
 export function GetSettings() {
   return window['go']['main']['App']['GetSettings']();
+}
+
+export function GetUpdateDownloadUrl() {
+  return window['go']['main']['App']['GetUpdateDownloadUrl']();
 }
 
 export function GetYtDlpVersion() {
@@ -76,6 +96,10 @@ export function SetDownloadDirectory(arg1) {
 
 export function SetupDependencies() {
   return window['go']['main']['App']['SetupDependencies']();
+}
+
+export function ShouldUpdate() {
+  return window['go']['main']['App']['ShouldUpdate']();
 }
 
 export function UpdateAutoRedirectToQueue(arg1) {

@@ -11,6 +11,8 @@ export function CancelConversion():Promise<void>;
 
 export function CancelDownload():Promise<void>;
 
+export function CheckForUpdate():Promise<string>;
+
 export function ConvertVideo(arg1:string,arg2:string):Promise<void>;
 
 export function DownloadPlaylist(arg1:string,arg2:string,arg3:string,arg4:number,arg5:number):Promise<void>;
@@ -19,15 +21,23 @@ export function DownloadVideo(arg1:string,arg2:string,arg3:string):Promise<void>
 
 export function GetActualDownloadPath(arg1:string):Promise<string>;
 
+export function GetCurrentVersion():Promise<string>;
+
 export function GetDownloadDirectory():Promise<string>;
 
 export function GetDownloadPath(arg1:string):Promise<string>;
+
+export function GetLatestVersion():Promise<string>;
 
 export function GetLatestYtDlpVersion():Promise<string>;
 
 export function GetPlaylistItems(arg1:string):Promise<string>;
 
+export function GetReleaseNotes():Promise<string>;
+
 export function GetSettings():Promise<string>;
+
+export function GetUpdateDownloadUrl():Promise<string>;
 
 export function GetYtDlpVersion():Promise<string>;
 
@@ -38,6 +48,8 @@ export function SelectDownloadDirectory():Promise<string>;
 export function SetDownloadDirectory(arg1:string):Promise<void>;
 
 export function SetupDependencies():Promise<void>;
+
+export function ShouldUpdate():Promise<boolean>;
 
 export function UpdateAutoRedirectToQueue(arg1:boolean):Promise<void>;
 

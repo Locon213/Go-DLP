@@ -185,3 +185,45 @@ func (a *App) ConvertVideo(sourcePath, targetFormat string) error {
 func (a *App) GetActualDownloadPath(title string) (string, error) {
 	return a.getActualDownloadPathInternal(title)
 }
+
+// GetCurrentVersion returns the current application version
+//
+//export GetCurrentVersion
+func (a *App) GetCurrentVersion() string {
+	return GetCurrentVersion()
+}
+
+// GetLatestVersion returns the latest version from GitHub
+//
+//export GetLatestVersion
+func (a *App) GetLatestVersion() (string, error) {
+	return GetLatestVersion()
+}
+
+// CheckForUpdate checks if a newer version is available
+//
+//export CheckForUpdate
+func (a *App) CheckForUpdate() (string, error) {
+	return CheckForUpdate()
+}
+
+// ShouldUpdate checks if an update is available and returns update info
+//
+//export ShouldUpdate
+func (a *App) ShouldUpdate() (bool, string, error) {
+	return ShouldUpdate()
+}
+
+// GetUpdateDownloadUrl returns the appropriate download URL for the current platform
+//
+//export GetUpdateDownloadUrl
+func (a *App) GetUpdateDownloadUrl() (string, error) {
+	return GetUpdateDownloadUrl()
+}
+
+// GetReleaseNotes returns the release notes for the latest version
+//
+//export GetReleaseNotes
+func (a *App) GetReleaseNotes() (string, error) {
+	return GetReleaseNotes()
+}

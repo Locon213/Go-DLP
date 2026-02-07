@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch } from '@mui/material';
-import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, AccountCircle as ChromeIcon, AccountBox as FirefoxIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, AccountCircle as ChromeIcon, AccountBox as FirefoxIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon } from '@mui/icons-material';
 import LanguageSelector from './LanguageSelector';
 import { LanguageCode } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
@@ -32,6 +32,10 @@ interface SettingsModalProps {
   setAutoRedirectToQueue: (value: boolean) => void;
   clearQueue: () => void;
   clearCache: () => void;
+  currentAppVersion: string;
+  latestAppVersion: string;
+  isCheckingAppVersion: boolean;
+  checkAppVersion: () => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -60,7 +64,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   autoRedirectToQueue,
   setAutoRedirectToQueue,
   clearQueue,
-  clearCache
+  clearCache,
+  currentAppVersion,
+  latestAppVersion,
+  isCheckingAppVersion,
+  checkAppVersion,
 }) => {
   const { t } = useLanguage();
 
@@ -283,6 +291,35 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               {isUpdatingYtDlp ? t.updating : t.update}
             </Button>
           </Box>
+
+          {/* App Update Section */}
+          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+            Go-DLP {t.version}
+          </Typography>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {t.currentVersion}: {currentAppVersion || '-'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {t.latestVersion}: {latestAppVersion || '-'}
+            </Typography>
+            {currentAppVersion && latestAppVersion && currentAppVersion !== latestAppVersion && (
+              <Alert severity="info" sx={{ mt: 1 }}>
+                {t.updateAvailable}! {t.currentVersion}: {currentAppVersion}, {t.latestVersion}: {latestAppVersion}
+              </Alert>
+            )}
+          </Box>
+
+          <Button
+            variant="outlined"
+            onClick={checkAppVersion}
+            disabled={isCheckingAppVersion}
+            startIcon={isCheckingAppVersion ? <CircularProgress size={20} /> : <UpdateIcon />}
+            fullWidth
+          >
+            {isCheckingAppVersion ? t.updating : t.checkUpdate}
+          </Button>
         </Box>
       </DialogContent>
       <DialogActions>
