@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -53,12 +54,22 @@ func TestGetDownloadPathSpecialChars(t *testing.T) {
 	title := "Test/Video\\File:Name*?\"<>|"
 	path := app.GetDownloadPath(title)
 
-	// All special characters should be replaced with _
-	// Note: On Windows, backslash is path separator and will remain, so we only check other special chars
-	if contains(path, "/") || contains(path, ":") ||
-		contains(path, "*") || contains(path, "?") || contains(path, "\"") ||
-		contains(path, "<") || contains(path, ">") || contains(path, "|") {
-		t.Errorf("Path should not contain special characters, got: %s", path)
+	// Extract just the filename from the path to check sanitization
+	// The path separator (/ or \) is valid in the directory part
+	filename := path
+	if lastSlash := strings.LastIndex(path, "/"); lastSlash >= 0 {
+		filename = path[lastSlash+1:]
+	}
+	if lastBackslash := strings.LastIndex(filename, "\\"); lastBackslash >= 0 {
+		filename = filename[lastBackslash+1:]
+	}
+
+	// All special characters in the filename should be replaced with _
+	if contains(filename, "/") || contains(filename, ":") ||
+		contains(filename, "*") || contains(filename, "?") || contains(filename, "\"") ||
+		contains(filename, "<") || contains(filename, ">") || contains(filename, "|") ||
+		contains(filename, "\\") {
+		t.Errorf("Filename should not contain special characters, got: %s", filename)
 	}
 
 	// Verify the path uses the correct directory
