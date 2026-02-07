@@ -7,11 +7,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -70,11 +68,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	// Store the current download command for cancellation
 	downloadMutex.Lock()
@@ -280,11 +274,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 					argsWithoutCookies = append(argsWithoutCookies, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 					cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
-					if runtime.GOOS == "windows" {
-						cmdWithoutCookies.SysProcAttr = &syscall.SysProcAttr{
-							HideWindow: true,
-						}
-					}
+					setHideWindow(cmdWithoutCookies)
 
 					// Store the retry download command
 					downloadMutex.Lock()

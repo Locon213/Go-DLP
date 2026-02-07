@@ -8,11 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -49,11 +47,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -83,11 +77,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 				// Note: When ProxyMode is "system", yt-dlp automatically uses system proxy settings
 
 				cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
-				if runtime.GOOS == "windows" {
-					cmdWithoutCookies.SysProcAttr = &syscall.SysProcAttr{
-						HideWindow: true,
-					}
-				}
+				setHideWindow(cmdWithoutCookies)
 
 				output, err = cmdWithoutCookies.Output()
 				if err == nil {
@@ -123,11 +113,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 				}
 
 				fallbackCmd := exec.Command(ytDlpPath, fallbackArgs...)
-				if runtime.GOOS == "windows" {
-					fallbackCmd.SysProcAttr = &syscall.SysProcAttr{
-						HideWindow: true,
-					}
-				}
+				setHideWindow(fallbackCmd)
 
 				output, err = fallbackCmd.Output()
 				if err != nil {
@@ -158,11 +144,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 					}
 
 					minimalCmd := exec.Command(ytDlpPath, minimalArgs...)
-					if runtime.GOOS == "windows" {
-						minimalCmd.SysProcAttr = &syscall.SysProcAttr{
-							HideWindow: true,
-						}
-					}
+					setHideWindow(minimalCmd)
 
 					output, err = minimalCmd.Output()
 					if err != nil {
@@ -191,11 +173,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 						}
 
 						listCmd := exec.Command(ytDlpPath, listArgs...)
-						if runtime.GOOS == "windows" {
-							listCmd.SysProcAttr = &syscall.SysProcAttr{
-								HideWindow: true,
-							}
-						}
+						setHideWindow(listCmd)
 
 						listOutput, listErr := listCmd.CombinedOutput()
 						if listErr != nil {
@@ -237,11 +215,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 			}
 
 			cmd = exec.Command(ytDlpPath, args...)
-			if runtime.GOOS == "windows" {
-				cmd.SysProcAttr = &syscall.SysProcAttr{
-					HideWindow: true,
-				}
-			}
+			setHideWindow(cmd)
 
 			output, err = cmd.Output()
 			if err != nil {
@@ -303,11 +277,7 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 			}
 
 			cmd := exec.Command(ytDlpPath, args...)
-			if runtime.GOOS == "windows" {
-				cmd.SysProcAttr = &syscall.SysProcAttr{
-					HideWindow: true,
-				}
-			}
+			setHideWindow(cmd)
 
 			output, err := cmd.Output()
 			if err == nil {
@@ -345,11 +315,7 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 						// Note: When ProxyMode is "system", yt-dlp automatically uses system proxy settings
 
 						cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
-						if runtime.GOOS == "windows" {
-							cmdWithoutCookies.SysProcAttr = &syscall.SysProcAttr{
-								HideWindow: true,
-							}
-						}
+						setHideWindow(cmdWithoutCookies)
 
 						outputWithoutCookies, errWithoutCookies := cmdWithoutCookies.Output()
 						if errWithoutCookies == nil {
@@ -421,11 +387,7 @@ func (a *App) analyzePlaylistInternal(url string) (string, error) {
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -442,11 +404,7 @@ func (a *App) analyzePlaylistInternal(url string) (string, error) {
 				}
 
 				cmd = exec.Command(ytDlpPath, fallbackArgs...)
-				if runtime.GOOS == "windows" {
-					cmd.SysProcAttr = &syscall.SysProcAttr{
-						HideWindow: true,
-					}
-				}
+				setHideWindow(cmd)
 
 				output, err = cmd.Output()
 			}
@@ -521,11 +479,7 @@ func (a *App) getPlaylistItemsInternal(url string) (string, error) {
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	output, err := cmd.Output()
 	if err != nil {
@@ -543,11 +497,7 @@ func (a *App) getPlaylistItemsInternal(url string) (string, error) {
 				}
 
 				cmd = exec.Command(ytDlpPath, fallbackArgs...)
-				if runtime.GOOS == "windows" {
-					cmd.SysProcAttr = &syscall.SysProcAttr{
-						HideWindow: true,
-					}
-				}
+				setHideWindow(cmd)
 
 				output, err = cmd.Output()
 			}
@@ -660,11 +610,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	// Store the current download command for cancellation
 	downloadMutex.Lock()
@@ -874,11 +820,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 					argsWithoutCookies = append(argsWithoutCookies, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 					cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
-					if runtime.GOOS == "windows" {
-						cmdWithoutCookies.SysProcAttr = &syscall.SysProcAttr{
-							HideWindow: true,
-						}
-					}
+					setHideWindow(cmdWithoutCookies)
 
 					// Store the retry download command
 					downloadMutex.Lock()

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
-	"syscall"
 	"time"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -176,11 +175,7 @@ func (a *App) getYtDlpVersionInternal() (string, error) {
 
 	// Run yt-dlp --version
 	cmd := exec.Command(ytDlpPath, "--version")
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	output, err := cmd.Output()
 	if err != nil {

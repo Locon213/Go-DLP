@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"syscall"
 
 	wailsRuntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -57,11 +56,7 @@ func (a *App) convertVideoInternal(sourcePath, targetFormat string) error {
 
 	// Hide console window on Windows
 	cmd := exec.Command(ffmpegPath, args...)
-	if runtime.GOOS == "windows" {
-		cmd.SysProcAttr = &syscall.SysProcAttr{
-			HideWindow: true,
-		}
-	}
+	setHideWindow(cmd)
 
 	// Store the current conversion command for cancellation
 	convertMutex.Lock()
