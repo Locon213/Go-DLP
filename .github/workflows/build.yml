@@ -7,7 +7,7 @@ on:
     branches: [main, master]
 
 env:
-  GO_VERSION: '1.22' # Wails лучше работает с 1.21+, 1.25 еще не вышел
+  GO_VERSION: '1.25' 
   NODE_VERSION: '20'
 
 jobs:
