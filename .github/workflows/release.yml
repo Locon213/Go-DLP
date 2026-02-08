@@ -106,6 +106,13 @@ jobs:
             -o "$OUT_NAME"
           fi
 
+      - name: Rename Darwin app bundle
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cd build/bin
+          mv Go-DLP.app "Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.app"
+
       - name: Archive Binary (Zip)
         shell: bash
         run: |
