@@ -33,12 +33,10 @@ jobs:
             platform: linux
             arch: amd64
             ext: ""
-          # Оставил как ты просил
           - os: macos-15-intel
             platform: darwin
             arch: amd64
             ext: ""
-          # Оставил как ты просил
           - os: macos-14
             platform: darwin
             arch: arm64
@@ -103,7 +101,7 @@ jobs:
             -tags webkit2_41 \
             -o "$OUT_NAME"
           else
-            # На macOS флаг -o создаст папку "$OUT_NAME.app"
+            # Для macOS мы все равно передаем -o, но Wails создаст папку Go-DLP.app
             wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
             -ldflags "-s -w -X main.version=${{ inputs.version }}" \
             -o "$OUT_NAME"
@@ -113,7 +111,8 @@ jobs:
         shell: bash
         run: |
           cd build/bin
-          # Базовое имя файла/папки
+          
+          # Определяем желаемое имя (без расширения) и имя архива
           BASE_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
           ZIP_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.zip"
           
@@ -121,15 +120,21 @@ jobs:
             7z a "$ZIP_NAME" "$BASE_NAME"
           
           elif [ "${{ matrix.platform }}" == "darwin" ]; then
-            # Для macOS это папка .app, а не файл.
-            # Wails добавляет .app автоматически, если мы использовали -o
-            APP_BUNDLE="${BASE_NAME}.app"
+            # Целевое имя папки .app
+            TARGET_APP="${BASE_NAME}.app"
             
-            if [ -d "$APP_BUNDLE" ]; then
-              # Используем zip -r для папки
-              zip -r "$ZIP_NAME" "$APP_BUNDLE"
+            # Wails создал Go-DLP.app (стандартное имя проекта). Переименовываем его.
+            if [ -d "Go-DLP.app" ]; then
+              echo "Renaming Go-DLP.app to $TARGET_APP"
+              mv "Go-DLP.app" "$TARGET_APP"
+            fi
+            
+            # Проверяем и архивируем
+            if [ -d "$TARGET_APP" ]; then
+              # Используем zip -r для папки, chmod не нужен для .app
+              zip -r "$ZIP_NAME" "$TARGET_APP"
             else
-              echo "Error: Bundle $APP_BUNDLE not found!"
+              echo "Error: Bundle $TARGET_APP not found! Directory content:"
               ls -la
               exit 1
             fi
