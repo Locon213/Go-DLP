@@ -29,23 +29,15 @@ jobs:
             platform: windows
             arch: amd64
             ext: .exe
-          - os: windows-latest
-            platform: windows
-            arch: arm64
-            ext: .exe
           - os: ubuntu-latest
             platform: linux
             arch: amd64
             ext: ""
-          - os: ubuntu-latest
-            platform: linux
-            arch: arm64
-            ext: ""
-          - os: macos-latest
+          - os: macos-13
             platform: darwin
             arch: amd64
             ext: ""
-          - os: macos-latest
+          - os: macos-14
             platform: darwin
             arch: arm64
             ext: ""
