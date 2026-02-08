@@ -50,9 +50,6 @@ jobs:
           - os: ubuntu-latest
             platform: linux
             arch: amd64
-          - os: ubuntu-arm64
-            platform: linux
-            arch: arm64
           - os: macos-13
             platform: darwin
             arch: amd64
@@ -119,6 +116,15 @@ jobs:
             wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} -ldflags "-s -w" -tags webkit2_41
           else
             wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} -ldflags "-s -w"
+          fi
+
+      - name: Rename Darwin binary
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          cd build/bin
+          if [ -d "Go-DLP.app" ]; then
+            mv Go-DLP.app "Go-DLP_1.0.0_${{ matrix.platform }}_${{ matrix.arch }}.app"
           fi
 
       - name: Upload artifact
