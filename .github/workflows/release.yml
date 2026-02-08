@@ -33,10 +33,12 @@ jobs:
             platform: linux
             arch: amd64
             ext: ""
+          # Оставил как ты просил
           - os: macos-15-intel
             platform: darwin
             arch: amd64
             ext: ""
+          # Оставил как ты просил
           - os: macos-14
             platform: darwin
             arch: arm64
@@ -101,29 +103,46 @@ jobs:
             -tags webkit2_41 \
             -o "$OUT_NAME"
           else
+            # На macOS флаг -o создаст папку "$OUT_NAME.app"
             wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
             -ldflags "-s -w -X main.version=${{ inputs.version }}" \
             -o "$OUT_NAME"
           fi
 
-      - name: Rename Darwin app bundle
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          cd build/bin
-          mv Go-DLP.app "Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.app"
-
       - name: Archive Binary (Zip)
         shell: bash
         run: |
           cd build/bin
-          BINARY="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
+          # Базовое имя файла/папки
+          BASE_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
           ZIP_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.zip"
+          
           if [ "${{ matrix.platform }}" == "windows" ]; then
-            7z a "$ZIP_NAME" "$BINARY"
+            7z a "$ZIP_NAME" "$BASE_NAME"
+          
+          elif [ "${{ matrix.platform }}" == "darwin" ]; then
+            # Для macOS это папка .app, а не файл.
+            # Wails добавляет .app автоматически, если мы использовали -o
+            APP_BUNDLE="${BASE_NAME}.app"
+            
+            if [ -d "$APP_BUNDLE" ]; then
+              # Используем zip -r для папки
+              zip -r "$ZIP_NAME" "$APP_BUNDLE"
+            else
+              echo "Error: Bundle $APP_BUNDLE not found!"
+              ls -la
+              exit 1
+            fi
+            
           else
-            chmod +x "$BINARY"
-            zip "$ZIP_NAME" "$BINARY"
+            # Linux
+            if [ -f "$BASE_NAME" ]; then
+              chmod +x "$BASE_NAME"
+              zip "$ZIP_NAME" "$BASE_NAME"
+            else
+               echo "Error: Binary $BASE_NAME not found!"
+               exit 1
+            fi
           fi
 
       - name: Create Debian Package
