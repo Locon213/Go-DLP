@@ -1,7 +1,7 @@
-import React from 'react';
-import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button } from '@mui/material';
-import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, Download as DownloadIcon } from '@mui/icons-material';
-import { VideoInfo } from '../types';
+import React, { useState, useMemo } from 'react';
+import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button, ToggleButtonGroup, ToggleButton } from '@mui/material';
+import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, Download as DownloadIcon, HighQuality as HighQualityIcon, Sort as SortIcon, Movie as MovieIcon, MusicNote as MusicNoteIcon, MergeType as MergeTypeIcon, ThumbUp } from '@mui/icons-material';
+import { VideoInfo, Format } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 
 interface SelectionScreenProps {
@@ -14,6 +14,9 @@ interface SelectionScreenProps {
   formatFileSize: (bytes: number | null | undefined) => string;
 }
 
+type FilterType = 'all' | 'video' | 'audio' | 'both';
+type SortType = 'quality' | 'size';
+
 const SelectionScreen: React.FC<SelectionScreenProps> = ({
   videoInfo,
   selectedFormat,
@@ -24,6 +27,103 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
   formatFileSize
 }) => {
   const { t } = useLanguage();
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [sortType, setSortType] = useState<SortType>('quality');
+
+  // Helper function to check if format has video
+  const hasVideo = (format: Format): boolean => {
+    return format.resolution !== undefined && format.vcodec !== 'none';
+  };
+
+  // Helper function to check if format has audio
+  const hasAudio = (format: Format): boolean => {
+    return format.acodec !== 'none' && format.acodec !== undefined;
+  };
+
+  // Helper function to get resolution height
+  const getResolutionHeight = (resolution: string | undefined): number => {
+    if (!resolution) return 0;
+    const parts = resolution.split('x');
+    return parts.length === 2 ? parseInt(parts[1]) : 0;
+  };
+
+  // Helper function to get file size in bytes
+  const getFileSizeBytes = (format: Format): number => {
+    if (format.filesize) return Number(format.filesize);
+    if (format.filesizeApprox) {
+      if (typeof format.filesizeApprox === 'string') {
+        return parseInt(format.filesizeApprox);
+      }
+      return format.filesizeApprox;
+    }
+    return 0;
+  };
+
+  // Check if format is recommended (720p+ with both audio and video)
+  const isRecommended = (format: Format): boolean => {
+    const height = getResolutionHeight(format.resolution);
+    return hasVideo(format) && hasAudio(format) && height >= 720;
+  };
+
+  // Processed and filtered formats
+  const processedFormats = useMemo(() => {
+    let formats = videoInfo.formats.filter(format => {
+      return (format.resolution || (format.acodec !== 'none' && format.vcodec === 'none')) && format.format_id;
+    });
+
+    // Apply type filter
+    formats = formats.filter(format => {
+      switch (filterType) {
+        case 'video':
+          return hasVideo(format) && !hasAudio(format);
+        case 'audio':
+          return !hasVideo(format) && hasAudio(format);
+        case 'both':
+          return hasVideo(format) && hasAudio(format);
+        case 'all':
+        default:
+          return true;
+      }
+    });
+
+    // Apply sorting
+    formats = formats.sort((a, b) => {
+      if (sortType === 'quality') {
+        // Sort by resolution (highest first)
+        const aHeight = getResolutionHeight(a.resolution);
+        const bHeight = getResolutionHeight(b.resolution);
+        
+        if (bHeight !== aHeight) {
+          return bHeight - aHeight;
+        }
+        
+        // If same resolution, prefer formats with both audio and video
+        const aScore = (hasVideo(a) ? 1 : 0) + (hasAudio(a) ? 1 : 0);
+        const bScore = (hasVideo(b) ? 1 : 0) + (hasAudio(b) ? 1 : 0);
+        
+        if (bScore !== aScore) {
+          return bScore - aScore;
+        }
+        
+        // Then by file size
+        return getFileSizeBytes(b) - getFileSizeBytes(a);
+      } else {
+        // Sort by size (smallest first)
+        return getFileSizeBytes(a) - getFileSizeBytes(b);
+      }
+    });
+
+    return formats;
+  }, [videoInfo.formats, filterType, sortType]);
+
+  // Find best quality format for auto-selection
+  const bestQualityFormat = useMemo(() => {
+    const videoFormats = videoInfo.formats.filter(f => hasVideo(f) && hasAudio(f) && getResolutionHeight(f.resolution) >= 720);
+    if (videoFormats.length > 0) {
+      return videoFormats.sort((a, b) => getResolutionHeight(b.resolution) - getResolutionHeight(a.resolution))[0];
+    }
+    return null;
+  }, [videoInfo.formats]);
 
   return (
     <Box sx={{ spacing: 3, pb: 4 }}>
@@ -94,8 +194,100 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
               {t.selectFormat}
             </Typography>
 
+            {/* Compact Filters */}
+            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+              {/* Type Filter */}
+              <ToggleButtonGroup
+                value={filterType}
+                exclusive
+                onChange={(_, value) => value && setFilterType(value)}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    px: 1.5,
+                    py: 0.5,
+                    fontSize: '0.75rem',
+                    borderRadius: 2,
+                    mr: 0.5,
+                    '&.Mui-selected': {
+                      bgcolor: 'primary.main',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                      }
+                    }
+                  }
+                }}
+              >
+                <ToggleButton value="all" sx={{ display: 'flex', gap: 0.5 }}>
+                  <ViewListIcon fontSize="small" />
+                  All
+                </ToggleButton>
+                <ToggleButton value="both" sx={{ display: 'flex', gap: 0.5 }}>
+                  <MergeTypeIcon fontSize="small" />
+                  Video+Audio
+                </ToggleButton>
+                <ToggleButton value="video" sx={{ display: 'flex', gap: 0.5 }}>
+                  <MovieIcon fontSize="small" />
+                  Video
+                </ToggleButton>
+                <ToggleButton value="audio" sx={{ display: 'flex', gap: 0.5 }}>
+                  <MusicNoteIcon fontSize="small" />
+                  Audio
+                </ToggleButton>
+              </ToggleButtonGroup>
+
+              {/* Sort Filter */}
+              <ToggleButtonGroup
+                value={sortType}
+                exclusive
+                onChange={(_, value) => value && setSortType(value)}
+                size="small"
+                sx={{
+                  '& .MuiToggleButton-root': {
+                    px: 1.5,
+                    py: 0.5,
+                    fontSize: '0.75rem',
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      bgcolor: 'secondary.main',
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'secondary.dark',
+                      }
+                    }
+                  }
+                }}
+              >
+                <ToggleButton value="quality" sx={{ display: 'flex', gap: 0.5 }}>
+                  <HighQualityIcon fontSize="small" />
+                  Best Quality
+                </ToggleButton>
+                <ToggleButton value="size" sx={{ display: 'flex', gap: 0.5 }}>
+                  <SortIcon fontSize="small" />
+                  Smallest Size
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
+
+            {/* Quick Select Best Quality */}
+            {bestQualityFormat && (
+              <Box sx={{ mb: 2 }}>
+                <Button
+                  variant="outlined"
+                  color="success"
+                  size="small"
+                  startIcon={<ThumbUp />}
+                  onClick={() => setSelectedFormat(bestQualityFormat.format_id)}
+                  sx={{ borderRadius: 2 }}
+                >
+                  Select Best Quality ({bestQualityFormat.resolution})
+                </Button>
+              </Box>
+            )}
+
             <Box sx={{
-              maxHeight: 500,
+              maxHeight: 400,
               overflowY: 'auto',
               pr: 1,
               '&::-webkit-scrollbar': {
@@ -113,104 +305,97 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
               }
             }}>
               <List>
-                {videoInfo.formats
-                  .filter(format => {
-                    return (format.resolution || (format.acodec !== 'none' && format.vcodec === 'none')) && format.format_id;
-                  })
-                  .sort((a, b) => {
-                    if (b.resolution && a.resolution) {
-                      const [aWidth, aHeight] = a.resolution.split('x').map(Number);
-                      const [bWidth, bHeight] = b.resolution.split('x').map(Number);
-
-                      if (bHeight !== aHeight) {
-                        return bHeight - aHeight;
+                {processedFormats.map((format, index) => (
+                  <ListItem
+                    key={`${format.format_id}-${index}`}
+                    onClick={() => setSelectedFormat(format.format_id)}
+                    sx={{
+                      borderRadius: 2,
+                      mb: 1,
+                      border: 1,
+                      borderColor: selectedFormat === format.format_id ? 'primary.main' : 'divider',
+                      bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'background.paper',
+                      '&:hover': {
+                        bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'action.hover',
+                        cursor: 'pointer',
+                      },
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          {format.resolution ? (
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                              <VideocamIcon fontSize="small" sx={{ mr: 0.5, color: 'success.main' }} />
+                              {format.resolution}
+                            </Box>
+                          ) : (
+                            <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
+                              <AudiotrackIcon fontSize="small" sx={{ mr: 0.5, color: 'info.main' }} />
+                              AUDIO ONLY
+                            </Box>
+                          )}
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {format.ext.toUpperCase()}
+                          </Typography>
+                          {/* Recommended badge */}
+                          {isRecommended(format) && (
+                            <Chip
+                              icon={<ThumbUp sx={{ fontSize: '0.875rem !important' }} />}
+                              label="Recommended"
+                              size="small"
+                              color="success"
+                              variant="outlined"
+                              sx={{ 
+                                height: 20, 
+                                fontSize: '0.65rem',
+                                '& .MuiChip-label': { px: 0.5 }
+                              }}
+                            />
+                          )}
+                          {selectedFormat === format.format_id && (
+                            <Chip
+                              label="Selected"
+                              size="small"
+                              color="primary"
+                              sx={{ height: 20, fontSize: '0.65rem' }}
+                            />
+                          )}
+                        </Box>
                       }
-
-                      if (bWidth !== aWidth) {
-                        return bWidth - aWidth;
+                      secondary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                          <StorageIcon fontSize="small" sx={{ mr: 1 }} />
+                          <Typography variant="caption" color="text.secondary">
+                            {format.vcodec !== 'none' ? format.vcodec : 'No video'} + {format.acodec !== 'none' ? format.acodec : 'No audio'}
+                          </Typography>
+                        </Box>
                       }
-
-                      if (b.filesize && a.filesize) {
-                        return Number(b.filesize) - Number(a.filesize);
-                      }
-                    }
-
-                    if (!a.resolution && b.resolution) return 1;
-                    if (a.resolution && !b.resolution) return -1;
-
-                    return 0;
-                  })
-                  .map((format, index) => (
-                    <ListItem
-                      key={`${format.format_id}-${index}`}
-                      onClick={() => setSelectedFormat(format.format_id)}
-                      sx={{
-                        borderRadius: 2,
-                        mb: 1,
-                        border: 1,
-                        borderColor: selectedFormat === format.format_id ? 'primary.main' : 'divider',
-                        bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'background.paper',
-                        '&:hover': {
-                          bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'action.hover',
-                          cursor: 'pointer',
-                        },
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography variant="body1" component="span" sx={{ fontWeight: 'medium' }}>
-                              {format.resolution ? (
-                                <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <VideocamIcon fontSize="small" sx={{ mr: 1, color: 'success.main' }} />
-                                  {format.resolution}
-                                </Box>
-                              ) : (
-                                <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <AudiotrackIcon fontSize="small" sx={{ mr: 1, color: 'info.main' }} />
-                                  AUDIO ONLY
-                                </Box>
-                              )}
-                              <Typography variant="caption" sx={{ ml: 1, color: 'text.secondary' }}>
-                                {format.ext.toUpperCase()}
-                              </Typography>
-                            </Typography>
-                            {selectedFormat === format.format_id && (
-                              <Chip
-                                label="Selected"
-                                size="small"
-                                color="primary"
-                                sx={{ ml: 2 }}
-                              />
-                            )}
-                          </Box>
-                        }
-                        secondary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                            <StorageIcon fontSize="small" sx={{ mr: 1 }} />
-                            <Typography variant="caption" color="text.secondary">
-                              {format.vcodec !== 'none' ? format.vcodec : 'No video'} + {format.acodec !== 'none' ? format.acodec : 'No audio'}
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                      <Box sx={{ textAlign: 'right' }}>
-                        <Typography variant="body2" color="primary" component="div">
-                          {format.filesizeHuman ||
-                           (formatFileSize(format.filesize || 0) !== 'Unknown'
-                             ? formatFileSize(format.filesize)
-                             : (format.filesizeApprox
-                               ? (typeof format.filesizeApprox === 'string' 
-                                   ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B') 
-                                       ? format.filesizeApprox 
-                                       : '~' + formatFileSize(parseInt(format.filesizeApprox)))
-                                   : '~' + formatFileSize(format.filesizeApprox))
-                               : 'Unknown'))}
-                        </Typography>
-                      </Box>
-                    </ListItem>
-                  ))}
+                    />
+                    <Box sx={{ textAlign: 'right' }}>
+                      <Typography variant="body2" color="primary" component="div">
+                        {format.filesizeHuman ||
+                         (formatFileSize(format.filesize || 0) !== 'Unknown'
+                           ? formatFileSize(format.filesize)
+                           : (format.filesizeApprox
+                             ? (typeof format.filesizeApprox === 'string' 
+                                 ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B') 
+                                     ? format.filesizeApprox 
+                                     : '~' + formatFileSize(parseInt(format.filesizeApprox)))
+                                 : '~' + formatFileSize(format.filesizeApprox))
+                             : 'Unknown'))}
+                      </Typography>
+                    </Box>
+                  </ListItem>
+                ))}
+                {processedFormats.length === 0 && (
+                  <Box sx={{ textAlign: 'center', py: 4 }}>
+                    <Typography color="text.secondary">
+                      No formats match the selected filter
+                    </Typography>
+                  </Box>
+                )}
               </List>
             </Box>
 
