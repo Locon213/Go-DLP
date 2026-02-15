@@ -1,9 +1,11 @@
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch } from '@mui/material';
-import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, AccountCircle as ChromeIcon, AccountBox as FirefoxIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon } from '@mui/icons-material';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch, LinearProgress } from '@mui/material';
+import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, AccountCircle as ChromeIcon, AccountBox as FirefoxIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon, Terminal as TerminalIcon } from '@mui/icons-material';
 import LanguageSelector from './LanguageSelector';
 import { LanguageCode } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
+import { GetDenoVersion, GetLatestDenoVersion, InstallDeno, UpdateDeno, IsDenoAvailable } from '../../wailsjs/go/main/App';
+import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime';
 
 interface SettingsModalProps {
   showSettings: boolean;
@@ -30,6 +32,8 @@ interface SettingsModalProps {
   saveSettings: () => void;
   autoRedirectToQueue: boolean;
   setAutoRedirectToQueue: (value: boolean) => void;
+  useJSRuntime: boolean;
+  setUseJSRuntime: (value: boolean) => void;
   clearQueue: () => void;
   clearCache: () => void;
   currentAppVersion: string;
@@ -63,6 +67,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   saveSettings,
   autoRedirectToQueue,
   setAutoRedirectToQueue,
+  useJSRuntime,
+  setUseJSRuntime,
   clearQueue,
   clearCache,
   currentAppVersion,
@@ -71,6 +77,128 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   checkAppVersion,
 }) => {
   const { t } = useLanguage();
+  
+  // Deno state
+  const [denoInstalled, setDenoInstalled] = useState(false);
+  const [currentDenoVersion, setCurrentDenoVersion] = useState<string>('');
+  const [latestDenoVersion, setLatestDenoVersion] = useState<string>('');
+  const [isCheckingDeno, setIsCheckingDeno] = useState(false);
+  const [isInstallingDeno, setIsInstallingDeno] = useState(false);
+  const [denoDownloadProgress, setDenoDownloadProgress] = useState(0);
+  const [denoDownloadStatus, setDenoDownloadStatus] = useState('');
+
+  // Check Deno status on mount
+  useEffect(() => {
+    if (showSettings) {
+      checkDenoStatus();
+    }
+  }, [showSettings]);
+
+  // Listen for Deno download events
+  useEffect(() => {
+    EventsOn('deno-download-start', () => {
+      setIsInstallingDeno(true);
+      setDenoDownloadProgress(0);
+      setDenoDownloadStatus('Starting download...');
+    });
+
+    EventsOn('deno-download-progress', (data: any) => {
+      setDenoDownloadProgress(data.progress);
+      if (data.status === 'extracting') {
+        setDenoDownloadStatus('Extracting...');
+      } else {
+        const downloadedMB = (data.downloaded / (1024 * 1024)).toFixed(1);
+        const totalMB = (data.total / (1024 * 1024)).toFixed(1);
+        setDenoDownloadStatus(`Downloading... ${downloadedMB}MB / ${totalMB}MB`);
+      }
+    });
+
+    EventsOn('deno-download-complete', () => {
+      setIsInstallingDeno(false);
+      setDenoDownloadProgress(100);
+      setDenoDownloadStatus('Installation complete!');
+      checkDenoStatus();
+      // Clear status after 3 seconds
+      setTimeout(() => {
+        setDenoDownloadStatus('');
+        setDenoDownloadProgress(0);
+      }, 3000);
+    });
+
+    EventsOn('deno-download-error', (error: string) => {
+      setIsInstallingDeno(false);
+      setDenoDownloadStatus(`Error: ${error}`);
+      // Clear error after 5 seconds
+      setTimeout(() => {
+        setDenoDownloadStatus('');
+        setDenoDownloadProgress(0);
+      }, 5000);
+    });
+
+    return () => {
+      EventsOff('deno-download-start');
+      EventsOff('deno-download-progress');
+      EventsOff('deno-download-complete');
+      EventsOff('deno-download-error');
+    };
+  }, []);
+
+  const checkDenoStatus = async () => {
+    setIsCheckingDeno(true);
+    try {
+      const installed = await IsDenoAvailable();
+      setDenoInstalled(installed);
+      
+      if (installed) {
+        const version = await GetDenoVersion();
+        setCurrentDenoVersion(version);
+      } else {
+        setCurrentDenoVersion('');
+      }
+      
+      const latest = await GetLatestDenoVersion();
+      setLatestDenoVersion(latest);
+    } catch (error) {
+      console.error('Error checking Deno status:', error);
+    } finally {
+      setIsCheckingDeno(false);
+    }
+  };
+
+  const handleInstallDeno = async () => {
+    setIsInstallingDeno(true);
+    setDenoDownloadProgress(0);
+    setDenoDownloadStatus('Starting download...');
+    try {
+      // The function will emit events that update the progress
+      // We don't need to await it - events will handle the state
+      InstallDeno().catch((err) => {
+        console.error('InstallDeno error:', err);
+        setIsInstallingDeno(false);
+        setDenoDownloadStatus(`Error: ${err}`);
+      });
+    } catch (error) {
+      console.error('Error installing Deno:', error);
+      setIsInstallingDeno(false);
+    }
+  };
+
+  const handleUpdateDeno = async () => {
+    setIsInstallingDeno(true);
+    setDenoDownloadProgress(0);
+    setDenoDownloadStatus('Starting update...');
+    try {
+      // The function will emit events that update the progress
+      UpdateDeno().catch((err) => {
+        console.error('UpdateDeno error:', err);
+        setIsInstallingDeno(false);
+        setDenoDownloadStatus(`Error: ${err}`);
+      });
+    } catch (error) {
+      console.error('Error updating Deno:', error);
+      setIsInstallingDeno(false);
+    }
+  };
 
   return (
     <Dialog
@@ -251,6 +379,102 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               </Box>
             )}
           </FormControl>
+
+          {/* JS Runtime Settings */}
+          <Typography variant="h6" gutterBottom sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <TerminalIcon /> JavaScript Runtime (Deno)
+          </Typography>
+          
+          <Box sx={{ mb: 3 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={useJSRuntime}
+                  onChange={(e) => setUseJSRuntime(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Use JavaScript Runtime for YouTube and other sites"
+            />
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+              Enable JavaScript runtime (Deno) for sites that require it, especially YouTube. Allows access to higher quality video formats.
+            </Typography>
+          </Box>
+
+          {/* Deno Status Section */}
+          <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              Deno Status: {denoInstalled ? (
+                <Typography component="span" color="success.main">Installed</Typography>
+              ) : (
+                <Typography component="span" color="error.main">Not Installed</Typography>
+              )}
+            </Typography>
+            
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {t.currentVersion}: {currentDenoVersion || '-'}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              {t.latestVersion}: {latestDenoVersion || '-'}
+            </Typography>
+            
+            {currentDenoVersion && latestDenoVersion && currentDenoVersion !== latestDenoVersion && (
+              <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+                Update available! Current: {currentDenoVersion}, Latest: {latestDenoVersion}
+              </Alert>
+            )}
+
+            {/* Download Progress */}
+            {(isInstallingDeno || denoDownloadProgress > 0 || denoDownloadStatus) && (
+              <Box sx={{ mt: 2, mb: 2 }}>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {denoDownloadStatus}
+                </Typography>
+                <LinearProgress 
+                  variant="determinate" 
+                  value={denoDownloadProgress} 
+                  sx={{ mt: 1 }}
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                  {denoDownloadProgress}%
+                </Typography>
+              </Box>
+            )}
+
+            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={checkDenoStatus}
+                disabled={isCheckingDeno || isInstallingDeno}
+                startIcon={isCheckingDeno ? <CircularProgress size={20} /> : <VisibilityIcon />}
+                sx={{ flex: 1 }}
+              >
+                {isCheckingDeno ? 'Checking...' : t.checkUpdate}
+              </Button>
+              
+              {!denoInstalled ? (
+                <Button
+                  variant="contained"
+                  onClick={handleInstallDeno}
+                  disabled={isInstallingDeno}
+                  startIcon={isInstallingDeno ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
+                  sx={{ flex: 1 }}
+                >
+                  {isInstallingDeno ? 'Installing...' : 'Install'}
+                </Button>
+              ) : (
+                <Button
+                  variant="contained"
+                  onClick={handleUpdateDeno}
+                  disabled={isInstallingDeno || !latestDenoVersion}
+                  startIcon={isInstallingDeno ? <CircularProgress size={20} /> : <UpdateIcon />}
+                  sx={{ flex: 1 }}
+                >
+                  {isInstallingDeno ? t.updating : t.update}
+                </Button>
+              )}
+            </Box>
+          </Box>
 
           {/* yt-dlp Version Section */}
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>

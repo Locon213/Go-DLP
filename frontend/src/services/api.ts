@@ -190,6 +190,17 @@ export const apiService = {
     } catch {
       return '';
     }
+  },
+
+  // Обновление настройки использования JS runtime
+  updateJSRuntimeSetting: async (useJSRuntime: boolean): Promise<void> => {
+    try {
+      // @ts-ignore
+      await window.go.main.App.UpdateJSRuntimeSetting(useJSRuntime);
+    } catch (error) {
+      console.error('Failed to update JS runtime setting:', error);
+      throw error;
+    }
   }
 };
 

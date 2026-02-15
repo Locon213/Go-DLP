@@ -22,8 +22,25 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 
 	// Build command arguments based on settings - ensure we only get info, not download
 	// Updated to get all available formats without restrictions
-	args := []string{"--print-json", "--simulate", url, "--no-warnings",
-		"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+	// Note: Removed --extractor-args as it conflicts with --js-runtimes and prevents high quality formats
+	args := []string{"--print-json", "--simulate", url, "--no-warnings"}
+
+	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+		if a.isDenoAvailable() {
+			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		} else {
+			// If deno is not available but JS runtime is required, try to download it
+			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+			err := a.downloadDenoWithProgress()
+			if err != nil {
+				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+				// Continue without JS runtime
+			} else {
+				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+			}
+		}
+	}
 
 	// Add proxy settings if enabled
 	if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -67,8 +84,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 				wailsRuntime.LogInfof(a.ctx, "Cookies-related error detected, trying without cookies...")
 
 				// Try without cookies
-				argsWithoutCookies := []string{"--print-json", "--simulate", url, "--no-warnings",
-					"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+				argsWithoutCookies := []string{"--print-json", "--simulate", url, "--no-warnings"}
 
 				// Add proxy settings if enabled (but no cookies)
 				if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -90,8 +106,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 			// If still have error, check if it's format availability issue
 			if err != nil && isFormatError {
 				// If format is not available, try without specifying format restrictions
-				fallbackArgs := []string{"--print-json", "--simulate", url, "--no-warnings",
-					"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+				fallbackArgs := []string{"--print-json", "--simulate", url, "--no-warnings"}
 
 				// Add proxy settings if enabled
 				if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -121,8 +136,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 					wailsRuntime.LogInfof(a.ctx, "Fallback attempt also failed with stderr: %s", string(exitError.Stderr))
 
 					// Try with minimal arguments to get basic info
-					minimalArgs := []string{"--print-json", "--simulate", url,
-						"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+					minimalArgs := []string{"--print-json", "--simulate", url}
 
 					// Add proxy settings if enabled
 					if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -150,8 +164,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 					if err != nil {
 						// If even minimal attempt fails, try with --list-formats to see what's available
 						// and then try to get basic info without format restrictions
-						listArgs := []string{"--list-formats", "--simulate", url, "--no-warnings",
-							"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+						listArgs := []string{"--list-formats", "--simulate", url, "--no-warnings"}
 
 						// Add proxy settings if enabled
 						if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -192,8 +205,7 @@ func (a *App) analyzeURLInternal(url string) (string, error) {
 
 		if err != nil {
 			// Try with the older flag if --print-json fails
-			args = []string{"--dump-single-json", "--simulate", url, "--no-warnings",
-				"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+			args = []string{"--dump-single-json", "--simulate", url, "--no-warnings"}
 
 			// Add proxy settings if enabled
 			if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -257,6 +269,23 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 			// Try to get detailed info for this specific format
 			args := []string{"--print-json", "--simulate", "-f", format.FormatID, url, "--no-warnings"}
 
+			// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+			if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+				if a.isDenoAvailable() {
+					args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+				} else {
+					// If deno is not available but JS runtime is required, try to download it
+					wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+					err := a.downloadDenoWithProgress()
+					if err != nil {
+						wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+						// Continue without JS runtime
+					} else {
+						args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+					}
+				}
+			}
+
 			// Add proxy settings if enabled
 			if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
 				args = append(args, "--proxy", a.settings.ProxyAddress)
@@ -308,6 +337,23 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 						// Try without cookies
 						argsWithoutCookies := []string{"--print-json", "--simulate", "-f", format.FormatID, url, "--no-warnings"}
 
+						// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+						if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+							if a.isDenoAvailable() {
+								argsWithoutCookies = append(argsWithoutCookies, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+							} else {
+								// If deno is not available but JS runtime is required, try to download it
+								wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+								err := a.downloadDenoWithProgress()
+								if err != nil {
+									wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+									// Continue without JS runtime
+								} else {
+									argsWithoutCookies = append(argsWithoutCookies, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+								}
+							}
+						}
+
 						// Add proxy settings if enabled (but no cookies)
 						if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
 							argsWithoutCookies = append(argsWithoutCookies, "--proxy", a.settings.ProxyAddress)
@@ -351,10 +397,16 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 		if fileSize, ok := enrichedFormats[i].FileSize.(float64); ok && fileSize > 0 {
 			enrichedFormats[i].FileSizeHuman = formatFileSizeHuman(fileSize)
 		} else if fileSize, ok := enrichedFormats[i].FileSizeApprox.(float64); ok && fileSize > 0 {
-			enrichedFormats[i].FileSizeHuman = formatFileSizeHuman(fileSize)
+			// Add ~ prefix for approximate sizes
+			enrichedFormats[i].FileSizeHuman = "~" + formatFileSizeHuman(fileSize)
 		} else if fileSize, ok := enrichedFormats[i].FileSizeApprox.(string); ok && fileSize != "" {
-			if fileSizeFloat, err := strconv.ParseFloat(fileSize, 64); err == nil && fileSizeFloat > 0 {
-				enrichedFormats[i].FileSizeHuman = formatFileSizeHuman(fileSizeFloat)
+			// Check if it's already a human-readable format (e.g., "~ 80.69MiB")
+			if strings.Contains(fileSize, "iB") || strings.Contains(fileSize, "B") {
+				// Already human-readable, use as-is
+				enrichedFormats[i].FileSizeHuman = fileSize
+			} else if fileSizeFloat, err := strconv.ParseFloat(fileSize, 64); err == nil && fileSizeFloat > 0 {
+				// Numeric string, convert to human-readable
+				enrichedFormats[i].FileSizeHuman = "~" + formatFileSizeHuman(fileSizeFloat)
 			}
 		}
 	}
@@ -367,8 +419,24 @@ func (a *App) analyzePlaylistInternal(url string) (string, error) {
 	ytDlpPath := filepath.Join("./bin", a.getYtDlpBinaryName())
 
 	// Build command arguments for playlist info - use --flat-playlist to get just the playlist metadata
-	args := []string{"--print-json", "--flat-playlist", "--simulate", url, "--no-warnings",
-		"--extractor-args", "youtube:player-client=web,mobile,android,ios"}
+	args := []string{"--print-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
+
+	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+		if a.isDenoAvailable() {
+			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		} else {
+			// If deno is not available but JS runtime is required, try to download it
+			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+			err := a.downloadDenoWithProgress()
+			if err != nil {
+				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+				// Continue without JS runtime
+			} else {
+				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+			}
+		}
+	}
 
 	// Add proxy settings if enabled
 	if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -461,6 +529,23 @@ func (a *App) getPlaylistItemsInternal(url string) (string, error) {
 
 	// Use --dump-json with --flat-playlist to get just the entries without full video info
 	args := []string{"--dump-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
+
+	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+		if a.isDenoAvailable() {
+			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		} else {
+			// If deno is not available but JS runtime is required, try to download it
+			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+			err := a.downloadDenoWithProgress()
+			if err != nil {
+				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+				// Continue without JS runtime
+			} else {
+				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+			}
+		}
+	}
 
 	// Add proxy settings if enabled
 	if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -581,6 +666,23 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 	// Build command arguments for playlist download
 	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--ignore-errors"}
 
+	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+		if a.isDenoAvailable() {
+			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		} else {
+			// If deno is not available but JS runtime is required, try to download it
+			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+			err := a.downloadDenoWithProgress()
+			if err != nil {
+				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+				// Continue without JS runtime
+			} else {
+				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+			}
+		}
+	}
+
 	// Add playlist range if specified
 	if startItem > 0 {
 		if endItem > 0 {
@@ -604,9 +706,6 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 			args = append(args, "--cookies", a.settings.CookiesFile)
 		}
 	}
-
-	// Add extractor args for YouTube
-	args = append(args, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
@@ -815,9 +914,6 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 					} else if a.settings.ProxyMode == "system" {
 						argsWithoutCookies = append(argsWithoutCookies, "--proxy", "system")
 					}
-
-					// Add extractor args for YouTube
-					argsWithoutCookies = append(argsWithoutCookies, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 					cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
 					setHideWindow(cmdWithoutCookies)

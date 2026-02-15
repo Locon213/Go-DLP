@@ -15,6 +15,8 @@ export function CheckForUpdate():Promise<string>;
 
 export function ConvertVideo(arg1:string,arg2:string):Promise<void>;
 
+export function DownloadDeno():Promise<void>;
+
 export function DownloadPlaylist(arg1:string,arg2:string,arg3:string,arg4:number,arg5:number):Promise<void>;
 
 export function DownloadVideo(arg1:string,arg2:string,arg3:string):Promise<void>;
@@ -23,9 +25,13 @@ export function GetActualDownloadPath(arg1:string):Promise<string>;
 
 export function GetCurrentVersion():Promise<string>;
 
+export function GetDenoVersion():Promise<string>;
+
 export function GetDownloadDirectory():Promise<string>;
 
 export function GetDownloadPath(arg1:string):Promise<string>;
+
+export function GetLatestDenoVersion():Promise<string>;
 
 export function GetLatestVersion():Promise<string>;
 
@@ -41,6 +47,10 @@ export function GetUpdateDownloadUrl():Promise<string>;
 
 export function GetYtDlpVersion():Promise<string>;
 
+export function InstallDeno():Promise<void>;
+
+export function IsDenoAvailable():Promise<boolean>;
+
 export function OpenInExplorer(arg1:string):Promise<void>;
 
 export function SelectDownloadDirectory():Promise<string>;
@@ -52,6 +62,10 @@ export function SetupDependencies():Promise<void>;
 export function ShouldUpdate():Promise<boolean>;
 
 export function UpdateAutoRedirectToQueue(arg1:boolean):Promise<void>;
+
+export function UpdateDeno():Promise<void>;
+
+export function UpdateJSRuntimeSetting(arg1:boolean):Promise<void>;
 
 export function UpdateLanguage(arg1:string):Promise<void>;
 

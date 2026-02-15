@@ -227,3 +227,59 @@ func (a *App) GetUpdateDownloadUrl() (string, error) {
 func (a *App) GetReleaseNotes() (string, error) {
 	return GetReleaseNotes()
 }
+
+// UpdateJSRuntimeSetting updates the JS runtime setting
+//
+//export UpdateJSRuntimeSetting
+func (a *App) UpdateJSRuntimeSetting(useJSRuntime bool) error {
+	a.settings.UseJSRuntime = useJSRuntime
+
+	err := a.saveSettings()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// DownloadDeno downloads deno with progress reporting
+//
+//export DownloadDeno
+func (a *App) DownloadDeno() error {
+	return a.downloadDenoWithProgress()
+}
+
+// IsDenoAvailable checks if deno is available
+//
+//export IsDenoAvailable
+func (a *App) IsDenoAvailable() bool {
+	return a.isDenoAvailable()
+}
+
+// GetDenoVersion returns the current deno version
+//
+//export GetDenoVersion
+func (a *App) GetDenoVersion() (string, error) {
+	return a.getDenoVersion()
+}
+
+// GetLatestDenoVersion returns the latest deno version from GitHub
+//
+//export GetLatestDenoVersion
+func (a *App) GetLatestDenoVersion() (string, error) {
+	return a.getLatestDenoVersion()
+}
+
+// InstallDeno downloads and installs deno
+//
+//export InstallDeno
+func (a *App) InstallDeno() error {
+	return a.installDeno()
+}
+
+// UpdateDeno updates deno to the latest version
+//
+//export UpdateDeno
+func (a *App) UpdateDeno() error {
+	return a.updateDeno()
+}

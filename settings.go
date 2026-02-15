@@ -21,6 +21,7 @@ func (a *App) loadSettings() {
 	a.settings.CookiesFile = ""
 	a.settings.Language = "en"            // Default language
 	a.settings.AutoRedirectToQueue = true // Default: auto redirect to queue
+	a.settings.UseJSRuntime = false       // Default: don't use JS runtime
 
 	// Try to read existing settings
 	data, err := os.ReadFile(settingsFile)
@@ -40,6 +41,7 @@ func (a *App) loadSettings() {
 		a.settings.CookiesMode = "none"
 		a.settings.CookiesBrowser = "chrome"
 		a.settings.CookiesFile = ""
+		a.settings.UseJSRuntime = false
 	}
 }
 
@@ -158,6 +160,7 @@ func (a *App) loadSettingsWithLogging() {
 	a.settings.CookiesFile = ""
 	a.settings.Language = "en"            // Default language
 	a.settings.AutoRedirectToQueue = true // Default: auto redirect to queue
+	a.settings.UseJSRuntime = false       // Default: don't use JS runtime
 
 	// Try to read existing settings
 	data, err := os.ReadFile(settingsFile)
@@ -177,6 +180,7 @@ func (a *App) loadSettingsWithLogging() {
 		a.settings.CookiesMode = "none"
 		a.settings.CookiesBrowser = "chrome"
 		a.settings.CookiesFile = ""
+		a.settings.UseJSRuntime = false
 	} else {
 		wailsRuntime.LogInfo(a.ctx, "Settings loaded successfully")
 	}

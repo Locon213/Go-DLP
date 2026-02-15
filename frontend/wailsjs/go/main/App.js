@@ -30,6 +30,10 @@ export function ConvertVideo(arg1, arg2) {
   return window['go']['main']['App']['ConvertVideo'](arg1, arg2);
 }
 
+export function DownloadDeno() {
+  return window['go']['main']['App']['DownloadDeno']();
+}
+
 export function DownloadPlaylist(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['DownloadPlaylist'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -46,12 +50,20 @@ export function GetCurrentVersion() {
   return window['go']['main']['App']['GetCurrentVersion']();
 }
 
+export function GetDenoVersion() {
+  return window['go']['main']['App']['GetDenoVersion']();
+}
+
 export function GetDownloadDirectory() {
   return window['go']['main']['App']['GetDownloadDirectory']();
 }
 
 export function GetDownloadPath(arg1) {
   return window['go']['main']['App']['GetDownloadPath'](arg1);
+}
+
+export function GetLatestDenoVersion() {
+  return window['go']['main']['App']['GetLatestDenoVersion']();
 }
 
 export function GetLatestVersion() {
@@ -82,6 +94,14 @@ export function GetYtDlpVersion() {
   return window['go']['main']['App']['GetYtDlpVersion']();
 }
 
+export function InstallDeno() {
+  return window['go']['main']['App']['InstallDeno']();
+}
+
+export function IsDenoAvailable() {
+  return window['go']['main']['App']['IsDenoAvailable']();
+}
+
 export function OpenInExplorer(arg1) {
   return window['go']['main']['App']['OpenInExplorer'](arg1);
 }
@@ -104,6 +124,14 @@ export function ShouldUpdate() {
 
 export function UpdateAutoRedirectToQueue(arg1) {
   return window['go']['main']['App']['UpdateAutoRedirectToQueue'](arg1);
+}
+
+export function UpdateDeno() {
+  return window['go']['main']['App']['UpdateDeno']();
+}
+
+export function UpdateJSRuntimeSetting(arg1) {
+  return window['go']['main']['App']['UpdateJSRuntimeSetting'](arg1);
 }
 
 export function UpdateLanguage(arg1) {

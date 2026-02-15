@@ -201,7 +201,11 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                            (formatFileSize(format.filesize || 0) !== 'Unknown'
                              ? formatFileSize(format.filesize)
                              : (format.filesizeApprox
-                               ? '~' + formatFileSize(typeof format.filesizeApprox === 'string' ? parseInt(format.filesizeApprox) : format.filesizeApprox)
+                               ? (typeof format.filesizeApprox === 'string' 
+                                   ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B') 
+                                       ? format.filesizeApprox 
+                                       : '~' + formatFileSize(parseInt(format.filesizeApprox)))
+                                   : '~' + formatFileSize(format.filesizeApprox))
                                : 'Unknown'))}
                         </Typography>
                       </Box>

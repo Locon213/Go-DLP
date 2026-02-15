@@ -33,6 +33,7 @@ export const useAppLogic = () => {
   const [cookiesBrowser, setCookiesBrowser] = useState<'chrome' | 'firefox'>('chrome');
   const [cookiesFile, setCookiesFile] = useState<string>('');
   const [autoRedirectToQueue, setAutoRedirectToQueue] = useState<boolean>(true);
+  const [useJSRuntime, setUseJSRuntime] = useState<boolean>(false);
 
   // Состояния для версии yt-dlp
   const [currentYtDlpVersion, setCurrentYtDlpVersion] = useState<string>('');
@@ -396,6 +397,7 @@ export const useAppLogic = () => {
       setCookiesBrowser(settings.cookies_browser as 'chrome' | 'firefox');
       setCookiesFile(settings.cookies_file || '');
       setAutoRedirectToQueue(settings.auto_redirect_to_queue !== undefined ? settings.auto_redirect_to_queue : true);
+      setUseJSRuntime(settings.use_js_runtime !== undefined ? settings.use_js_runtime : false);
     } catch (error) {
       console.error('Failed to load settings:', error);
       showError('Failed to load settings');
@@ -406,6 +408,10 @@ export const useAppLogic = () => {
     try {
       await UpdateSettingsWithCookiesFile(proxyMode, proxyAddress, cookiesMode, cookiesBrowser, cookiesFile);
       await UpdateAutoRedirectToQueue(autoRedirectToQueue);
+      
+      // Обновляем настройки JS runtime через отдельный метод
+      await apiService.updateJSRuntimeSetting(useJSRuntime);
+      
       showSuccess('Settings saved successfully!');
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -980,6 +986,7 @@ export const useAppLogic = () => {
     cookiesBrowser, setCookiesBrowser,
     cookiesFile, setCookiesFile,
     autoRedirectToQueue, setAutoRedirectToQueue,
+    useJSRuntime, setUseJSRuntime,
     currentYtDlpVersion, setCurrentYtDlpVersion,
     latestYtDlpVersion, setLatestYtDlpVersion,
     isCheckingVersion, setIsCheckingVersion,

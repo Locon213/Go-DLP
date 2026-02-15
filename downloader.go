@@ -44,6 +44,23 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 	// Build command arguments based on settings
 	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress"}
 
+	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
+	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
+		if a.isDenoAvailable() {
+			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		} else {
+			// If deno is not available but JS runtime is required, try to download it
+			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+			err := a.downloadDenoWithProgress()
+			if err != nil {
+				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+				// Continue without JS runtime
+			} else {
+				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+			}
+		}
+	}
+
 	// Add proxy settings if enabled
 	if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
 		args = append(args, "--proxy", a.settings.ProxyAddress)
@@ -62,9 +79,6 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 			wailsRuntime.LogInfof(a.ctx, "Cookies file does not exist: %s, proceeding without cookies", a.settings.CookiesFile)
 		}
 	}
-
-	// Add extractor args for YouTube
-	args = append(args, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 	// Hide console window on Windows
 	cmd := exec.Command(ytDlpPath, args...)
@@ -269,9 +283,6 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 					} else if a.settings.ProxyMode == "system" {
 						argsWithoutCookies = append(argsWithoutCookies, "--proxy", "system")
 					}
-
-					// Add extractor args for YouTube
-					argsWithoutCookies = append(argsWithoutCookies, "--extractor-args", "youtube:player-client=web,mobile,android,ios")
 
 					cmdWithoutCookies := exec.Command(ytDlpPath, argsWithoutCookies...)
 					setHideWindow(cmdWithoutCookies)
