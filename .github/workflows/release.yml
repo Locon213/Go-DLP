@@ -101,29 +101,53 @@ jobs:
             -tags webkit2_41 \
             -o "$OUT_NAME"
           else
+            # Для macOS мы все равно передаем -o, но Wails создаст папку Go-DLP.app
             wails build -platform ${{ matrix.platform }}/${{ matrix.arch }} \
             -ldflags "-s -w -X main.version=${{ inputs.version }}" \
             -o "$OUT_NAME"
           fi
 
-      - name: Rename Darwin app bundle
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          cd build/bin
-          mv Go-DLP.app "Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.app"
-
       - name: Archive Binary (Zip)
         shell: bash
         run: |
           cd build/bin
-          BINARY="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
+          
+          # Определяем желаемое имя (без расширения) и имя архива
+          BASE_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}${{ matrix.ext }}"
           ZIP_NAME="Go-DLP_${{ inputs.version }}_${{ matrix.platform }}_${{ matrix.arch }}.zip"
+          
           if [ "${{ matrix.platform }}" == "windows" ]; then
-            7z a "$ZIP_NAME" "$BINARY"
+            7z a "$ZIP_NAME" "$BASE_NAME"
+          
+          elif [ "${{ matrix.platform }}" == "darwin" ]; then
+            # Целевое имя папки .app
+            TARGET_APP="${BASE_NAME}.app"
+            
+            # Wails создал Go-DLP.app (стандартное имя проекта). Переименовываем его.
+            if [ -d "Go-DLP.app" ]; then
+              echo "Renaming Go-DLP.app to $TARGET_APP"
+              mv "Go-DLP.app" "$TARGET_APP"
+            fi
+            
+            # Проверяем и архивируем
+            if [ -d "$TARGET_APP" ]; then
+              # Используем zip -r для папки, chmod не нужен для .app
+              zip -r "$ZIP_NAME" "$TARGET_APP"
+            else
+              echo "Error: Bundle $TARGET_APP not found! Directory content:"
+              ls -la
+              exit 1
+            fi
+            
           else
-            chmod +x "$BINARY"
-            zip "$ZIP_NAME" "$BINARY"
+            # Linux
+            if [ -f "$BASE_NAME" ]; then
+              chmod +x "$BASE_NAME"
+              zip "$ZIP_NAME" "$BASE_NAME"
+            else
+               echo "Error: Binary $BASE_NAME not found!"
+               exit 1
+            fi
           fi
 
       - name: Create Debian Package
