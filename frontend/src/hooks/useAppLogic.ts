@@ -30,7 +30,7 @@ export const useAppLogic = () => {
   const [proxyMode, setProxyMode] = useState<'none' | 'system' | 'manual'>('none');
   const [proxyAddress, setProxyAddress] = useState<string>('');
   const [cookiesMode, setCookiesMode] = useState<'none' | 'browser' | 'file'>('none');
-  const [cookiesBrowser, setCookiesBrowser] = useState<'chrome' | 'firefox'>('chrome');
+  const [cookiesBrowser, setCookiesBrowser] = useState<'chrome' | 'firefox' | 'opera' | 'edge'>('chrome');
   const [cookiesFile, setCookiesFile] = useState<string>('');
   const [autoRedirectToQueue, setAutoRedirectToQueue] = useState<boolean>(true);
   const [useJSRuntime, setUseJSRuntime] = useState<boolean>(false);
@@ -394,7 +394,7 @@ export const useAppLogic = () => {
       setProxyMode(settings.proxy_mode);
       setProxyAddress(settings.proxy_address);
       setCookiesMode(settings.cookies_mode);
-      setCookiesBrowser(settings.cookies_browser as 'chrome' | 'firefox');
+      setCookiesBrowser(settings.cookies_browser as 'chrome' | 'firefox' | 'opera' | 'edge');
       setCookiesFile(settings.cookies_file || '');
       setAutoRedirectToQueue(settings.auto_redirect_to_queue !== undefined ? settings.auto_redirect_to_queue : true);
       setUseJSRuntime(settings.use_js_runtime !== undefined ? settings.use_js_runtime : false);

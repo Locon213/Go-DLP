@@ -418,8 +418,8 @@ func (a *App) enrichFormatInfo(ytDlpPath, url string, formats []Format) []Format
 func (a *App) analyzePlaylistInternal(url string) (string, error) {
 	ytDlpPath := filepath.Join("./bin", a.getYtDlpBinaryName())
 
-	// Build command arguments for playlist info - use --flat-playlist to get just the playlist metadata
-	args := []string{"--print-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
+	// Build command arguments for playlist info - use --dump-single-json to get all info in one JSON object
+	args := []string{"--dump-single-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
 
 	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
 	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
@@ -465,7 +465,7 @@ func (a *App) analyzePlaylistInternal(url string) (string, error) {
 
 			// Try fallback without cookies if needed
 			if strings.Contains(stderrStr, "cookies") || strings.Contains(stderrStr, "Sign in") {
-				fallbackArgs := []string{"--print-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
+				fallbackArgs := []string{"--dump-single-json", "--flat-playlist", "--simulate", url, "--no-warnings"}
 
 				if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
 					fallbackArgs = append(fallbackArgs, "--proxy", a.settings.ProxyAddress)

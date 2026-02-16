@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch, LinearProgress } from '@mui/material';
-import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, AccountCircle as ChromeIcon, AccountBox as FirefoxIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon, Terminal as TerminalIcon } from '@mui/icons-material';
+import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon, Terminal as TerminalIcon } from '@mui/icons-material';
 import LanguageSelector from './LanguageSelector';
+// Browser icons
+import ChromeIcon from '../assets/google-chrome.svg';
+import FirefoxIcon from '../assets/firefox.svg';
+import EdgeIcon from '../assets/microsoft-edge.svg';
+import OperaIcon from '../assets/opera.svg';
 import { LanguageCode } from '../i18n/translations';
 import { useLanguage } from '../i18n/LanguageContext';
 import { GetDenoVersion, GetLatestDenoVersion, InstallDeno, UpdateDeno, IsDenoAvailable } from '../../wailsjs/go/main/App';
@@ -18,8 +23,8 @@ interface SettingsModalProps {
   setProxyAddress: (address: string) => void;
   cookiesMode: 'none' | 'browser' | 'file';
   setCookiesMode: (mode: 'none' | 'browser' | 'file') => void;
-  cookiesBrowser: 'chrome' | 'firefox';
-  setCookiesBrowser: (browser: 'chrome' | 'firefox') => void;
+  cookiesBrowser: 'chrome' | 'firefox' | 'opera' | 'edge';
+  setCookiesBrowser: (browser: 'chrome' | 'firefox' | 'opera' | 'edge') => void;
   cookiesFile: string;
   setCookiesFile: (file: string) => void;
   currentYtDlpVersion: string;
@@ -328,22 +333,38 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Typography variant="subtitle2" gutterBottom>
                   Select Browser:
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Button
                     variant={cookiesBrowser === 'chrome' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('chrome')}
-                    startIcon={<ChromeIcon />}
-                    sx={{ flex: 1 }}
+                    startIcon={<img src={ChromeIcon} alt="Chrome" style={{ width: 20, height: 20 }} />}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
                   >
                     Chrome
                   </Button>
                   <Button
                     variant={cookiesBrowser === 'firefox' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('firefox')}
-                    startIcon={<FirefoxIcon />}
-                    sx={{ flex: 1 }}
+                    startIcon={<img src={FirefoxIcon} alt="Firefox" style={{ width: 20, height: 20 }} />}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
                   >
                     Firefox
+                  </Button>
+                  <Button
+                    variant={cookiesBrowser === 'edge' ? 'contained' : 'outlined'}
+                    onClick={() => setCookiesBrowser('edge')}
+                    startIcon={<img src={EdgeIcon} alt="Edge" style={{ width: 20, height: 20 }} />}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                  >
+                    Edge
+                  </Button>
+                  <Button
+                    variant={cookiesBrowser === 'opera' ? 'contained' : 'outlined'}
+                    onClick={() => setCookiesBrowser('opera')}
+                    startIcon={<img src={OperaIcon} alt="Opera" style={{ width: 20, height: 20 }} />}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                  >
+                    Opera
                   </Button>
                 </Box>
               </Box>
