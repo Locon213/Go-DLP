@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| **README.md** | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| **README.md** | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **Lightning Fast**: Optimized for speed and efficiency
 - 🔐 **Secure & Private**: No external servers involved
 - 🎥 **High Quality**: Maintain original quality
-- 🌍 **Multilingual Support**: Available in 10 languages
+- 🌍 **Multilingual Support**: Available in 11 languages
 - 💻 **Cross-Platform**: Works on Windows, macOS, and Linux
 - 🎨 **Modern UI**: Beautiful, intuitive interface
 - 📁 **Format Selection**: Choose from multiple video/audio formats
@@ -132,10 +132,14 @@ We welcome contributions from everyone! Here's how you can help:
 
 To contribute translations:
 
-1. Locate the translation files in `frontend/src/i18n/translations.ts`
-2. Add your translations following the existing structure
-3. Update the `supportedLanguages` array with your language
-4. Submit a pull request with your changes
+1. Locate the translation files in `frontend/src/i18n/lang/`
+2. Find your language file (e.g., `uk.ts` for Ukrainian) or create a new one
+3. Add your translations following the existing structure (using `PartialTranslations` type)
+4. Update the `supportedLanguages` array in `frontend/src/i18n/index.ts` with your language
+5. Update the README files to include your language
+6. Submit a pull request with your changes
+
+**Note:** The system uses English as a fallback, so you don't need to translate every key - missing translations will automatically use English text.
 
 ## 📄 License
 

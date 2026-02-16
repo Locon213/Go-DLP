@@ -349,14 +349,6 @@ export const useAppLogic = () => {
 
     loadHistory();
 
-    // Таймер для уведомлений
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-
     // Восстанавливаем незавершенные загрузки при запуске
     pendingDownloadsManager.resumePendingDownloads();
 
@@ -374,7 +366,17 @@ export const useAppLogic = () => {
       clearInterval(queueInterval);
       unsubscribes.forEach(unsubscribe => unsubscribe());
     };
-  }, [notification, url, videoInfo, selectedFormat]);
+  }, [url, videoInfo, selectedFormat]);
+
+  // Отдельный эффект для уведомлений
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   // Функции для работы с уведомлениями
   const showError = (message: string) => {

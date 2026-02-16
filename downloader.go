@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -20,18 +21,42 @@ var defaultDownloadDir string = "./downloads"
 
 // Global variable to track the current download process
 var (
-	currentDownloadCmd *exec.Cmd
-	downloadMutex      sync.Mutex
-	downloadCache      map[string]string // Cache for download paths
-	downloadCancelChan chan struct{}     // Channel for graceful cancellation
-	completedDownloads map[string]bool   // Track completed downloads to prevent duplicates
-	completionEmitted  bool              // Track if completion event was already emitted
+	currentDownloadCmd  *exec.Cmd
+	downloadMutex       sync.Mutex
+	downloadCache       map[string]string // Cache for download paths
+	downloadCancelChan  chan struct{}     // Channel for graceful cancellation
+	completedDownloads  map[string]bool   // Track completed downloads to prevent duplicates
+	completionEmitted   bool              // Track if completion event was already emitted
+	completionEmittedMu sync.Mutex        // Mutex to protect completionEmitted
 )
 
 // Initialize download cache
 func init() {
 	downloadCache = make(map[string]string)
 	completedDownloads = make(map[string]bool)
+	completionEmitted = false
+}
+
+// emitDownloadEvent safely emits a download completion/error/cancelled event
+// ensuring only one such event is emitted per download
+func emitDownloadEvent(ctx context.Context, eventType string, data ...interface{}) {
+	completionEmittedMu.Lock()
+	defer completionEmittedMu.Unlock()
+
+	if completionEmitted {
+		return // Already emitted a completion event for this download
+	}
+
+	// Mark as emitted for all terminal events (complete, error, cancelled)
+	if eventType == "download-complete" || eventType == "download-error" || eventType == "download-cancelled" {
+		completionEmitted = true
+	}
+
+	if len(data) > 0 {
+		wailsRuntime.EventsEmit(ctx, eventType, data[0])
+	} else {
+		wailsRuntime.EventsEmit(ctx, eventType)
+	}
 }
 
 // downloadVideoInternal downloads a video using the selected format ID
@@ -40,6 +65,9 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 
 	// Initialize cancel channel for this download
 	downloadCancelChan = make(chan struct{})
+
+	// Reset completion flag for this download
+	completionEmitted = false
 
 	// Build command arguments based on settings
 	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress"}
@@ -427,7 +455,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 							wailsRuntime.LogErrorf(a.ctx, "Download failed (retry): %v", waitErr)
 							errorMsg := fmt.Sprintf("Download failed (retry): %v", waitErr)
 							a.logDetailedError("DownloadVideo", url, formatID, waitErr)
-							wailsRuntime.EventsEmit(a.ctx, "download-error", errorMsg)
+							emitDownloadEvent(a.ctx, "download-error", errorMsg)
 						} else {
 							wailsRuntime.LogInfof(a.ctx, "Download completed successfully (retry) for URL: %s, Format: %s", url, formatID)
 
@@ -496,11 +524,11 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 									})
 								}
 								progressTracker.mu.Unlock()
-								wailsRuntime.EventsEmit(a.ctx, "download-complete")
+								emitDownloadEvent(a.ctx, "download-complete")
 							} else if hasPartFile || hasYtdlFile {
 								// Download is incomplete, emit error
 								wailsRuntime.LogErrorf(a.ctx, "Download incomplete (retry): .part or .ytdl files still present")
-								wailsRuntime.EventsEmit(a.ctx, "download-error", "Download incomplete: File is still being processed")
+								emitDownloadEvent(a.ctx, "download-error", "Download incomplete: File is still being processed")
 							} else {
 								// No completed file found, wait a bit more and retry
 								wailsRuntime.LogWarningf(a.ctx, "No completed file found after retry download, waiting additional time...")
@@ -527,10 +555,10 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 										})
 									}
 									progressTracker.mu.Unlock()
-									wailsRuntime.EventsEmit(a.ctx, "download-complete")
+									emitDownloadEvent(a.ctx, "download-complete")
 								} else {
 									wailsRuntime.LogErrorf(a.ctx, "Download failed (retry): No completed file found after extended wait")
-									wailsRuntime.EventsEmit(a.ctx, "download-error", "Download failed: No completed file found")
+									emitDownloadEvent(a.ctx, "download-error", "Download failed: No completed file found")
 								}
 							}
 						}
@@ -562,7 +590,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 		if waitErr != nil {
 			wailsRuntime.LogErrorf(a.ctx, "Download failed: %v", waitErr)
 			a.logDetailedError("DownloadVideo", url, formatID, waitErr)
-			wailsRuntime.EventsEmit(a.ctx, "download-error", fmt.Sprintf("Download failed: %v", waitErr))
+			emitDownloadEvent(a.ctx, "download-error", fmt.Sprintf("Download failed: %v", waitErr))
 		} else {
 			wailsRuntime.LogInfof(a.ctx, "Download completed successfully for URL: %s, Format: %s", url, formatID)
 
@@ -633,11 +661,11 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 					})
 				}
 				progressTracker.mu.Unlock()
-				wailsRuntime.EventsEmit(a.ctx, "download-complete")
+				emitDownloadEvent(a.ctx, "download-complete")
 			} else if hasPartFile || hasYtdlFile {
 				// Download is incomplete, emit error
 				wailsRuntime.LogErrorf(a.ctx, "Download incomplete: .part or .ytdl files still present")
-				wailsRuntime.EventsEmit(a.ctx, "download-error", "Download incomplete: File is still being processed")
+				emitDownloadEvent(a.ctx, "download-error", "Download incomplete: File is still being processed")
 			} else {
 				// No completed file found, wait a bit more and retry
 				wailsRuntime.LogWarningf(a.ctx, "No completed file found after download, waiting additional time...")
@@ -664,10 +692,10 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 						})
 					}
 					progressTracker.mu.Unlock()
-					wailsRuntime.EventsEmit(a.ctx, "download-complete")
+					emitDownloadEvent(a.ctx, "download-complete")
 				} else {
 					wailsRuntime.LogErrorf(a.ctx, "Download failed: No completed file found after extended wait")
-					wailsRuntime.EventsEmit(a.ctx, "download-error", "Download failed: No completed file found")
+					emitDownloadEvent(a.ctx, "download-error", "Download failed: No completed file found")
 				}
 			}
 		}
@@ -699,7 +727,7 @@ func (a *App) cancelDownloadInternal() error {
 		}
 		currentDownloadCmd = nil
 		wailsRuntime.LogInfof(a.ctx, "Download cancelled successfully")
-		wailsRuntime.EventsEmit(a.ctx, "download-cancelled")
+		emitDownloadEvent(a.ctx, "download-cancelled")
 		downloadMutex.Unlock()
 		return nil
 	}

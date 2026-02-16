@@ -1053,7 +1053,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 							wailsRuntime.LogErrorf(a.ctx, "Playlist download failed (retry): %v", waitErr)
 							errorMsg := fmt.Sprintf("Playlist download failed (retry): %v", waitErr)
 							a.logDetailedError("DownloadPlaylist", url, formatID, waitErr)
-							wailsRuntime.EventsEmit(a.ctx, "download-error", errorMsg)
+							emitDownloadEvent(a.ctx, "download-error", errorMsg)
 						} else {
 							wailsRuntime.LogInfof(a.ctx, "Playlist download completed successfully (retry) for URL: %s, Format: %s", url, formatID)
 							progressTracker.mu.Lock()
@@ -1066,7 +1066,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 								})
 							}
 							progressTracker.mu.Unlock()
-							wailsRuntime.EventsEmit(a.ctx, "download-complete")
+							emitDownloadEvent(a.ctx, "download-complete")
 						}
 					}()
 
@@ -1096,7 +1096,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 		if waitErr != nil {
 			wailsRuntime.LogErrorf(a.ctx, "Playlist download failed: %v", waitErr)
 			a.logDetailedError("DownloadPlaylist", url, formatID, waitErr)
-			wailsRuntime.EventsEmit(a.ctx, "download-error", fmt.Sprintf("Playlist download failed: %v", waitErr))
+			emitDownloadEvent(a.ctx, "download-error", fmt.Sprintf("Playlist download failed: %v", waitErr))
 		} else {
 			wailsRuntime.LogInfof(a.ctx, "Playlist download completed successfully for URL: %s, Format: %s", url, formatID)
 			// Ensure we emit 100% progress when download completes
@@ -1110,7 +1110,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 				})
 			}
 			progressTracker.mu.Unlock()
-			wailsRuntime.EventsEmit(a.ctx, "download-complete")
+			emitDownloadEvent(a.ctx, "download-complete")
 		}
 	}()
 

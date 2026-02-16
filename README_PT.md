@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **Rápido como um Raio**: Otimizado para velocidade e eficiência
 - 🔐 **Seguro e Privado**: Sem servidores externos envolvidos
 - 🎥 **Alta Qualidade**: Mantém a qualidade original
-- 🌍 **Suporte Multilingue**: Disponível em 10 idiomas
+- 🌍 **Suporte Multilingue**: Disponível em 11 idiomas
 - 💻 **Multiplataforma**: Funciona no Windows, macOS e Linux
 - 🎨 **Interface Moderna**: Interface bonita e intuitiva
 - 📁 **Seleção de Formato**: Escolha entre vários formatos de vídeo/áudio
@@ -132,10 +132,14 @@ Aceitamos contribuições de todos! Veja como você pode ajudar:
 
 Para contribuir com traduções:
 
-1. Localize os arquivos de tradução em `frontend/src/i18n/translations.ts`
-2. Adicione suas traduções seguindo a estrutura existente
-3. Atualize o array `supportedLanguages` com seu idioma
-4. Submeta um pull request com suas alterações
+1. Localize os arquivos de tradução em `frontend/src/i18n/lang/`
+2. Encontre o arquivo do seu idioma (por exemplo, `uk.ts` para ucraniano) ou crie um novo
+3. Adicione suas traduções seguindo a estrutura existente (usando o tipo `PartialTranslations`)
+4. Atualize o array `supportedLanguages` em `frontend/src/i18n/index.ts` com seu idioma
+5. Atualize os arquivos README para incluir seu idioma
+6. Submeta um pull request com suas alterações
+
+**Nota:** O sistema usa o inglês como fallback, então você não precisa traduzir cada chave - as traduções ausentes usarão automaticamente o texto em inglês.
 
 ## 📄 Licença
 

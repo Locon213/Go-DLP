@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | **README_FR.md** |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | **README_FR.md** |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **Ultra rapide**: Optimisé pour la vitesse et l'efficacité
 - 🔐 **Sécurisé et privé**: Aucun serveur externe impliqué
 - 🎥 **Haute qualité**: Conserve la qualité originale
-- 🌍 **Support multilingue**: Disponible en 10 langues
+- 🌍 **Support multilingue**: Disponible en 11 langues
 - 💻 **Multiplateforme**: Fonctionne sur Windows, macOS et Linux
 - 🎨 **Interface moderne**: Belle interface intuitive
 - 📁 **Sélection de format**: Choix entre plusieurs formats vidéo/audio
@@ -130,12 +130,16 @@ Nous accueillons les contributions de tous! Voici comment vous pouvez aider:
 
 ### Guide de traduction
 
-Pour contribuer à la traduction:
+Pour contribuer aux traductions:
 
-1. Localisez les fichiers de traduction dans `frontend/src/i18n/translations.ts`
-2. Ajoutez vos traductions en suivant la structure existante
-3. Mettez à jour le tableau `supportedLanguages` avec votre langue
-4. Soumettez une pull request avec vos modifications
+1. Trouvez les fichiers de traduction dans `frontend/src/i18n/lang/`
+2. Trouvez le fichier de votre langue (par exemple, `uk.ts` pour l'ukrainien) ou créez-en un nouveau
+3. Ajoutez vos traductions en suivant la structure existante (en utilisant le type `PartialTranslations`)
+4. Mettez à jour le tableau `supportedLanguages` dans `frontend/src/i18n/index.ts` avec votre langue
+5. Mettez à jour les fichiers README pour inclure votre langue
+6. Soumettez une pull request avec vos modifications
+
+**Note:** Le système utilise l'anglais comme langue de repli, vous n'avez donc pas besoin de traduire chaque clé : les traductions manquantes utiliseront automatiquement le texte en anglais.
 
 ## 📄 Licence
 

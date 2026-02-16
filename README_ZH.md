@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | **README_ZH.md** | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | **README_ZH.md** | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **闪电般快速**：针对速度和效率进行了优化
 - 🔐 **安全私密**：不涉及外部服务器
 - 🎥 **高质量**：保持原始质量
-- 🌍 **多语言支持**：支持 10 种语言
+- 🌍 **多语言支持**：支持 11 种语言
 - 💻 **跨平台**：适用于 Windows、macOS 和 Linux
 - 🎨 **现代界面**：美观直观的界面
 - 📁 **格式选择**：多种视频/音频格式可选
@@ -132,10 +132,14 @@
 
 要贡献翻译：
 
-1. 在 `frontend/src/i18n/translations.ts` 中找到翻译文件
-2. 按照现有结构添加翻译
-3. 使用您的语言更新 `supportedLanguages` 数组
-4. 提交包含您的更改的 pull request
+1. 在 `frontend/src/i18n/lang/` 中找到翻译文件
+2. 找到您的语言文件（例如乌克兰语的 `uk.ts`）或创建新文件
+3. 按照现有结构添加翻译（使用 `PartialTranslations` 类型）
+4. 在 `frontend/src/i18n/index.ts` 中使用您的语言更新 `supportedLanguages` 数组
+5. 更新 README 文件以包含您的语言
+6. 提交包含您的更改的 pull request
+
+**注意：** 系统使用英语作为后备，因此您无需翻译每个键 - 缺失的翻译将自动使用英语文本。
 
 ## 📄 许可证
 

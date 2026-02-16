@@ -209,6 +209,6 @@ export function subscribeToEvents<K extends keyof AppEventHandlers>(
   eventName: K,
   handler: AppEventHandlers[K]
 ): () => void {
-  EventsOn(eventName, handler as (...args: unknown[]) => void);
-  return () => {};
+  // EventsOn уже возвращает функцию отписки
+  return EventsOn(eventName, handler as (...args: unknown[]) => void);
 }

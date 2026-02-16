@@ -10,7 +10,7 @@
 
   **현대적인 yt-dlp 데스크톱 클라이언트**
 
-  YouTube, Vimeo, TikTok, Instagram, Twitter, SoundCloud 및 1000개 이상의 다른 플랫폼에서 동영상을 다운로드하기 위한 강력한 크로스 플랫폼 데스크톱 애플리케이션입니다.
+  YouTube, Vimeo, TikTok, Instagram, Twitter, SoundCloud 및 1000 개 이상의 다른 플랫폼에서 동영상을 다운로드하기 위한 강력한 크로스 플랫폼 데스크톱 애플리케이션입니다.
 
   [🌐 웹사이트](https://github.com/Locon213/Go-DLP) • [📖 문서](#문서) • [🐛 이슈](https://github.com/Locon213/Go-DLP/issues) • [❤️ 후원](#후원)
 
@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,10 +39,10 @@
 - ⚡ **번개처럼 빠름**: 속도와 효율성을 위해 최적화됨
 - 🔐 **안전하고 프라이빗**: 외부 서버 없음
 - 🎥 **고품질**: 원본 품질 유지
-- 🌍 **다국어 지원**: 10개 언어 지원
-- 💻 **크로스 플랫폼**: Windows, macOS, Linux에서 작동
+- 🌍 **다국어 지원**: 11 개 언어 지원
+- 💻 **크로스 플랫폼**: Windows, macOS, Linux 에서 작동
 - 🎨 **현대적 UI**: 아름답고 직관적인 인터페이스
-- 📁 **형식 선택**: 다양한 동영상/오디오 형식中选择
+- 📁 **형식 선택**: 다양한 동영상/오디오 형식 선택
 - 🔄 **내장 변환기**: 동영상을 다른 형식으로 변환
 - 🛡️ **프록시 지원**: 제한된 네트워크를 위한 프록시 설정
 - 🍪 **쿠키 지원**: 브라우저에서 쿠키 추출 또는 사용자 정의 쿠키 파일 사용
@@ -50,14 +50,14 @@
 ## 📋 요구 사항
 
 - Windows 7 이상, macOS 10.12 이상, 또는 Linux
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp)가 설치되고 PATH에서 접근 가능
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) 가 설치되고 PATH 에서 접근 가능
 - 동영상을 다운로드하기 위한 인터넷 연결
 
 ## 🚀 설치
 
 ### 사전 빌드된 바이너리
 
-1. [릴리스 페이지](https://github.com/Locon213/Go-DLP/releases)에서 최신 버전 다운로드
+1. [릴리스 페이지](https://github.com/Locon213/Go-DLP/releases) 에서 최신 버전 다운로드
 2. 아카이브 추출
 3. 실행 파일 실행
 
@@ -125,17 +125,21 @@
 1. 리포지토리 포크
 2. 기능 브랜치 생성 (`git checkout -b feature/amazing-feature`)
 3. 변경 사항 커밋 (`git commit -m 'Add amazing feature'`)
-4. 브랜치에 푸시 (`git push origin feature/amazing-feature'`)
+4. 브랜치에 푸시 (`git push origin feature/amazing-feature`)
 5. Pull Request 열기
 
 ### 번역 가이드
 
-번역 기여:
+번역에 기여하려면:
 
-1. `frontend/src/i18n/translations.ts`에서 번역 파일 찾기
-2. 기존 구조에 따라 번역 추가
-3. `supportedLanguages` 배열을 해당 언어로 업데이트
-4. 변경 사항과 함께 pull request 제출
+1. `frontend/src/i18n/lang/` 에서 번역 파일 찾기
+2. 해당 언어의 파일 (예: 우크라이나어의 경우 `uk.ts`) 을 찾거나 새 파일 만들기
+3. 기존 구조에 따라 번역 추가 (`PartialTranslations` 타입 사용)
+4. `frontend/src/i18n/index.ts` 의 `supportedLanguages` 배열을 해당 언어로 업데이트
+5. README 파일에 해당 언어를 포함하도록 업데이트
+6. 변경 사항과 함께 pull request 제출
+
+**참고:** 시스템은 영어를 폴백으로 사용하므로 모든 키를 번역할 필요는 없습니다. 누락된 번역은 자동으로 영어 텍스트를 사용합니다.
 
 ## 📄 라이선스
 
@@ -151,14 +155,14 @@
 
 ## 🙏 감사
 
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Go-DLP의 핵심 기술
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) - Go-DLP 의 핵심 기술
 - [Wails](https://wails.io/) - Go 및 웹 기술로 데스크톱 애플리케이션을 구축하기 위한 프레임워크
 - [yt-dlp 커뮤니티](https://github.com/yt-dlp/yt-dlp) - 기본 다운로드 엔진 유지
 - Go-DLP 번역 및 개선에 도움을 준 모든 기여자
 
 ## ❤️ 후원
 
-Go-DLP가 유용하다고 생각되시면 프로젝트 지원을 고려해 주세요:
+Go-DLP 가 유용하다고 생각되시면 프로젝트 지원을 고려해 주세요:
 
 - Bitcoin (BTC): `bc1qgwur4cgs3hpzl7quc4p0yrvjw50326sxkdxldv`
 - Ethereum (ERC20): `0x9aa8eB123f24B917a0955C37DeBCb2Ee7281e51d`
@@ -181,7 +185,7 @@ Go-DLP가 유용하다고 생각되시면 프로젝트 지원을 고려해 주�
 추가 도움말:
 
 - 기존 [이슈](https://github.com/Locon213/Go-DLP/issues) 검색
-- [토론](https://github.com/Locon213/Go-DLP/discussions)에 참여
+- [토론](https://github.com/Locon213/Go-DLP/discussions) 에 참여
 
 ---
 

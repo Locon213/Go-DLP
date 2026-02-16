@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
-import { LanguageCode, supportedLanguages } from '../i18n/translations';
+import { LanguageCode, supportedLanguages } from '../i18n';
 
 interface LanguageSelectorProps {
   language: LanguageCode;

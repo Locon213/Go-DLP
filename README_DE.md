@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | [README_ES.md](README_ES.md) | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **Blitzschnell**: Optimiert für Geschwindigkeit und Effizienz
 - 🔐 **Sicher & Privat**: Keine externen Server beteiligt
 - 🎥 **Hohe Qualität**: Originalqualität beibehalten
-- 🌍 **Mehrsprachige Unterstützung**: Verfügbar in 10 Sprachen
+- 🌍 **Mehrsprachige Unterstützung**: Verfügbar in 11 Sprachen
 - 💻 **Plattformübergreifend**: Funktioniert unter Windows, macOS und Linux
 - 🎨 **Moderne Benutzeroberfläche**: Schöne, intuitive Oberfläche
 - 📁 **Formatauswahl**: Auswahl aus mehreren Video-/Audioformaten
@@ -132,10 +132,14 @@ Wir freuen uns über Beiträge von allen! So können Sie helfen:
 
 Um Übersetzungen beizutragen:
 
-1. Finden Sie die Übersetzungsdateien in `frontend/src/i18n/translations.ts`
-2. Fügen Sie Ihre Übersetzungen nach der bestehenden Struktur hinzu
-3. Aktualisieren Sie das `supportedLanguages`-Array mit Ihrer Sprache
-4. Senden Sie einen Pull Request mit Ihren Änderungen
+1. Finden Sie die Übersetzungsdateien in `frontend/src/i18n/lang/`
+2. Suchen Sie die Datei Ihrer Sprache (z.B. `uk.ts` für Ukrainisch) oder erstellen Sie eine neue
+3. Fügen Sie Ihre Übersetzungen nach der bestehenden Struktur hinzu (unter Verwendung des Typs `PartialTranslations`)
+4. Aktualisieren Sie das `supportedLanguages`-Array in `frontend/src/i18n/index.ts` mit Ihrer Sprache
+5. Aktualisieren Sie die README-Dateien, um Ihre Sprache aufzunehmen
+6. Senden Sie einen Pull Request mit Ihren Änderungen
+
+**Hinweis:** Das System verwendet Englisch als Fallback, sodass Sie nicht jeden Schlüssel übersetzen müssen – fehlende Übersetzungen verwenden automatisch den englischen Text.
 
 ## 📄 Lizenz
 

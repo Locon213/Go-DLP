@@ -7,7 +7,7 @@ import ChromeIcon from '../assets/google-chrome.svg';
 import FirefoxIcon from '../assets/firefox.svg';
 import EdgeIcon from '../assets/microsoft-edge.svg';
 import OperaIcon from '../assets/opera.svg';
-import { LanguageCode } from '../i18n/translations';
+import type { LanguageCode } from '../i18n';
 import { useLanguage } from '../i18n/LanguageContext';
 import { GetDenoVersion, GetLatestDenoVersion, InstallDeno, UpdateDeno, IsDenoAvailable } from '../../wailsjs/go/main/App';
 import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime';

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { LanguageCode, Translations, getInitialLanguage, getTranslations } from './translations';
+import { LanguageCode, Translations, getInitialLanguage, getTranslations } from './index';
 import { UpdateLanguage as UpdateLanguageAPI, GetSettings as GetSettingsAPI } from '../../wailsjs/go/main/App';
 
 // Re-export LanguageCode for convenience

@@ -22,9 +22,9 @@
 
 <div align="center">
 
-| 🇺🇸 English | 🇷🇺 Русский | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
-|:---:|:---:|:---:|:---:|:---:|
-| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_ZH.md](README_ZH.md) | **README_ES.md** | [README_FR.md](README_FR.md) |
+| 🇺🇸 English | 🇷🇺 Русский | 🇺🇦 Українська | 🇨🇳 中文 | 🇪🇸 Español | 🇫🇷 Français |
+|:---:|:---:|:---:|:---:|:---:|:---:|
+| [README.md](README.md) | [README_RU.md](README_RU.md) | [README_UK.md](README_UK.md) | [README_ZH.md](README_ZH.md) | **README_ES.md** | [README_FR.md](README_FR.md) |
 
 | 🇩🇪 Deutsch | 🇵🇹 Português | 🇯🇵 日本語 | 🇰🇷 한국어 | 🇸🇦 العربية |
 |:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@
 - ⚡ **Ultra rápido**: Optimizado para velocidad y eficiencia
 - 🔐 **Seguro y privado**: Sin servidores externos involucrados
 - 🎥 **Alta calidad**: Mantiene la calidad original
-- 🌍 **Soporte multilingüe**: Disponible en 10 idiomas
+- 🌍 **Soporte multilingüe**: Disponible en 11 idiomas
 - 💻 **Multiplataforma**: Funciona en Windows, macOS y Linux
 - 🎨 **Interfaz moderna**: Interfaz hermosa e intuitiva
 - 📁 **Selección de formato**: Elige entre múltiples formatos de video/audio
@@ -132,10 +132,14 @@
 
 Para contribuir con traducciones:
 
-1. Encuentra los archivos de traducción en `frontend/src/i18n/translations.ts`
-2. Agrega tus traducciones siguiendo la estructura existente
-3. Actualiza el array `supportedLanguages` con tu idioma
-4. Envía un pull request con tus cambios
+1. Encuentra los archivos de traducción en `frontend/src/i18n/lang/`
+2. Busca el archivo de tu idioma (por ejemplo, `uk.ts` para ucraniano) o crea uno nuevo
+3. Agrega tus traducciones siguiendo la estructura existente (usando el tipo `PartialTranslations`)
+4. Actualiza el array `supportedLanguages` en `frontend/src/i18n/index.ts` con tu idioma
+5. Actualiza los archivos README para incluir tu idioma
+6. Envía un pull request con tus cambios
+
+**Nota:** El sistema usa inglés como respaldo, así que no necesitas traducir cada clave: las traducciones faltantes usarán automáticamente el texto en inglés.
 
 ## 📄 Licencia
 
