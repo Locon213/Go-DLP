@@ -283,3 +283,64 @@ func (a *App) InstallDeno() error {
 func (a *App) UpdateDeno() error {
 	return a.updateDeno()
 }
+
+// IsNodeAvailable checks if node.js is available in the system
+//
+//export IsNodeAvailable
+func (a *App) IsNodeAvailable() bool {
+	return a.isNodeAvailable()
+}
+
+// GetNodeVersion returns the current node.js version
+//
+//export GetNodeVersion
+func (a *App) GetNodeVersion() (string, error) {
+	return a.getNodeVersion()
+}
+
+// GetLatestNodeVersion returns the latest node.js version from nodejs.org
+//
+//export GetLatestNodeVersion
+func (a *App) GetLatestNodeVersion() (string, error) {
+	return a.getLatestNodeVersion()
+}
+
+// InstallNode installs the latest version of node.js
+//
+//export InstallNode
+func (a *App) InstallNode() error {
+	return a.installNode()
+}
+
+// UpdateNode updates node.js to the latest version
+//
+//export UpdateNode
+func (a *App) UpdateNode() error {
+	return a.updateNode()
+}
+
+// GetJSRuntimeType returns the current JS runtime type
+//
+//export GetJSRuntimeType
+func (a *App) GetJSRuntimeType() string {
+	return a.settings.JSRuntimeType
+}
+
+// UpdateJSRuntimeType updates the JS runtime type setting
+//
+//export UpdateJSRuntimeType
+func (a *App) UpdateJSRuntimeType(runtimeType string) error {
+	a.settings.JSRuntimeType = runtimeType
+	err := a.saveSettings()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// SelectCookiesFile opens a file dialog to select a cookies file
+//
+//export SelectCookiesFile
+func (a *App) SelectCookiesFile() (string, error) {
+	return a.selectCookiesFileInternal()
+}

@@ -62,8 +62,16 @@ export function GetDownloadPath(arg1) {
   return window['go']['main']['App']['GetDownloadPath'](arg1);
 }
 
+export function GetJSRuntimeType() {
+  return window['go']['main']['App']['GetJSRuntimeType']();
+}
+
 export function GetLatestDenoVersion() {
   return window['go']['main']['App']['GetLatestDenoVersion']();
+}
+
+export function GetLatestNodeVersion() {
+  return window['go']['main']['App']['GetLatestNodeVersion']();
 }
 
 export function GetLatestVersion() {
@@ -72,6 +80,10 @@ export function GetLatestVersion() {
 
 export function GetLatestYtDlpVersion() {
   return window['go']['main']['App']['GetLatestYtDlpVersion']();
+}
+
+export function GetNodeVersion() {
+  return window['go']['main']['App']['GetNodeVersion']();
 }
 
 export function GetPlaylistItems(arg1) {
@@ -98,12 +110,24 @@ export function InstallDeno() {
   return window['go']['main']['App']['InstallDeno']();
 }
 
+export function InstallNode() {
+  return window['go']['main']['App']['InstallNode']();
+}
+
 export function IsDenoAvailable() {
   return window['go']['main']['App']['IsDenoAvailable']();
 }
 
+export function IsNodeAvailable() {
+  return window['go']['main']['App']['IsNodeAvailable']();
+}
+
 export function OpenInExplorer(arg1) {
   return window['go']['main']['App']['OpenInExplorer'](arg1);
+}
+
+export function SelectCookiesFile() {
+  return window['go']['main']['App']['SelectCookiesFile']();
 }
 
 export function SelectDownloadDirectory() {
@@ -134,8 +158,16 @@ export function UpdateJSRuntimeSetting(arg1) {
   return window['go']['main']['App']['UpdateJSRuntimeSetting'](arg1);
 }
 
+export function UpdateJSRuntimeType(arg1) {
+  return window['go']['main']['App']['UpdateJSRuntimeType'](arg1);
+}
+
 export function UpdateLanguage(arg1) {
   return window['go']['main']['App']['UpdateLanguage'](arg1);
+}
+
+export function UpdateNode() {
+  return window['go']['main']['App']['UpdateNode']();
 }
 
 export function UpdateSettingsWithCookiesFile(arg1, arg2, arg3, arg4, arg5) {

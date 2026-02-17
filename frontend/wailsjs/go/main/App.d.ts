@@ -31,11 +31,17 @@ export function GetDownloadDirectory():Promise<string>;
 
 export function GetDownloadPath(arg1:string):Promise<string>;
 
+export function GetJSRuntimeType():Promise<string>;
+
 export function GetLatestDenoVersion():Promise<string>;
+
+export function GetLatestNodeVersion():Promise<string>;
 
 export function GetLatestVersion():Promise<string>;
 
 export function GetLatestYtDlpVersion():Promise<string>;
+
+export function GetNodeVersion():Promise<string>;
 
 export function GetPlaylistItems(arg1:string):Promise<string>;
 
@@ -49,9 +55,15 @@ export function GetYtDlpVersion():Promise<string>;
 
 export function InstallDeno():Promise<void>;
 
+export function InstallNode():Promise<void>;
+
 export function IsDenoAvailable():Promise<boolean>;
 
+export function IsNodeAvailable():Promise<boolean>;
+
 export function OpenInExplorer(arg1:string):Promise<void>;
+
+export function SelectCookiesFile():Promise<string>;
 
 export function SelectDownloadDirectory():Promise<string>;
 
@@ -67,7 +79,11 @@ export function UpdateDeno():Promise<void>;
 
 export function UpdateJSRuntimeSetting(arg1:boolean):Promise<void>;
 
+export function UpdateJSRuntimeType(arg1:string):Promise<void>;
+
 export function UpdateLanguage(arg1:string):Promise<void>;
+
+export function UpdateNode():Promise<void>;
 
 export function UpdateSettingsWithCookiesFile(arg1:string,arg2:string,arg3:string,arg4:string,arg5:string):Promise<void>;
 

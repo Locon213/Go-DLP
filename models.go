@@ -10,6 +10,7 @@ type Settings struct {
 	Language            string `json:"language"`               // Language code: "ru", "en", "zh", etc.
 	AutoRedirectToQueue bool   `json:"auto_redirect_to_queue"` // Automatically redirect to queue screen after adding download
 	UseJSRuntime        bool   `json:"use_js_runtime"`         // Use JavaScript runtime for YouTube and other sites that require it
+	JSRuntimeType       string `json:"js_runtime_type"`        // "deno" (recommended) or "node"
 }
 
 // VideoInfo represents the video metadata from yt-dlp

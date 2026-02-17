@@ -34,6 +34,7 @@ export const useAppLogic = () => {
   const [cookiesFile, setCookiesFile] = useState<string>('');
   const [autoRedirectToQueue, setAutoRedirectToQueue] = useState<boolean>(true);
   const [useJSRuntime, setUseJSRuntime] = useState<boolean>(false);
+  const [jsRuntimeType, setJsRuntimeType] = useState<'deno' | 'node'>('deno');
 
   // Состояния для версии yt-dlp
   const [currentYtDlpVersion, setCurrentYtDlpVersion] = useState<string>('');
@@ -334,6 +335,31 @@ export const useAppLogic = () => {
         }, 2000);
       }),
 
+      // Обработчики событий конвертации
+      subscribeToEvents('conversion-progress', (data: any) => {
+        if (typeof data === 'object' && data.progress !== undefined) {
+          // Progress event received from backend
+        }
+      }),
+
+      subscribeToEvents('conversion-complete', (data: any) => {
+        setIsDownloading(false);
+        showSuccess('Conversion completed successfully!');
+        if (data && data.targetPath) {
+          setDownloadPath(data.targetPath);
+        }
+      }),
+
+      subscribeToEvents('conversion-error', (error: string) => {
+        setIsDownloading(false);
+        showError(`Conversion Error: ${error}`);
+      }),
+
+      subscribeToEvents('conversion-cancelled', () => {
+        setIsDownloading(false);
+        showError('Conversion cancelled');
+      }),
+
     ];
 
 
@@ -400,6 +426,7 @@ export const useAppLogic = () => {
       setCookiesFile(settings.cookies_file || '');
       setAutoRedirectToQueue(settings.auto_redirect_to_queue !== undefined ? settings.auto_redirect_to_queue : true);
       setUseJSRuntime(settings.use_js_runtime !== undefined ? settings.use_js_runtime : false);
+      setJsRuntimeType(settings.js_runtime_type || 'deno');
     } catch (error) {
       console.error('Failed to load settings:', error);
       showError('Failed to load settings');
@@ -410,10 +437,18 @@ export const useAppLogic = () => {
     try {
       await UpdateSettingsWithCookiesFile(proxyMode, proxyAddress, cookiesMode, cookiesBrowser, cookiesFile);
       await UpdateAutoRedirectToQueue(autoRedirectToQueue);
-      
-      // Обновляем настройки JS runtime через отдельный метод
+
+      // Обновляем настройки JS runtime через отдельные методы
       await apiService.updateJSRuntimeSetting(useJSRuntime);
       
+      // Обновляем тип JS runtime
+      try {
+        // @ts-ignore - wails binding
+        await window.go.main.App.UpdateJSRuntimeType(jsRuntimeType);
+      } catch (err) {
+        console.error('Failed to update JS runtime type:', err);
+      }
+
       showSuccess('Settings saved successfully!');
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -512,25 +547,15 @@ export const useAppLogic = () => {
   // Функция для выбора файла с куками
   const selectCookiesFile = async () => {
     try {
-      // Создаем элемент input типа file
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.txt,.cookies'; // Ограничиваем типы файлов
+      // Use backend method to open file dialog
+      const { SelectCookiesFile } = await import('../../wailsjs/go/main/App');
+      
+      const filePath = await SelectCookiesFile();
 
-      // Обработчик события изменения
-      const handleFileSelect = (event: Event) => {
-        const target = event.target as HTMLInputElement;
-        if (target.files && target.files.length > 0) {
-          const file = target.files[0];
-          // Для Wails приложений путь к файлу не всегда доступен напрямую через браузер
-          // Вместо этого, мы можем передать имя файла или использовать другую стратегию
-          // В данном случае, пользователь должен скопировать путь к файлу вручную
-          alert(`Selected file: ${file.name}. Please copy the file path and paste it in the field.`);
-        }
-      };
-
-      input.onchange = handleFileSelect;
-      input.click();
+      if (filePath) {
+        setCookiesFile(filePath);
+        showSuccess('Cookies file selected!');
+      }
     } catch (error) {
       console.error('Error selecting cookies file:', error);
       showError('Failed to select cookies file');
@@ -807,7 +832,7 @@ export const useAppLogic = () => {
         setDownloadPath(path);
       }
       setCurrentStep('conversion');
-      showSuccess('Starting conversion...');
+      // Don't show success message here - let the conversion events handle it
     } catch (error) {
       console.error('Error starting conversion:', error);
       showError('Failed to start conversion');
@@ -989,6 +1014,7 @@ export const useAppLogic = () => {
     cookiesFile, setCookiesFile,
     autoRedirectToQueue, setAutoRedirectToQueue,
     useJSRuntime, setUseJSRuntime,
+    jsRuntimeType, setJsRuntimeType,
     currentYtDlpVersion, setCurrentYtDlpVersion,
     latestYtDlpVersion, setLatestYtDlpVersion,
     isCheckingVersion, setIsCheckingVersion,

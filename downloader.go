@@ -74,17 +74,44 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 
 	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
 	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
-		if a.isDenoAvailable() {
-			args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+		jsRuntimeCmd := a.getJSRuntimeCommand()
+		if jsRuntimeCmd != "" {
+			args = append(args, "--js-runtimes", jsRuntimeCmd)
 		} else {
-			// If deno is not available but JS runtime is required, try to download it
-			wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
-			err := a.downloadDenoWithProgress()
-			if err != nil {
-				wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
-				// Continue without JS runtime
+			// If JS runtime is required but not available, try to install based on settings
+			if a.settings.JSRuntimeType == "node" {
+				if !a.isNodeAvailable() {
+					wailsRuntime.LogInfof(a.ctx, "Node.js not found, attempting to download...")
+					err := a.installNode()
+					if err != nil {
+						wailsRuntime.LogErrorf(a.ctx, "Failed to download node.js: %v", err)
+						// Try fallback to deno
+						if a.isDenoAvailable() {
+							args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+						}
+					} else {
+						args = append(args, "--js-runtimes", "node")
+					}
+				} else {
+					args = append(args, "--js-runtimes", "node")
+				}
 			} else {
-				args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+				// Default to deno
+				if !a.isDenoAvailable() {
+					wailsRuntime.LogInfof(a.ctx, "Deno not found, attempting to download...")
+					err := a.downloadDenoWithProgress()
+					if err != nil {
+						wailsRuntime.LogErrorf(a.ctx, "Failed to download deno: %v", err)
+						// Try fallback to node
+						if a.isNodeAvailable() {
+							args = append(args, "--js-runtimes", "node")
+						}
+					} else {
+						args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+					}
+				} else {
+					args = append(args, "--js-runtimes", "deno:"+filepath.Join("./bin", a.getDenoBinaryName()))
+				}
 			}
 		}
 	}
@@ -809,4 +836,30 @@ func (a *App) setDownloadDirectoryInternal(path string) error {
 	defaultDownloadDir = path
 	wailsRuntime.LogInfof(a.ctx, "Download directory set to: %s", path)
 	return nil
+}
+
+// selectCookiesFileInternal opens a file dialog to select a cookies file
+func (a *App) selectCookiesFileInternal() (string, error) {
+	selectedPath, err := wailsRuntime.OpenFileDialog(a.ctx, wailsRuntime.OpenDialogOptions{
+		Title: "Select Cookies File",
+		Filters: []wailsRuntime.FileFilter{
+			{
+				DisplayName: "Cookies Files (*.txt, *.cookies)",
+				Pattern:     "*.txt;*.cookies",
+			},
+			{
+				DisplayName: "All Files (*.*)",
+				Pattern:     "*.*",
+			},
+		},
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to open file dialog: %w", err)
+	}
+
+	if selectedPath == "" {
+		return "", fmt.Errorf("no file selected")
+	}
+
+	return selectedPath, nil
 }

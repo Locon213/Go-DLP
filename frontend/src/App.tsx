@@ -52,6 +52,7 @@ const App: React.FC = () => {
     cookiesFile, setCookiesFile,
     autoRedirectToQueue, setAutoRedirectToQueue,
     useJSRuntime, setUseJSRuntime,
+    jsRuntimeType, setJsRuntimeType,
     currentYtDlpVersion,
     latestYtDlpVersion,
     isCheckingVersion,
@@ -462,6 +463,8 @@ const App: React.FC = () => {
           setAutoRedirectToQueue={setAutoRedirectToQueue}
           useJSRuntime={useJSRuntime}
           setUseJSRuntime={setUseJSRuntime}
+          jsRuntimeType={jsRuntimeType}
+          setJsRuntimeType={setJsRuntimeType}
           currentYtDlpVersion={currentYtDlpVersion}
           latestYtDlpVersion={latestYtDlpVersion}
           isCheckingVersion={isCheckingVersion}

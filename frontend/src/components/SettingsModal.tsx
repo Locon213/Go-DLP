@@ -41,6 +41,8 @@ interface SettingsModalProps {
   setAutoRedirectToQueue: (value: boolean) => void;
   useJSRuntime: boolean;
   setUseJSRuntime: (value: boolean) => void;
+  jsRuntimeType: 'deno' | 'node';
+  setJsRuntimeType: (value: 'deno' | 'node') => void;
   clearQueue: () => void;
   clearCache: () => void;
   currentAppVersion: string;
@@ -88,6 +90,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   setAutoRedirectToQueue,
   useJSRuntime,
   setUseJSRuntime,
+  jsRuntimeType,
+  setJsRuntimeType,
   clearQueue,
   clearCache,
   currentAppVersion,
@@ -593,9 +597,58 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               }
               label={t.useJavaScriptRuntime}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, mb: 2 }}>
               {t.useJavaScriptRuntimeDescription}
             </Typography>
+
+            {/* JS Runtime Type Selection */}
+            {useJSRuntime && (
+              <Box sx={{ mt: 2, p: 2, borderRadius: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  Select JavaScript Runtime
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 2, mt: 1 }}>
+                  <Button
+                    variant={jsRuntimeType === 'deno' ? 'contained' : 'outlined'}
+                    onClick={() => setJsRuntimeType('deno')}
+                    fullWidth
+                    sx={{
+                      borderRadius: 3,
+                      borderColor: jsRuntimeType === 'deno' ? 'primary.main' : undefined,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body1">Deno</Typography>
+                      {jsRuntimeType === 'deno' && <CheckIcon sx={{ fontSize: 16 }} />}
+                    </Box>
+                    {jsRuntimeType === 'deno' && (
+                      <Typography variant="caption" sx={{ ml: 1, opacity: 0.8 }}>
+                        Recommended
+                      </Typography>
+                    )}
+                  </Button>
+                  <Button
+                    variant={jsRuntimeType === 'node' ? 'contained' : 'outlined'}
+                    onClick={() => setJsRuntimeType('node')}
+                    fullWidth
+                    sx={{
+                      borderRadius: 3,
+                      borderColor: jsRuntimeType === 'node' ? 'primary.main' : undefined,
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="body1">Node.js</Typography>
+                      {jsRuntimeType === 'node' && <CheckIcon sx={{ fontSize: 16 }} />}
+                    </Box>
+                  </Button>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 2 }}>
+                  {jsRuntimeType === 'deno'
+                    ? 'Deno is a modern, secure runtime with built-in dependency management.'
+                    : 'Node.js is a widely-used JavaScript runtime. Better if you already have it installed.'}
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           {/* Deno Status Section */}

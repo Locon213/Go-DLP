@@ -41,17 +41,87 @@ func (a *App) convertVideoInternal(sourcePath, targetFormat string) error {
 		ffmpegPath = "ffmpeg"
 	}
 
-	// Build FFmpeg command
-	args := []string{
-		"-i", sourcePath,
-		"-c:v", "libx264",
-		"-preset", "medium",
-		"-crf", "23",
-		"-c:a", "aac",
-		"-b:a", "128k",
-		"-movflags", "+faststart",
-		"-y", // Overwrite output file if it exists
-		targetPath,
+	// Check if this is an audio-only format
+	audioOnlyFormats := map[string]bool{
+		"mp3":  true,
+		"m4a":  true,
+		"opus": true,
+		"wav":  true,
+		"flac": true,
+		"aac":  true,
+		"ogg":  true,
+	}
+
+	isAudioOnly := audioOnlyFormats[targetFormat]
+
+	// Build FFmpeg command arguments
+	var args []string
+
+	if isAudioOnly {
+		// Audio-only conversion with metadata preservation
+		args = []string{
+			"-i", sourcePath,
+			"-vn", // No video
+			"-map_metadata", "0", // Preserve all metadata
+			"-y", // Overwrite output file if it exists
+		}
+
+		// Add format-specific audio codec settings
+		switch targetFormat {
+		case "mp3":
+			args = append(args,
+				"-c:a", "libmp3lame",
+				"-b:a", "320k",
+				"-q:a", "2",
+			)
+		case "m4a":
+			args = append(args,
+				"-c:a", "aac",
+				"-b:a", "256k",
+				"-movflags", "+faststart",
+			)
+		case "opus":
+			args = append(args,
+				"-c:a", "libopus",
+				"-b:a", "256k",
+			)
+		case "wav":
+			args = append(args,
+				"-c:a", "pcm_s16le",
+				"-ar", "44100",
+			)
+		case "flac":
+			args = append(args,
+				"-c:a", "flac",
+				"-compression_level", "12",
+			)
+		case "aac":
+			args = append(args,
+				"-c:a", "aac",
+				"-b:a", "256k",
+			)
+		case "ogg":
+			args = append(args,
+				"-c:a", "libvorbis",
+				"-b:a", "320k",
+			)
+		}
+
+		args = append(args, targetPath)
+	} else {
+		// Video conversion
+		args = []string{
+			"-i", sourcePath,
+			"-c:v", "libx264",
+			"-preset", "medium",
+			"-crf", "23",
+			"-c:a", "aac",
+			"-b:a", "128k",
+			"-movflags", "+faststart",
+			"-map_metadata", "0", // Preserve metadata
+			"-y", // Overwrite output file if it exists
+			targetPath,
+		}
 	}
 
 	// Hide console window on Windows

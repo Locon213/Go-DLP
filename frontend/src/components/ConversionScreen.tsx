@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Card, Typography, Button, Grid, Paper, Avatar, LinearProgress, MenuItem, Select, SelectChangeEvent, FormControl, InputLabel, Divider, alpha } from '@mui/material';
 import {
   Transform as TransformIcon,
@@ -10,6 +10,7 @@ import {
 } from '@mui/icons-material';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime';
 
 interface ConversionScreenProps {
   sourceFile: string;
@@ -25,7 +26,7 @@ const ConversionScreen: React.FC<ConversionScreenProps> = ({
   const { t } = useLanguage();
   const { themeStyles, themeStyle, darkMode } = useTheme();
   const themeConfig = themeStyles[themeStyle];
-  
+
   const [targetFormat, setTargetFormat] = useState<string>('mp4');
   const [isConverting, setIsConverting] = useState<boolean>(false);
   const [conversionProgress, setConversionProgress] = useState<number>(0);
@@ -43,6 +44,19 @@ const ConversionScreen: React.FC<ConversionScreenProps> = ({
     { value: 'm4v', label: 'M4V', description: 'iTunes format' },
   ];
 
+  // Audio formats for audio-only extraction
+  const audioFormats = [
+    { value: 'mp3', label: 'MP3', description: 'Universal audio' },
+    { value: 'm4a', label: 'M4A', description: 'Apple audio' },
+    { value: 'opus', label: 'Opus', description: 'High quality audio' },
+    { value: 'wav', label: 'WAV', description: 'Lossless audio' },
+    { value: 'flac', label: 'FLAC', description: 'Lossless audio' },
+    { value: 'aac', label: 'AAC', description: 'Advanced audio' },
+    { value: 'ogg', label: 'OGG', description: 'Open source audio' },
+  ];
+
+  const [conversionMode, setConversionMode] = useState<'video' | 'audio'>('video');
+
   const handleFormatChange = (event: SelectChangeEvent) => {
     setTargetFormat(event.target.value as string);
   };
@@ -56,26 +70,11 @@ const ConversionScreen: React.FC<ConversionScreenProps> = ({
     setErrorMessage('');
 
     try {
-      // Simulate conversion progress
-      const progressInterval = setInterval(() => {
-        setConversionProgress(prev => {
-          if (prev >= 95) {
-            clearInterval(progressInterval);
-            return 95;
-          }
-          return prev + Math.random() * 5;
-        });
-      }, 500);
-
       await onConvert(targetFormat);
-
-      clearInterval(progressInterval);
-      setConversionProgress(100);
-      setConversionStatus('success');
+      // Progress will be handled by events
     } catch (error) {
       setConversionStatus('error');
       setErrorMessage(error instanceof Error ? error.message : t.conversionError);
-    } finally {
       setIsConverting(false);
     }
   };
@@ -85,6 +84,40 @@ const ConversionScreen: React.FC<ConversionScreenProps> = ({
       onBack();
     }
   };
+
+  // Listen for conversion events
+  useEffect(() => {
+    EventsOn('conversion-progress', (data: any) => {
+      if (data && typeof data.progress === 'number') {
+        setConversionProgress(data.progress);
+      }
+    });
+
+    EventsOn('conversion-complete', () => {
+      setConversionProgress(100);
+      setConversionStatus('success');
+      setIsConverting(false);
+    });
+
+    EventsOn('conversion-error', (error: string) => {
+      setConversionStatus('error');
+      setErrorMessage(error);
+      setIsConverting(false);
+    });
+
+    EventsOn('conversion-cancelled', () => {
+      setConversionStatus('error');
+      setErrorMessage('Conversion cancelled');
+      setIsConverting(false);
+    });
+
+    return () => {
+      EventsOff('conversion-progress');
+      EventsOff('conversion-complete');
+      EventsOff('conversion-error');
+      EventsOff('conversion-cancelled');
+    };
+  }, []);
 
   // Get status icon and color
   const getStatusConfig = () => {
@@ -228,36 +261,63 @@ const ConversionScreen: React.FC<ConversionScreenProps> = ({
           </Typography>
         </Paper>
 
-        {/* Format Selection */}
+        {/* Conversion Mode Selection */}
         {conversionStatus === 'idle' && (
-          <FormControl
-            fullWidth
-            sx={{
-              mb: 3,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: 3,
-              },
-            }}
-          >
-            <InputLabel>{t.targetFormat}</InputLabel>
-            <Select
-              value={targetFormat}
-              label={t.targetFormat}
-              onChange={handleFormatChange}
-              disabled={isConverting}
+          <>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
+              Conversion Mode
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+              <Button
+                variant={conversionMode === 'video' ? 'contained' : 'outlined'}
+                onClick={() => setConversionMode('video')}
+                startIcon={<VideoFileIcon />}
+                fullWidth
+                sx={{ borderRadius: 3 }}
+              >
+                Video
+              </Button>
+              <Button
+                variant={conversionMode === 'audio' ? 'contained' : 'outlined'}
+                onClick={() => setConversionMode('audio')}
+                startIcon={<TransformIcon />}
+                fullWidth
+                sx={{ borderRadius: 3 }}
+              >
+                Audio Only
+              </Button>
+            </Box>
+
+            {/* Format Selection */}
+            <FormControl
+              fullWidth
+              sx={{
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 3,
+                },
+              }}
             >
-              {videoFormats.map((format) => (
-                <MenuItem key={format.value} value={format.value}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                    <Typography variant="body1">{format.label}</Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
-                      {format.description}
-                    </Typography>
-                  </Box>
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              <InputLabel>{t.targetFormat}</InputLabel>
+              <Select
+                value={targetFormat}
+                label={t.targetFormat}
+                onChange={handleFormatChange}
+                disabled={isConverting}
+              >
+                {(conversionMode === 'video' ? videoFormats : audioFormats).map((format) => (
+                  <MenuItem key={format.value} value={format.value}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <Typography variant="body1">{format.label}</Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ ml: 2 }}>
+                        {format.description}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </>
         )}
 
         {/* Progress Bar */}
