@@ -188,6 +188,117 @@ export interface Translations {
   // Настройки очереди
   autoRedirectToQueue: string;
   autoRedirectToQueueDescription: string;
+
+  // UpdateProgressModal
+  updatingYtDlp: string;
+
+  // SettingsModal - Deno
+  denoStatus: string;
+  denoInstalled: string;
+  denoNotInstalled: string;
+  denoUpdateAvailable: string;
+  denoInstall: string;
+  denoInstalling: string;
+  denoInstallingDeno: string;
+  denoChecking: string;
+  denoCheckUpdate: string;
+  denoExtracting: string;
+  denoDownloading: string;
+  denoDownloadStatus: string;
+  denoInstallComplete: string;
+  denoError: string;
+
+  // SettingsModal - Queue buttons
+  clearQueue: string;
+  clearCache: string;
+
+  // SettingsModal - Proxy options
+  noProxyOption: string;
+  useSystemProxyOption: string;
+  manualProxyOption: string;
+
+  // SettingsModal - Cookies options
+  noCookiesOption: string;
+  extractFromBrowserOption: string;
+  useCookieFileOption: string;
+  selectBrowserLabel: string;
+  clickFolderIconForCookieFile: string;
+
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: string;
+  useJavaScriptRuntimeDescription: string;
+  denoStatusSection: string;
+
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: string;
+  ytDlpCurrentVersion: string;
+  ytDlpLatestVersion: string;
+  ytDlpUpdateAvailable: string;
+
+  // SettingsModal - App version
+  appVersionSection: string;
+  appCurrentVersion: string;
+  appLatestVersion: string;
+  appUpdateAvailableMessage: string;
+
+  // SelectionScreen - Filters
+  filterAll: string;
+  filterVideoAudio: string;
+  filterVideo: string;
+  filterAudio: string;
+  sortQuality: string;
+  sortSize: string;
+  selectBestQuality: string;
+  noFormatsMatchFilter: string;
+  recommended: string;
+  selectedFormat: string;
+  noVideo: string;
+  noAudio: string;
+
+  // App.tsx - Tooltips
+  switchToLightMode: string;
+  switchToDarkMode: string;
+  downloadQueueTooltip: string;
+  downloadHistoryTooltip: string;
+  settingsTooltip: string;
+
+  // PlaylistScreen
+  playlistTitle: string;
+  playlistDescription: string;
+
+  // QueueScreen
+  queueTitle: string;
+  queueDescriptionText: string;
+  calculating: string;
+
+  // HistoryScreen
+  historyTitle: string;
+  historyDescriptionText: string;
+
+  // CompletionScreen
+  completionVideoTitle: string;
+  completionUploader: string;
+
+  // DownloadScreen
+  downloadScreenTitle: string;
+  downloadScreenUploader: string;
+
+  // ConversionScreen
+  conversionScreenTitle: string;
+  conversionScreenDescription: string;
+  conversionScreenSourceFile: string;
+
+  // SavePathScreen
+  savePathScreenTitle: string;
+  savePathScreenDescription: string;
+  savePathScreenVideoTitle: string;
+  savePathScreenCurrentSaveLocation: string;
+  savePathScreenOrEnterCustomPath: string;
+  savePathScreenUseThisPath: string;
+  savePathScreenStartDownload: string;
+
+  // InputScreen
+  pasteFromClipboard: string;
 }
 
 // Частичные переводы - любой ключ может отсутствовать

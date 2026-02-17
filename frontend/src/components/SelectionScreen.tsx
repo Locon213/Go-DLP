@@ -221,19 +221,19 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
               >
                 <ToggleButton value="all" sx={{ display: 'flex', gap: 0.5 }}>
                   <ViewListIcon fontSize="small" />
-                  All
+                  {t.filterAll}
                 </ToggleButton>
                 <ToggleButton value="both" sx={{ display: 'flex', gap: 0.5 }}>
                   <MergeTypeIcon fontSize="small" />
-                  Video+Audio
+                  {t.filterVideoAudio}
                 </ToggleButton>
                 <ToggleButton value="video" sx={{ display: 'flex', gap: 0.5 }}>
                   <MovieIcon fontSize="small" />
-                  Video
+                  {t.filterVideo}
                 </ToggleButton>
                 <ToggleButton value="audio" sx={{ display: 'flex', gap: 0.5 }}>
                   <MusicNoteIcon fontSize="small" />
-                  Audio
+                  {t.filterAudio}
                 </ToggleButton>
               </ToggleButtonGroup>
 
@@ -261,11 +261,11 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
               >
                 <ToggleButton value="quality" sx={{ display: 'flex', gap: 0.5 }}>
                   <HighQualityIcon fontSize="small" />
-                  Best Quality
+                  {t.sortQuality}
                 </ToggleButton>
                 <ToggleButton value="size" sx={{ display: 'flex', gap: 0.5 }}>
                   <SortIcon fontSize="small" />
-                  Smallest Size
+                  {t.sortSize}
                 </ToggleButton>
               </ToggleButtonGroup>
             </Box>
@@ -281,7 +281,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                   onClick={() => setSelectedFormat(bestQualityFormat.format_id)}
                   sx={{ borderRadius: 2 }}
                 >
-                  Select Best Quality ({bestQualityFormat.resolution})
+                  {t.selectBestQuality} ({bestQualityFormat.resolution})
                 </Button>
               </Box>
             )}
@@ -333,7 +333,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                           ) : (
                             <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
                               <AudiotrackIcon fontSize="small" sx={{ mr: 0.5, color: 'info.main' }} />
-                              AUDIO ONLY
+                              {t.filterAudio} ONLY
                             </Box>
                           )}
                           <Typography variant="caption" sx={{ color: 'text.secondary' }}>
@@ -343,12 +343,12 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                           {isRecommended(format) && (
                             <Chip
                               icon={<ThumbUp sx={{ fontSize: '0.875rem !important' }} />}
-                              label="Recommended"
+                              label={t.recommended}
                               size="small"
                               color="success"
                               variant="outlined"
-                              sx={{ 
-                                height: 20, 
+                              sx={{
+                                height: 20,
                                 fontSize: '0.65rem',
                                 '& .MuiChip-label': { px: 0.5 }
                               }}
@@ -356,7 +356,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                           )}
                           {selectedFormat === format.format_id && (
                             <Chip
-                              label="Selected"
+                              label={t.selectedFormat}
                               size="small"
                               color="primary"
                               sx={{ height: 20, fontSize: '0.65rem' }}
@@ -368,7 +368,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                         <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
                           <StorageIcon fontSize="small" sx={{ mr: 1 }} />
                           <Typography variant="caption" color="text.secondary">
-                            {format.vcodec !== 'none' ? format.vcodec : 'No video'} + {format.acodec !== 'none' ? format.acodec : 'No audio'}
+                            {format.vcodec !== 'none' ? format.vcodec : t.noVideo} + {format.acodec !== 'none' ? format.acodec : t.noAudio}
                           </Typography>
                         </Box>
                       }
@@ -379,9 +379,9 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                          (formatFileSize(format.filesize || 0) !== 'Unknown'
                            ? formatFileSize(format.filesize)
                            : (format.filesizeApprox
-                             ? (typeof format.filesizeApprox === 'string' 
-                                 ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B') 
-                                     ? format.filesizeApprox 
+                             ? (typeof format.filesizeApprox === 'string'
+                                 ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B')
+                                     ? format.filesizeApprox
                                      : '~' + formatFileSize(parseInt(format.filesizeApprox)))
                                  : '~' + formatFileSize(format.filesizeApprox))
                              : 'Unknown'))}
@@ -392,7 +392,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                 {processedFormats.length === 0 && (
                   <Box sx={{ textAlign: 'center', py: 4 }}>
                     <Typography color="text.secondary">
-                      No formats match the selected filter
+                      {t.noFormatsMatchFilter}
                     </Typography>
                   </Box>
                 )}

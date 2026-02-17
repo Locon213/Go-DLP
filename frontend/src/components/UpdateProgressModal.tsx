@@ -10,6 +10,7 @@ import {
   LinearProgress,
   CircularProgress
 } from '@mui/material';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface UpdateProgressModalProps {
   open: boolean;
@@ -24,6 +25,8 @@ const UpdateProgressModal: React.FC<UpdateProgressModalProps> = ({
   status,
   onClose
 }) => {
+  const { t } = useLanguage();
+
   return (
     <Dialog
       open={open}
@@ -39,7 +42,7 @@ const UpdateProgressModal: React.FC<UpdateProgressModalProps> = ({
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <CircularProgress size={24} />
-          <Typography variant="h6">Обновление yt-dlp</Typography>
+          <Typography variant="h6">{t.updatingYtDlp}</Typography>
         </Box>
       </DialogTitle>
       <DialogContent>
@@ -59,7 +62,7 @@ const UpdateProgressModal: React.FC<UpdateProgressModalProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={progress < 100 && progress > 0}>
-          Закрыть
+          {t.close}
         </Button>
       </DialogActions>
     </Dialog>

@@ -47,19 +47,19 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
             WebkitTextFillColor: 'transparent',
             fontWeight: 'bold'
           }}>
-            {t.downloadHistory || 'Download History'}
+            {t.historyTitle}
           </Typography>
           <Button
             variant="outlined"
             color="primary"
             onClick={onGoToHome}
           >
-            {t.goToHome || 'Go to Home'}
+            {t.goToHome}
           </Button>
         </Box>
 
         <Typography variant="body1" color="text.secondary" paragraph align="center">
-          {t.historyDescription || 'View your past downloads'}
+          {t.historyDescriptionText}
         </Typography>
 
         <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -91,7 +91,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
 
         {historyItems.length === 0 ? (
           <Typography variant="h6" align="center" color="text.secondary" sx={{ py: 4 }}>
-            {t.noHistory || 'No download history'}
+            {t.noHistory}
           </Typography>
         ) : (
           <>
@@ -103,7 +103,7 @@ const HistoryScreen: React.FC<HistoryScreenProps> = ({
                   startIcon={<DeleteIcon />}
                   onClick={onClearHistory}
                 >
-                  {t.clearHistory || 'Clear History'}
+                  {t.clearHistory}
                 </Button>
               </Box>
             )}

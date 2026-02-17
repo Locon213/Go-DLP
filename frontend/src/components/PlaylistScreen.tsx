@@ -97,19 +97,19 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
           <Typography variant="subtitle1">
             {t.playlistVideosCount}: {playlistInfo.entryCount}
           </Typography>
-          
+
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button 
-              variant="outlined" 
-              size="small" 
+            <Button
+              variant="outlined"
+              size="small"
               onClick={selectAllVideos}
               disabled={allSelected}
             >
               {t.selectAll}
             </Button>
-            <Button 
-              variant="outlined" 
-              size="small" 
+            <Button
+              variant="outlined"
+              size="small"
               onClick={deselectAllVideos}
               disabled={selectedVideos.length === 0}
             >
@@ -119,7 +119,7 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <Chip 
+          <Chip
             label={`${t.selected}: ${selectedVideos.length}`}
             color={selectedVideos.length > 0 ? "primary" : "default"}
             variant={selectedVideos.length > 0 ? "filled" : "outlined"}

@@ -149,4 +149,115 @@ export const ru: PartialTranslations = {
   clearHistory: 'Очистить историю',
   autoRedirectToQueue: 'Автоматически перенаправлять в очередь',
   autoRedirectToQueueDescription: 'Автоматически переключаться на экран очереди после начала загрузки',
+
+  // UpdateProgressModal
+  updatingYtDlp: 'Обновление yt-dlp',
+
+  // SettingsModal - Deno
+  denoStatus: 'Статус Deno',
+  denoInstalled: 'Установлен',
+  denoNotInstalled: 'Не установлен',
+  denoUpdateAvailable: 'Доступно обновление!',
+  denoInstall: 'Установить',
+  denoInstalling: 'Установка...',
+  denoInstallingDeno: 'Установка Deno',
+  denoChecking: 'Проверка...',
+  denoCheckUpdate: 'Проверить обновление',
+  denoExtracting: 'Извлечение...',
+  denoDownloading: 'Загрузка...',
+  denoDownloadStatus: 'Статус загрузки',
+  denoInstallComplete: 'Установка завершена!',
+  denoError: 'Ошибка',
+
+  // SettingsModal - Queue buttons
+  clearQueue: 'Очистить очередь',
+  clearCache: 'Очистить кэш',
+
+  // SettingsModal - Proxy options
+  noProxyOption: 'Без прокси',
+  useSystemProxyOption: 'Использовать системный прокси',
+  manualProxyOption: 'Ручной прокси',
+
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Без куки',
+  extractFromBrowserOption: 'Извлечь из браузера',
+  useCookieFileOption: 'Использовать файл куки',
+  selectBrowserLabel: 'Выберите браузер:',
+  clickFolderIconForCookieFile: 'Нажмите значок папки для выбора файла куки',
+
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'Использовать JavaScript Runtime для YouTube и других сайтов',
+  useJavaScriptRuntimeDescription: 'Включить JavaScript runtime (Deno) для сайтов, которые требуют его, особенно YouTube. Позволяет получить доступ к форматам видео более высокого качества.',
+  denoStatusSection: 'Статус Deno',
+
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'Версия yt-dlp',
+  ytDlpCurrentVersion: 'Текущая версия',
+  ytDlpLatestVersion: 'Последняя версия',
+  ytDlpUpdateAvailable: 'Доступна новая версия!',
+
+  // SettingsModal - App version
+  appVersionSection: 'Версия Go-DLP',
+  appCurrentVersion: 'Текущая версия',
+  appLatestVersion: 'Последняя версия',
+  appUpdateAvailableMessage: 'Доступно обновление',
+
+  // SelectionScreen - Filters
+  filterAll: 'Все',
+  filterVideoAudio: 'Видео+Аудио',
+  filterVideo: 'Видео',
+  filterAudio: 'Аудио',
+  sortQuality: 'Лучшее качество',
+  sortSize: 'Наименьший размер',
+  selectBestQuality: 'Выбрать лучшее качество',
+  noFormatsMatchFilter: 'Нет форматов, соответствующих выбранному фильтру',
+  recommended: 'Рекомендуется',
+  selectedFormat: 'Выбрано',
+  noVideo: 'Без видео',
+  noAudio: 'Без аудио',
+
+  // App.tsx - Tooltips
+  switchToLightMode: 'Переключиться на светлую тему',
+  switchToDarkMode: 'Переключиться на темную тему',
+  downloadQueueTooltip: 'Очередь загрузок',
+  downloadHistoryTooltip: 'История загрузок',
+  settingsTooltip: 'Настройки',
+
+  // PlaylistScreen
+  playlistTitle: 'Название плейлиста',
+  playlistDescription: 'Описание плейлиста',
+
+  // QueueScreen
+  queueTitle: 'Очередь загрузок',
+  queueDescriptionText: 'Управление текущими и запланированными загрузками',
+  calculating: 'Вычисление...',
+
+  // HistoryScreen
+  historyTitle: 'История загрузок',
+  historyDescriptionText: 'Просмотр ваших прошлых загрузок',
+
+  // CompletionScreen
+  completionVideoTitle: 'Название видео',
+  completionUploader: 'Автор',
+
+  // DownloadScreen
+  downloadScreenTitle: 'Загрузка медиа',
+  downloadScreenUploader: 'Автор',
+
+  // ConversionScreen
+  conversionScreenTitle: 'Перекодирование видео',
+  conversionScreenDescription: 'Выберите формат для перекодирования видео',
+  conversionScreenSourceFile: 'Исходный файл',
+
+  // SavePathScreen
+  savePathScreenTitle: 'Выберите место сохранения',
+  savePathScreenDescription: 'Выберите, куда сохранить видеофайл. Вы можете выбрать папку или ввести свой путь.',
+  savePathScreenVideoTitle: 'Название видео',
+  savePathScreenCurrentSaveLocation: 'Текущее место сохранения',
+  savePathScreenOrEnterCustomPath: 'Или введите свой путь',
+  savePathScreenUseThisPath: 'Использовать этот путь',
+  savePathScreenStartDownload: 'Начать загрузку',
+
+  // InputScreen
+  pasteFromClipboard: 'Вставить из буфера обмена',
 };

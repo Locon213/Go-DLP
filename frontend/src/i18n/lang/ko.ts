@@ -149,4 +149,96 @@ export const ko: PartialTranslations = {
   clearHistory: '기록 삭제',
   autoRedirectToQueue: '자동으로 대기열로 리다이렉션',
   autoRedirectToQueueDescription: '다운로드 시작 후 자동으로 대기열 화면으로 전환',
+  // UpdateProgressModal
+  updatingYtDlp: 'yt-dlp 업데이트 중',
+  // SettingsModal - Deno
+  denoStatus: 'Deno 상태',
+  denoInstalled: '설치됨',
+  denoNotInstalled: '설치되지 않음',
+  denoUpdateAvailable: '업데이트 사용 가능!',
+  denoInstall: '설치',
+  denoInstalling: '설치 중...',
+  denoInstallingDeno: 'Deno 설치 중',
+  denoChecking: '확인 중...',
+  denoCheckUpdate: '업데이트 확인',
+  denoExtracting: '추출 중...',
+  denoDownloading: '다운로드 중...',
+  denoDownloadStatus: '다운로드 상태',
+  denoInstallComplete: '설치 완료!',
+  denoError: '오류',
+  // SettingsModal - Queue buttons
+  clearQueue: '대기열 지우기',
+  clearCache: '캐시 지우기',
+  // SettingsModal - Proxy options
+  noProxyOption: '프록시 없음',
+  useSystemProxyOption: '시스템 프록시 사용',
+  manualProxyOption: '수동 프록시',
+  // SettingsModal - Cookies options
+  noCookiesOption: '쿠키 없음',
+  extractFromBrowserOption: '브라우저에서 추출',
+  useCookieFileOption: '쿠키 파일 사용',
+  selectBrowserLabel: '브라우저 선택:',
+  clickFolderIconForCookieFile: '폴더 아이콘을 클릭하여 쿠키 파일 찾아보기',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'YouTube 및 기타 사이트를 위해 JavaScript 런타임 사용',
+  useJavaScriptRuntimeDescription: 'YouTube 를 비롯한 JavaScript 런타임 (Deno) 이 필요한 사이트를 위해 활성화합니다. 더 높은 품질의 비디오 형식에 액세스할 수 있습니다.',
+  denoStatusSection: 'Deno 상태',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'yt-dlp 버전',
+  ytDlpCurrentVersion: '현재 버전',
+  ytDlpLatestVersion: '최신 버전',
+  ytDlpUpdateAvailable: '새 버전 사용 가능!',
+  // SettingsModal - App version
+  appVersionSection: 'Go-DLP 버전',
+  appCurrentVersion: '현재 버전',
+  appLatestVersion: '최신 버전',
+  appUpdateAvailableMessage: '업데이트 사용 가능',
+  // SelectionScreen - Filters
+  filterAll: '모두',
+  filterVideoAudio: '비디오 + 오디오',
+  filterVideo: '비디오',
+  filterAudio: '오디오',
+  sortQuality: '최고 품질',
+  sortSize: '최소 크기',
+  selectBestQuality: '최고 품질 선택',
+  noFormatsMatchFilter: '선택한 필터와 일치하는 형식 없음',
+  recommended: '추천',
+  selectedFormat: '선택됨',
+  noVideo: '비디오 없음',
+  noAudio: '오디오 없음',
+  // App.tsx - Tooltips
+  switchToLightMode: '라이트 모드로 전환',
+  switchToDarkMode: '다크 모드로 전환',
+  downloadQueueTooltip: '다운로드 대기열',
+  downloadHistoryTooltip: '다운로드 기록',
+  settingsTooltip: '설정',
+  // PlaylistScreen
+  playlistTitle: '재생목록 제목',
+  playlistDescription: '재생목록 설명',
+  // QueueScreen
+  queueTitle: '다운로드 대기열',
+  queueDescriptionText: '현재 및 예약된 다운로드 관리',
+  calculating: '계산 중...',
+  // HistoryScreen
+  historyTitle: '다운로드 기록',
+  historyDescriptionText: '이전 다운로드 보기',
+  // CompletionScreen
+  completionVideoTitle: '동영상 제목',
+  completionUploader: '업로더',
+  // DownloadScreen
+  downloadScreenTitle: '미디어 다운로드 중',
+  downloadScreenUploader: '업로더',
+  // ConversionScreen
+  conversionScreenTitle: '동영상 변환',
+  conversionScreenDescription: '동영상 변환 형식 선택',
+  conversionScreenSourceFile: '소스 파일',
+  // SavePathScreen
+  savePathScreenTitle: '저장 위치 선택',
+  savePathScreenDescription: '동영상을 저장할 위치를 선택하세요. 폴더를 선택하거나 사용자 지정 경로를 입력할 수 있습니다.',
+  savePathScreenVideoTitle: '동영상 제목',
+  savePathScreenCurrentSaveLocation: '현재 저장 위치',
+  savePathScreenOrEnterCustomPath: '또는 사용자 지정 경로 입력',
+  savePathScreenUseThisPath: '이 경로 사용',
+  savePathScreenStartDownload: '다운로드 시작',
+  pasteFromClipboard: '클립보드에서 붙여넣기',
 };

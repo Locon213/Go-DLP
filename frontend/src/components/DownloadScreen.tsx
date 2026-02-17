@@ -62,7 +62,7 @@ const DownloadScreen: React.FC<DownloadScreenProps> = ({
             {videoInfo?.title}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {t.uploader}: {videoInfo?.uploader || 'Unknown'}
+            {t.downloadScreenUploader}: {videoInfo?.uploader || t.unknown}
           </Typography>
         </Box>
 

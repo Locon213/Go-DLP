@@ -100,7 +100,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
             {t.back}
           </Button>
           <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-            {t.selectSaveLocation || 'Select Save Location'}
+            {t.savePathScreenTitle}
           </Typography>
           <Box sx={{ width: 80 }} /> {/* Spacer for centering */}
         </Box>
@@ -120,7 +120,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
 
         {/* Description */}
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          {t.saveLocationDescription || 'Choose where to save the video file. You can select a folder or enter a custom path.'}
+          {t.savePathScreenDescription}
         </Typography>
 
         <Divider sx={{ my: 3 }} />
@@ -136,7 +136,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
           }}
         >
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            {t.videoTitle || 'Video Title'}
+            {t.savePathScreenVideoTitle}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
             {videoInfo.title}
@@ -154,7 +154,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
           }}
         >
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            {t.currentSaveLocation || 'Current Save Location'}
+            {t.savePathScreenCurrentSaveLocation}
           </Typography>
           <Typography variant="body1" sx={{ wordBreak: 'break-all', fontFamily: 'monospace', mb: 2 }}>
             {downloadDir}
@@ -166,7 +166,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
             disabled={isSelecting}
             fullWidth
           >
-            {isSelecting ? (t.selecting || 'Selecting...') : (t.selectFolder || 'Select Folder')}
+            {isSelecting ? t.selecting : t.selectFolder}
           </Button>
         </Paper>
 
@@ -181,7 +181,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
           }}
         >
           <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            {t.orEnterCustomPath || 'Or Enter Custom Path'}
+            {t.savePathScreenOrEnterCustomPath}
           </Typography>
           <TextField
             fullWidth
@@ -201,7 +201,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
               onClick={handleUseCustomPath}
               fullWidth
             >
-              {t.useThisPath || 'Use This Path'}
+              {t.savePathScreenUseThisPath}
             </Button>
           )}
         </Paper>
@@ -228,7 +228,7 @@ const SavePathScreen: React.FC<SavePathScreenProps> = ({
               fullWidth
               sx={{ py: 2, fontSize: '1rem' }}
             >
-              {t.startDownload || 'Start Download'}
+              {t.savePathScreenStartDownload}
             </Button>
           </Grid>
         </Grid>

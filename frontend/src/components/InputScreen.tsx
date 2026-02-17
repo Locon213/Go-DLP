@@ -55,7 +55,7 @@ const InputScreen: React.FC<InputScreenProps> = ({
                       }
                     }}
                     edge="end"
-                    title="Paste from clipboard"
+                    title={t.pasteFromClipboard}
                   >
                     <ContentCopyIcon />
                   </IconButton>

@@ -149,4 +149,96 @@ export const zh: PartialTranslations = {
   clearHistory: '清除历史',
   autoRedirectToQueue: '自动重定向到队列',
   autoRedirectToQueueDescription: '开始下载后自动切换到队列屏幕',
+  // UpdateProgressModal
+  updatingYtDlp: '正在更新 yt-dlp',
+  // SettingsModal - Deno
+  denoStatus: 'Deno 状态',
+  denoInstalled: '已安装',
+  denoNotInstalled: '未安装',
+  denoUpdateAvailable: '有可用更新!',
+  denoInstall: '安装',
+  denoInstalling: '正在安装...',
+  denoInstallingDeno: '正在安装 Deno',
+  denoChecking: '正在检查...',
+  denoCheckUpdate: '检查更新',
+  denoExtracting: '正在解压...',
+  denoDownloading: '正在下载...',
+  denoDownloadStatus: '下载状态',
+  denoInstallComplete: '安装完成!',
+  denoError: '错误',
+  // SettingsModal - Queue buttons
+  clearQueue: '清除队列',
+  clearCache: '清除缓存',
+  // SettingsModal - Proxy options
+  noProxyOption: '无代理',
+  useSystemProxyOption: '使用系统代理',
+  manualProxyOption: '手动代理',
+  // SettingsModal - Cookies options
+  noCookiesOption: '无 Cookies',
+  extractFromBrowserOption: '从浏览器提取',
+  useCookieFileOption: '使用 Cookies 文件',
+  selectBrowserLabel: '选择浏览器：',
+  clickFolderIconForCookieFile: '点击文件夹图标浏览 Cookies 文件',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: '为 YouTube 和其他网站使用 JavaScript 运行时',
+  useJavaScriptRuntimeDescription: '为需要 JavaScript 运行时（Deno）的网站（尤其是 YouTube）启用它。可以访问更高质量的视频格式。',
+  denoStatusSection: 'Deno 状态',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'yt-dlp 版本',
+  ytDlpCurrentVersion: '当前版本',
+  ytDlpLatestVersion: '最新版本',
+  ytDlpUpdateAvailable: '有新版本可用!',
+  // SettingsModal - App version
+  appVersionSection: 'Go-DLP 版本',
+  appCurrentVersion: '当前版本',
+  appLatestVersion: '最新版本',
+  appUpdateAvailableMessage: '有可用更新',
+  // SelectionScreen - Filters
+  filterAll: '全部',
+  filterVideoAudio: '视频 + 音频',
+  filterVideo: '视频',
+  filterAudio: '音频',
+  sortQuality: '最佳质量',
+  sortSize: '最小大小',
+  selectBestQuality: '选择最佳质量',
+  noFormatsMatchFilter: '没有格式与所选过滤器匹配',
+  recommended: '推荐',
+  selectedFormat: '已选择',
+  noVideo: '无视频',
+  noAudio: '无音频',
+  // App.tsx - Tooltips
+  switchToLightMode: '切换到浅色主题',
+  switchToDarkMode: '切换到深色主题',
+  downloadQueueTooltip: '下载队列',
+  downloadHistoryTooltip: '下载历史',
+  settingsTooltip: '设置',
+  // PlaylistScreen
+  playlistTitle: '播放列表标题',
+  playlistDescription: '播放列表描述',
+  // QueueScreen
+  queueTitle: '下载队列',
+  queueDescriptionText: '管理当前和计划的下载',
+  calculating: '计算中...',
+  // HistoryScreen
+  historyTitle: '下载历史',
+  historyDescriptionText: '查看您的历史下载',
+  // CompletionScreen
+  completionVideoTitle: '视频标题',
+  completionUploader: '上传者',
+  // DownloadScreen
+  downloadScreenTitle: '正在下载媒体',
+  downloadScreenUploader: '上传者',
+  // ConversionScreen
+  conversionScreenTitle: '视频转换',
+  conversionScreenDescription: '选择视频转换格式',
+  conversionScreenSourceFile: '源文件',
+  // SavePathScreen
+  savePathScreenTitle: '选择保存位置',
+  savePathScreenDescription: '选择保存视频的位置。您可以选择文件夹或输入自定义路径。',
+  savePathScreenVideoTitle: '视频标题',
+  savePathScreenCurrentSaveLocation: '当前保存位置',
+  savePathScreenOrEnterCustomPath: '或输入自定义路径',
+  savePathScreenUseThisPath: '使用此路径',
+  savePathScreenStartDownload: '开始下载',
+  pasteFromClipboard: '从剪贴板粘贴',
 };

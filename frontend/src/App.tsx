@@ -103,7 +103,7 @@ const App: React.FC = () => {
   };
 
   // Получаем язык и тему из контекста
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const { darkMode, toggleTheme } = useTheme();
 
   return (
@@ -129,24 +129,24 @@ const App: React.FC = () => {
                 />
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Tooltip title="Download Queue">
+                <Tooltip title={t.downloadQueueTooltip}>
                   <IconButton onClick={handleGoToQueue} color="inherit">
                     <Badge badgeContent={queueItems.filter(item => item.status === 'pending' || item.status === 'in-progress').length} color="primary">
                       <QueueIcon />
                     </Badge>
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Download History">
+                <Tooltip title={t.downloadHistoryTooltip}>
                   <IconButton onClick={handleGoToHistory} color="inherit">
                     <HistoryIcon />
                   </IconButton>
                 </Tooltip>
-                <Tooltip title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+                <Tooltip title={darkMode ? t.switchToLightMode : t.switchToDarkMode}>
                   <IconButton onClick={toggleTheme} color="inherit">
                     {darkMode ? <Brightness7Icon /> : <Brightness4Icon />}
                   </IconButton>
                 </Tooltip>
-                <Tooltip title="Settings">
+                <Tooltip title={t.settingsTooltip}>
                   <IconButton
                     onClick={() => {
                       loadSettings();
@@ -162,7 +162,7 @@ const App: React.FC = () => {
           </AppBar>
 
           <Typography variant="h6" align="center" sx={{ mb: 3, color: 'text.secondary' }}>
-            Modern yt-dlp Desktop Client
+            {t.appSubtitle}
           </Typography>
 
           {ffmpegWarning && (
@@ -292,7 +292,7 @@ const App: React.FC = () => {
               severity={notification?.type === 'error' ? 'error' : 'success'}
               sx={{ width: '100%' }}
             >
-              <AlertTitle>{notification?.type === 'error' ? 'Error' : 'Success'}</AlertTitle>
+              <AlertTitle>{notification?.type === 'error' ? t.error : t.success}</AlertTitle>
               {notification?.message}
             </Alert>
           </Snackbar>

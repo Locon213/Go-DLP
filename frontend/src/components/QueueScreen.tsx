@@ -71,12 +71,12 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
             color="primary"
             onClick={onGoToHome}
           >
-            {t.goToHome || 'Go to Home'}
+            {t.goToHome}
           </Button>
         </Box>
 
         <Typography variant="body1" color="text.secondary" paragraph align="center">
-          {t.queueDescription}
+          {t.queueDescriptionText}
         </Typography>
 
         <Grid container spacing={3} sx={{ mb: 3 }}>
@@ -138,19 +138,19 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
                               {/* [FIX] Показываем speed, или плейсхолдер если статус активен, но данных нет */}
                               {(item.speed || item.status === 'in-progress') && (
                                 <Typography variant="caption" color="text.secondary">
-                                  {t.speed}: {item.speed || 'Calculating...'}
+                                  {t.speed}: {item.speed || t.calculating}
                                 </Typography>
                               )}
 
                               {(item.size || item.status === 'in-progress') && (
                                 <Typography variant="caption" color="text.secondary">
-                                  {t.fileSize}: {item.size || 'Calculating...'}
+                                  {t.fileSize}: {item.size || t.calculating}
                                 </Typography>
                               )}
 
                               {(item.eta || item.status === 'in-progress') && (
                                 <Typography variant="caption" color="text.secondary">
-                                  {t.timeLeft}: {item.eta || 'Calculating...'}
+                                  {t.timeLeft}: {item.eta || t.calculating}
                                 </Typography>
                               )}
                             </Box>

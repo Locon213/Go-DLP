@@ -149,4 +149,96 @@ export const fr: PartialTranslations = {
   clearHistory: 'Effacer l\'historique',
   autoRedirectToQueue: 'Redirection automatique vers la file d\'attente',
   autoRedirectToQueueDescription: 'Passer automatiquement à l\'écran de la file d\'attente après le début du téléchargement',
+  // UpdateProgressModal
+  updatingYtDlp: 'Mise à jour de yt-dlp',
+  // SettingsModal - Deno
+  denoStatus: 'Statut Deno',
+  denoInstalled: 'Installé',
+  denoNotInstalled: 'Non installé',
+  denoUpdateAvailable: 'Mise à jour disponible!',
+  denoInstall: 'Installer',
+  denoInstalling: 'Installation...',
+  denoInstallingDeno: 'Installation de Deno',
+  denoChecking: 'Vérification...',
+  denoCheckUpdate: 'Vérifier la mise à jour',
+  denoExtracting: 'Extraction...',
+  denoDownloading: 'Téléchargement...',
+  denoDownloadStatus: 'Statut du téléchargement',
+  denoInstallComplete: 'Installation terminée!',
+  denoError: 'Erreur',
+  // SettingsModal - Queue buttons
+  clearQueue: 'Effacer la file d\'attente',
+  clearCache: 'Effacer le cache',
+  // SettingsModal - Proxy options
+  noProxyOption: 'Sans proxy',
+  useSystemProxyOption: 'Utiliser le proxy du système',
+  manualProxyOption: 'Proxy manuel',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Sans cookies',
+  extractFromBrowserOption: 'Extraire du navigateur',
+  useCookieFileOption: 'Utiliser le fichier de cookies',
+  selectBrowserLabel: 'Sélectionner le navigateur:',
+  clickFolderIconForCookieFile: 'Cliquez sur l\'icône du dossier pour parcourir le fichier de cookies',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'Utiliser le runtime JavaScript pour YouTube et autres sites',
+  useJavaScriptRuntimeDescription: 'Activer le runtime JavaScript (Deno) pour les sites qui le nécessitent, en particulier YouTube. Permet d\'accéder aux formats vidéo de meilleure qualité.',
+  denoStatusSection: 'Statut Deno',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'Version de yt-dlp',
+  ytDlpCurrentVersion: 'Version actuelle',
+  ytDlpLatestVersion: 'Dernière version',
+  ytDlpUpdateAvailable: 'Nouvelle version disponible!',
+  // SettingsModal - App version
+  appVersionSection: 'Version de Go-DLP',
+  appCurrentVersion: 'Version actuelle',
+  appLatestVersion: 'Dernière version',
+  appUpdateAvailableMessage: 'Mise à jour disponible',
+  // SelectionScreen - Filters
+  filterAll: 'Tous',
+  filterVideoAudio: 'Vidéo+Audio',
+  filterVideo: 'Vidéo',
+  filterAudio: 'Audio',
+  sortQuality: 'Meilleure qualité',
+  sortSize: 'Taille la plus petite',
+  selectBestQuality: 'Sélectionner la meilleure qualité',
+  noFormatsMatchFilter: 'Aucun format ne correspond au filtre sélectionné',
+  recommended: 'Recommandé',
+  selectedFormat: 'Sélectionné',
+  noVideo: 'Pas de vidéo',
+  noAudio: 'Pas d\'audio',
+  // App.tsx - Tooltips
+  switchToLightMode: 'Passer au mode clair',
+  switchToDarkMode: 'Passer au mode sombre',
+  downloadQueueTooltip: 'File d\'attente de téléchargement',
+  downloadHistoryTooltip: 'Historique des téléchargements',
+  settingsTooltip: 'Paramètres',
+  // PlaylistScreen
+  playlistTitle: 'Titre de la liste de lecture',
+  playlistDescription: 'Description de la liste de lecture',
+  // QueueScreen
+  queueTitle: 'File d\'attente de téléchargement',
+  queueDescriptionText: 'Gérer les téléchargements actuels et planifiés',
+  calculating: 'Calcul...',
+  // HistoryScreen
+  historyTitle: 'Historique des téléchargements',
+  historyDescriptionText: 'Voir vos téléchargements précédents',
+  // CompletionScreen
+  completionVideoTitle: 'Titre de la vidéo',
+  completionUploader: 'Uploadeur',
+  // DownloadScreen
+  downloadScreenTitle: 'Téléchargement du média',
+  downloadScreenUploader: 'Uploadeur',
+  // ConversionScreen
+  conversionScreenTitle: 'Conversion vidéo',
+  conversionScreenDescription: 'Sélectionnez le format pour la conversion vidéo',
+  conversionScreenSourceFile: 'Fichier source',
+  // SavePathScreen
+  savePathScreenTitle: 'Sélectionner l\'emplacement de sauvegarde',
+  savePathScreenDescription: 'Choisissez où enregistrer la vidéo. Vous pouvez sélectionner un dossier ou entrer un chemin personnalisé.',
+  savePathScreenVideoTitle: 'Titre de la vidéo',
+  savePathScreenCurrentSaveLocation: 'Emplacement de sauvegarde actuel',
+  savePathScreenOrEnterCustomPath: 'Ou entrer un chemin personnalisé',
+  savePathScreenUseThisPath: 'Utiliser ce chemin',
+  savePathScreenStartDownload: 'Démarrer le téléchargement',
+  pasteFromClipboard: 'Coller depuis le presse-papiers',
 };

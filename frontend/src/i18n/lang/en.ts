@@ -149,4 +149,115 @@ export const en: PartialTranslations = {
   clearHistory: 'Clear History',
   autoRedirectToQueue: 'Auto redirect to queue',
   autoRedirectToQueueDescription: 'Automatically switch to queue screen after starting download',
+
+  // UpdateProgressModal
+  updatingYtDlp: 'Updating yt-dlp',
+
+  // SettingsModal - Deno
+  denoStatus: 'Deno Status',
+  denoInstalled: 'Installed',
+  denoNotInstalled: 'Not Installed',
+  denoUpdateAvailable: 'Update available!',
+  denoInstall: 'Install',
+  denoInstalling: 'Installing...',
+  denoInstallingDeno: 'Installing Deno',
+  denoChecking: 'Checking...',
+  denoCheckUpdate: 'Check Update',
+  denoExtracting: 'Extracting...',
+  denoDownloading: 'Downloading...',
+  denoDownloadStatus: 'Download Status',
+  denoInstallComplete: 'Installation complete!',
+  denoError: 'Error',
+
+  // SettingsModal - Queue buttons
+  clearQueue: 'Clear Queue',
+  clearCache: 'Clear Cache',
+
+  // SettingsModal - Proxy options
+  noProxyOption: 'No Proxy',
+  useSystemProxyOption: 'Use System Proxy',
+  manualProxyOption: 'Manual Proxy',
+
+  // SettingsModal - Cookies options
+  noCookiesOption: 'No Cookies',
+  extractFromBrowserOption: 'Extract from Browser',
+  useCookieFileOption: 'Use Cookie File',
+  selectBrowserLabel: 'Select Browser:',
+  clickFolderIconForCookieFile: 'Click the folder icon to browse for cookie file',
+
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'Use JavaScript Runtime for YouTube and other sites',
+  useJavaScriptRuntimeDescription: 'Enable JavaScript runtime (Deno) for sites that require it, especially YouTube. Allows access to higher quality video formats.',
+  denoStatusSection: 'Deno Status',
+
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'yt-dlp Version',
+  ytDlpCurrentVersion: 'Current Version',
+  ytDlpLatestVersion: 'Latest Version',
+  ytDlpUpdateAvailable: 'New version available!',
+
+  // SettingsModal - App version
+  appVersionSection: 'Go-DLP Version',
+  appCurrentVersion: 'Current Version',
+  appLatestVersion: 'Latest Version',
+  appUpdateAvailableMessage: 'Update Available',
+
+  // SelectionScreen - Filters
+  filterAll: 'All',
+  filterVideoAudio: 'Video+Audio',
+  filterVideo: 'Video',
+  filterAudio: 'Audio',
+  sortQuality: 'Best Quality',
+  sortSize: 'Smallest Size',
+  selectBestQuality: 'Select Best Quality',
+  noFormatsMatchFilter: 'No formats match the selected filter',
+  recommended: 'Recommended',
+  selectedFormat: 'Selected',
+  noVideo: 'No video',
+  noAudio: 'No audio',
+
+  // App.tsx - Tooltips
+  switchToLightMode: 'Switch to Light Mode',
+  switchToDarkMode: 'Switch to Dark Mode',
+  downloadQueueTooltip: 'Download Queue',
+  downloadHistoryTooltip: 'Download History',
+  settingsTooltip: 'Settings',
+
+  // PlaylistScreen
+  playlistTitle: 'Playlist Title',
+  playlistDescription: 'Playlist Description',
+
+  // QueueScreen
+  queueTitle: 'Download Queue',
+  queueDescriptionText: 'Manage current and planned downloads',
+  calculating: 'Calculating...',
+
+  // HistoryScreen
+  historyTitle: 'Download History',
+  historyDescriptionText: 'View your past downloads',
+
+  // CompletionScreen
+  completionVideoTitle: 'Video Title',
+  completionUploader: 'Uploader',
+
+  // DownloadScreen
+  downloadScreenTitle: 'Downloading Media',
+  downloadScreenUploader: 'Uploader',
+
+  // ConversionScreen
+  conversionScreenTitle: 'Video Conversion',
+  conversionScreenDescription: 'Select format for video conversion',
+  conversionScreenSourceFile: 'Source File',
+
+  // SavePathScreen
+  savePathScreenTitle: 'Select Save Location',
+  savePathScreenDescription: 'Choose where to save the video file. You can select a folder or enter a custom path.',
+  savePathScreenVideoTitle: 'Video Title',
+  savePathScreenCurrentSaveLocation: 'Current Save Location',
+  savePathScreenOrEnterCustomPath: 'Or Enter Custom Path',
+  savePathScreenUseThisPath: 'Use This Path',
+  savePathScreenStartDownload: 'Start Download',
+
+  // InputScreen
+  pasteFromClipboard: 'Paste from clipboard',
 };

@@ -149,4 +149,96 @@ export const de: PartialTranslations = {
   clearHistory: 'Verlauf löschen',
   autoRedirectToQueue: 'Automatisch zur Warteschlange weiterleiten',
   autoRedirectToQueueDescription: 'Automatisch zum Warteschlangenbildschirm wechseln nachdem der Download gestartet wurde',
+  // UpdateProgressModal
+  updatingYtDlp: 'yt-dlp wird aktualisiert',
+  // SettingsModal - Deno
+  denoStatus: 'Deno Status',
+  denoInstalled: 'Installiert',
+  denoNotInstalled: 'Nicht installiert',
+  denoUpdateAvailable: 'Update verfügbar!',
+  denoInstall: 'Installieren',
+  denoInstalling: 'Wird installiert...',
+  denoInstallingDeno: 'Deno wird installiert',
+  denoChecking: 'Wird überprüft...',
+  denoCheckUpdate: 'Auf Update prüfen',
+  denoExtracting: 'Wird extrahiert...',
+  denoDownloading: 'Wird heruntergeladen...',
+  denoDownloadStatus: 'Download-Status',
+  denoInstallComplete: 'Installation abgeschlossen!',
+  denoError: 'Fehler',
+  // SettingsModal - Queue buttons
+  clearQueue: 'Warteschlange leeren',
+  clearCache: 'Cache leeren',
+  // SettingsModal - Proxy options
+  noProxyOption: 'Ohne Proxy',
+  useSystemProxyOption: 'System-Proxy verwenden',
+  manualProxyOption: 'Manueller Proxy',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Ohne Cookies',
+  extractFromBrowserOption: 'Aus Browser extrahieren',
+  useCookieFileOption: 'Cookie-Datei verwenden',
+  selectBrowserLabel: 'Browser auswählen:',
+  clickFolderIconForCookieFile: 'Klicken Sie auf das Ordner-Symbol, um die Cookie-Datei auszuwählen',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'JavaScript-Laufzeitumgebung für YouTube und andere Websites verwenden',
+  useJavaScriptRuntimeDescription: 'JavaScript-Laufzeitumgebung (Deno) für Websites aktivieren, die dies erfordern, insbesondere YouTube. Ermöglicht den Zugriff auf Videoformate in höherer Qualität.',
+  denoStatusSection: 'Deno Status',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'yt-dlp Version',
+  ytDlpCurrentVersion: 'Aktuelle Version',
+  ytDlpLatestVersion: 'Neueste Version',
+  ytDlpUpdateAvailable: 'Neue Version verfügbar!',
+  // SettingsModal - App version
+  appVersionSection: 'Go-DLP Version',
+  appCurrentVersion: 'Aktuelle Version',
+  appLatestVersion: 'Neueste Version',
+  appUpdateAvailableMessage: 'Update verfügbar',
+  // SelectionScreen - Filters
+  filterAll: 'Alle',
+  filterVideoAudio: 'Video+Audio',
+  filterVideo: 'Video',
+  filterAudio: 'Audio',
+  sortQuality: 'Beste Qualität',
+  sortSize: 'Kleinste Größe',
+  selectBestQuality: 'Beste Qualität auswählen',
+  noFormatsMatchFilter: 'Keine Formate entsprechen dem ausgewählten Filter',
+  recommended: 'Empfohlen',
+  selectedFormat: 'Ausgewählt',
+  noVideo: 'Kein Video',
+  noAudio: 'Kein Audio',
+  // App.tsx - Tooltips
+  switchToLightMode: 'Zum hellen Design wechseln',
+  switchToDarkMode: 'Zum dunklen Design wechseln',
+  downloadQueueTooltip: 'Download-Warteschlange',
+  downloadHistoryTooltip: 'Downloadverlauf',
+  settingsTooltip: 'Einstellungen',
+  // PlaylistScreen
+  playlistTitle: 'Wiedergabelistentitel',
+  playlistDescription: 'Wiedergabelistenbeschreibung',
+  // QueueScreen
+  queueTitle: 'Download-Warteschlange',
+  queueDescriptionText: 'Aktuelle und geplante Downloads verwalten',
+  calculating: 'Wird berechnet...',
+  // HistoryScreen
+  historyTitle: 'Downloadverlauf',
+  historyDescriptionText: 'Ihre früheren Downloads anzeigen',
+  // CompletionScreen
+  completionVideoTitle: 'Videotitel',
+  completionUploader: 'Uploader',
+  // DownloadScreen
+  downloadScreenTitle: 'Medien werden heruntergeladen',
+  downloadScreenUploader: 'Uploader',
+  // ConversionScreen
+  conversionScreenTitle: 'Videokonvertierung',
+  conversionScreenDescription: 'Format für Videokonvertierung auswählen',
+  conversionScreenSourceFile: 'Quelldatei',
+  // SavePathScreen
+  savePathScreenTitle: 'Speicherort auswählen',
+  savePathScreenDescription: 'Wählen Sie, wo das Video gespeichert werden soll. Sie können einen Ordner auswählen oder einen benutzerdefinierten Pfad eingeben.',
+  savePathScreenVideoTitle: 'Videotitel',
+  savePathScreenCurrentSaveLocation: 'Aktueller Speicherort',
+  savePathScreenOrEnterCustomPath: 'Oder benutzerdefinierten Pfad eingeben',
+  savePathScreenUseThisPath: 'Diesen Pfad verwenden',
+  savePathScreenStartDownload: 'Download starten',
+  pasteFromClipboard: 'Aus Zwischenablage einfügen',
 };

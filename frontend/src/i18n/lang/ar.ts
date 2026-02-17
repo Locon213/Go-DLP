@@ -149,4 +149,96 @@ export const ar: PartialTranslations = {
   clearHistory: 'مسح السجل',
   autoRedirectToQueue: 'إعادة التوجيه التلقائي إلى قائمة الانتظار',
   autoRedirectToQueueDescription: 'التبديل التلقائي إلى شاشة قائمة الانتظار بعد بدء التنزيل',
+  // UpdateProgressModal
+  updatingYtDlp: 'جاري تحديث yt-dlp',
+  // SettingsModal - Deno
+  denoStatus: 'حالة Deno',
+  denoInstalled: 'مثبت',
+  denoNotInstalled: 'غير مثبت',
+  denoUpdateAvailable: 'تحديث متاح!',
+  denoInstall: 'تثبيت',
+  denoInstalling: 'جاري التثبيت...',
+  denoInstallingDeno: 'جاري تثبيت Deno',
+  denoChecking: 'جاري التحقق...',
+  denoCheckUpdate: 'التحقق من التحديث',
+  denoExtracting: 'جاري الاستخراج...',
+  denoDownloading: 'جاري التنزيل...',
+  denoDownloadStatus: 'حالة التنزيل',
+  denoInstallComplete: 'اكتمل التثبيت!',
+  denoError: 'خطأ',
+  // SettingsModal - Queue buttons
+  clearQueue: 'مسح قائمة الانتظار',
+  clearCache: 'مسح الذاكرة المؤقتة',
+  // SettingsModal - Proxy options
+  noProxyOption: 'بدون وكيل',
+  useSystemProxyOption: 'استخدام وكيل النظام',
+  manualProxyOption: 'وكيل يدوي',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'بدون ملفات تعريف الارتباط',
+  extractFromBrowserOption: 'استخراج من المتصفح',
+  useCookieFileOption: 'استخدام ملف ملفات تعريف الارتباط',
+  selectBrowserLabel: 'اختر المتصفح:',
+  clickFolderIconForCookieFile: 'انقر على أيقونة المجلد لتحديد ملف ملفات تعريف الارتباط',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'استخدام بيئة تشغيل JavaScript لـ YouTube والمواقع الأخرى',
+  useJavaScriptRuntimeDescription: 'تمكين بيئة تشغيل JavaScript (Deno) للمواقع التي تتطلب ذلك، خاصة YouTube. يسمح بالوصول إلى تنسيقات الفيديو ذات الجودة الأعلى.',
+  denoStatusSection: 'حالة Deno',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'إصدار yt-dlp',
+  ytDlpCurrentVersion: 'الإصدار الحالي',
+  ytDlpLatestVersion: 'أحدث إصدار',
+  ytDlpUpdateAvailable: 'إصدار جديد متاح!',
+  // SettingsModal - App version
+  appVersionSection: 'إصدار Go-DLP',
+  appCurrentVersion: 'الإصدار الحالي',
+  appLatestVersion: 'أحدث إصدار',
+  appUpdateAvailableMessage: 'تحديث متاح',
+  // SelectionScreen - Filters
+  filterAll: 'الكل',
+  filterVideoAudio: 'فيديو+صوت',
+  filterVideo: 'فيديو',
+  filterAudio: 'صوت',
+  sortQuality: 'أفضل جودة',
+  sortSize: 'أصغر حجم',
+  selectBestQuality: 'اختر أفضل جودة',
+  noFormatsMatchFilter: 'لا توجد تنسيقات تطابق الفلتر المحدد',
+  recommended: 'موصى به',
+  selectedFormat: 'محدد',
+  noVideo: 'بدون فيديو',
+  noAudio: 'بدون صوت',
+  // App.tsx - Tooltips
+  switchToLightMode: 'التبديل إلى الوضع الفاتح',
+  switchToDarkMode: 'التبديل إلى الوضع الداكن',
+  downloadQueueTooltip: 'قائمة انتظار التنزيل',
+  downloadHistoryTooltip: 'سجل التنزيلات',
+  settingsTooltip: 'الإعدادات',
+  // PlaylistScreen
+  playlistTitle: 'عنوان قائمة التشغيل',
+  playlistDescription: 'وصف قائمة التشغيل',
+  // QueueScreen
+  queueTitle: 'قائمة انتظار التنزيل',
+  queueDescriptionText: 'إدارة التنزيلات الحالية والمجدولة',
+  calculating: 'جاري الحساب...',
+  // HistoryScreen
+  historyTitle: 'سجل التنزيلات',
+  historyDescriptionText: 'عرض التنزيلات السابقة',
+  // CompletionScreen
+  completionVideoTitle: 'عنوان الفيديو',
+  completionUploader: 'المحمّل',
+  // DownloadScreen
+  downloadScreenTitle: 'جاري تحميل الوسائط',
+  downloadScreenUploader: 'المحمّل',
+  // ConversionScreen
+  conversionScreenTitle: 'تحويل الفيديو',
+  conversionScreenDescription: 'اختر تنسيق لتحويل الفيديو',
+  conversionScreenSourceFile: 'الملف المصدر',
+  // SavePathScreen
+  savePathScreenTitle: 'اختر موقع الحفظ',
+  savePathScreenDescription: 'اختر مكان حفظ الفيديو. يمكنك تحديد مجلد أو إدخال مسار مخصص.',
+  savePathScreenVideoTitle: 'عنوان الفيديو',
+  savePathScreenCurrentSaveLocation: 'موقع الحفظ الحالي',
+  savePathScreenOrEnterCustomPath: 'أو أدخل مسار مخصص',
+  savePathScreenUseThisPath: 'استخدام هذا المسار',
+  savePathScreenStartDownload: 'بدء التحميل',
+  pasteFromClipboard: 'لصق من الحافظة',
 };

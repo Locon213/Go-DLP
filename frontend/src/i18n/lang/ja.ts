@@ -149,4 +149,96 @@ export const ja: PartialTranslations = {
   clearHistory: '履歴をクリア',
   autoRedirectToQueue: '自動的にキューにリダイレクト',
   autoRedirectToQueueDescription: 'ダウンロード開始後にキュー画面に自動的に切り替える',
+  // UpdateProgressModal
+  updatingYtDlp: 'yt-dlp を更新中',
+  // SettingsModal - Deno
+  denoStatus: 'Deno のステータス',
+  denoInstalled: 'インストール済み',
+  denoNotInstalled: '未インストール',
+  denoUpdateAvailable: '更新利用可能!',
+  denoInstall: 'インストール',
+  denoInstalling: 'インストール中...',
+  denoInstallingDeno: 'Deno をインストール中',
+  denoChecking: '確認中...',
+  denoCheckUpdate: '更新を確認',
+  denoExtracting: '抽出中...',
+  denoDownloading: 'ダウンロード中...',
+  denoDownloadStatus: 'ダウンロードステータス',
+  denoInstallComplete: 'インストール完了!',
+  denoError: 'エラー',
+  // SettingsModal - Queue buttons
+  clearQueue: 'キューをクリア',
+  clearCache: 'キャッシュをクリア',
+  // SettingsModal - Proxy options
+  noProxyOption: 'プロキシなし',
+  useSystemProxyOption: 'システムプロキシを使用',
+  manualProxyOption: '手動プロキシ',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Cookie なし',
+  extractFromBrowserOption: 'ブラウザから抽出',
+  useCookieFileOption: 'Cookie ファイルを使用',
+  selectBrowserLabel: 'ブラウザを選択:',
+  clickFolderIconForCookieFile: 'フォルダーアイコンをクリックして Cookie ファイルを参照',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'YouTube やその他のサイトのために JavaScript ランタイムを使用',
+  useJavaScriptRuntimeDescription: 'YouTube をはじめとする JavaScript ランタイム (Deno) が必要なサイトのために有効にします。より高品質なビデオフォーマットにアクセスできます。',
+  denoStatusSection: 'Deno のステータス',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'yt-dlp バージョン',
+  ytDlpCurrentVersion: '現在のバージョン',
+  ytDlpLatestVersion: '最新バージョン',
+  ytDlpUpdateAvailable: '新しいバージョンが利用可能!',
+  // SettingsModal - App version
+  appVersionSection: 'Go-DLP バージョン',
+  appCurrentVersion: '現在のバージョン',
+  appLatestVersion: '最新バージョン',
+  appUpdateAvailableMessage: '更新利用可能',
+  // SelectionScreen - Filters
+  filterAll: 'すべて',
+  filterVideoAudio: 'ビデオ + オーディオ',
+  filterVideo: 'ビデオ',
+  filterAudio: 'オーディオ',
+  sortQuality: '最高品質',
+  sortSize: '最小サイズ',
+  selectBestQuality: '最高品質を選択',
+  noFormatsMatchFilter: '選択したフィルターに一致するフォーマットがありません',
+  recommended: 'おすすめ',
+  selectedFormat: '選択済み',
+  noVideo: 'ビデオなし',
+  noAudio: 'オーディオなし',
+  // App.tsx - Tooltips
+  switchToLightMode: 'ライトモードに切り替え',
+  switchToDarkMode: 'ダークモードに切り替え',
+  downloadQueueTooltip: 'ダウンロードキュー',
+  downloadHistoryTooltip: 'ダウンロード履歴',
+  settingsTooltip: '設定',
+  // PlaylistScreen
+  playlistTitle: 'プレイリストタイトル',
+  playlistDescription: 'プレイリストの説明',
+  // QueueScreen
+  queueTitle: 'ダウンロードキュー',
+  queueDescriptionText: '現在および計画中のダウンロードを管理',
+  calculating: '計算中...',
+  // HistoryScreen
+  historyTitle: 'ダウンロード履歴',
+  historyDescriptionText: '過去のダウンロードを表示',
+  // CompletionScreen
+  completionVideoTitle: 'ビデオタイトル',
+  completionUploader: 'アップローダー',
+  // DownloadScreen
+  downloadScreenTitle: 'メディアをダウンロード中',
+  downloadScreenUploader: 'アップローダー',
+  // ConversionScreen
+  conversionScreenTitle: 'ビデオ変換',
+  conversionScreenDescription: 'ビデオ変換のフォーマットを選択',
+  conversionScreenSourceFile: 'ソースファイル',
+  // SavePathScreen
+  savePathScreenTitle: '保存場所を選択',
+  savePathScreenDescription: '動画を保存する場所を選択してください。フォルダを選択するか、カスタムパスを入力できます。',
+  savePathScreenVideoTitle: '動画タイトル',
+  savePathScreenCurrentSaveLocation: '現在の保存場所',
+  savePathScreenOrEnterCustomPath: 'またはカスタムパスを入力',
+  savePathScreenUseThisPath: 'このパスを使用',
+  savePathScreenStartDownload: 'ダウンロード開始',
+  pasteFromClipboard: 'クリップボードから貼り付け',
 };

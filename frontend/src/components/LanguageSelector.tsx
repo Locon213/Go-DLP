@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import { Language as LanguageIcon } from '@mui/icons-material';
 import { LanguageCode, supportedLanguages } from '../i18n';
+import { useLanguage } from '../i18n/LanguageContext';
 
 interface LanguageSelectorProps {
   language: LanguageCode;
@@ -13,9 +14,11 @@ interface LanguageSelectorProps {
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   language,
   onLanguageChange,
-  label = 'Language',
+  label,
   fullWidth = true
 }) => {
+  const { t } = useLanguage();
+  
   const handleChange = (event: SelectChangeEvent) => {
     onLanguageChange(event.target.value as LanguageCode);
   };
@@ -25,7 +28,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       <InputLabel id="language-select-label">
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LanguageIcon fontSize="small" />
-          {label}
+          {label || t.settings}
         </Box>
       </InputLabel>
       <Select
@@ -34,7 +37,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         label={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <LanguageIcon fontSize="small" />
-            {label}
+            {label || t.settings}
           </Box>
         }
         onChange={handleChange}

@@ -71,10 +71,10 @@ const CompletionScreen: React.FC<CompletionScreenProps> = ({
           <Box sx={{ mb: 3, textAlign: 'left' }}>
             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <VideoFileIcon />
-              {videoInfo.title}
+              {t.completionVideoTitle}: {videoInfo.title}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {t.uploader}: {videoInfo.uploader || 'Unknown'}
+              {t.completionUploader}: {videoInfo.uploader || t.unknown}
             </Typography>
           </Box>
         )}

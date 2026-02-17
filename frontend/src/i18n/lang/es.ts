@@ -149,4 +149,96 @@ export const es: PartialTranslations = {
   clearHistory: 'Limpiar Historial',
   autoRedirectToQueue: 'Redirección automática a la cola',
   autoRedirectToQueueDescription: 'Cambiar automáticamente a la pantalla de cola después de iniciar la descarga',
+  // UpdateProgressModal
+  updatingYtDlp: 'Actualizando yt-dlp',
+  // SettingsModal - Deno
+  denoStatus: 'Estado de Deno',
+  denoInstalled: 'Instalado',
+  denoNotInstalled: 'No instalado',
+  denoUpdateAvailable: '¡Actualización disponible!',
+  denoInstall: 'Instalar',
+  denoInstalling: 'Instalando...',
+  denoInstallingDeno: 'Instalando Deno',
+  denoChecking: 'Verificando...',
+  denoCheckUpdate: 'Verificar actualización',
+  denoExtracting: 'Extrayendo...',
+  denoDownloading: 'Descargando...',
+  denoDownloadStatus: 'Estado de descarga',
+  denoInstallComplete: '¡Instalación completada!',
+  denoError: 'Error',
+  // SettingsModal - Queue buttons
+  clearQueue: 'Limpiar cola',
+  clearCache: 'Limpiar caché',
+  // SettingsModal - Proxy options
+  noProxyOption: 'Sin proxy',
+  useSystemProxyOption: 'Usar proxy del sistema',
+  manualProxyOption: 'Proxy manual',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Sin cookies',
+  extractFromBrowserOption: 'Extraer del navegador',
+  useCookieFileOption: 'Usar archivo de cookies',
+  selectBrowserLabel: 'Seleccionar navegador:',
+  clickFolderIconForCookieFile: 'Haga clic en el icono de carpeta para buscar el archivo de cookies',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'Usar entorno de ejecución JavaScript para YouTube y otros sitios',
+  useJavaScriptRuntimeDescription: 'Habilitar el entorno de ejecución JavaScript (Deno) para sitios que lo requieren, especialmente YouTube. Permite acceder a formatos de video de mayor calidad.',
+  denoStatusSection: 'Estado de Deno',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'Versión de yt-dlp',
+  ytDlpCurrentVersion: 'Versión actual',
+  ytDlpLatestVersion: 'Última versión',
+  ytDlpUpdateAvailable: '¡Nueva versión disponible!',
+  // SettingsModal - App version
+  appVersionSection: 'Versión de Go-DLP',
+  appCurrentVersion: 'Versión actual',
+  appLatestVersion: 'Última versión',
+  appUpdateAvailableMessage: 'Actualización disponible',
+  // SelectionScreen - Filters
+  filterAll: 'Todos',
+  filterVideoAudio: 'Video+Audio',
+  filterVideo: 'Video',
+  filterAudio: 'Audio',
+  sortQuality: 'Mejor calidad',
+  sortSize: 'Tamaño más pequeño',
+  selectBestQuality: 'Seleccionar mejor calidad',
+  noFormatsMatchFilter: 'No hay formatos que coincidan con el filtro seleccionado',
+  recommended: 'Recomendado',
+  selectedFormat: 'Seleccionado',
+  noVideo: 'Sin video',
+  noAudio: 'Sin audio',
+  // App.tsx - Tooltips
+  switchToLightMode: 'Cambiar a modo claro',
+  switchToDarkMode: 'Cambiar a modo oscuro',
+  downloadQueueTooltip: 'Cola de descargas',
+  downloadHistoryTooltip: 'Historial de descargas',
+  settingsTooltip: 'Configuración',
+  // PlaylistScreen
+  playlistTitle: 'Título de la lista de reproducción',
+  playlistDescription: 'Descripción de la lista de reproducción',
+  // QueueScreen
+  queueTitle: 'Cola de descargas',
+  queueDescriptionText: 'Gestionar descargas actuales y planificadas',
+  calculating: 'Calculando...',
+  // HistoryScreen
+  historyTitle: 'Historial de descargas',
+  historyDescriptionText: 'Ver tus descargas pasadas',
+  // CompletionScreen
+  completionVideoTitle: 'Título del video',
+  completionUploader: 'Cargador',
+  // DownloadScreen
+  downloadScreenTitle: 'Descargando multimedia',
+  downloadScreenUploader: 'Cargador',
+  // ConversionScreen
+  conversionScreenTitle: 'Conversión de video',
+  conversionScreenDescription: 'Seleccione formato para conversión de video',
+  conversionScreenSourceFile: 'Archivo fuente',
+  // SavePathScreen
+  savePathScreenTitle: 'Seleccionar ubicación de guardado',
+  savePathScreenDescription: 'Elige dónde guardar el video. Puede seleccionar una carpeta o ingresar una ruta personalizada.',
+  savePathScreenVideoTitle: 'Título del video',
+  savePathScreenCurrentSaveLocation: 'Ubicación actual de guardado',
+  savePathScreenOrEnterCustomPath: 'O ingresar ruta personalizada',
+  savePathScreenUseThisPath: 'Usar esta ruta',
+  savePathScreenStartDownload: 'Iniciar descarga',
+  pasteFromClipboard: 'Pegar desde el portapapeles',
 };

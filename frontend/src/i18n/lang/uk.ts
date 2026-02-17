@@ -149,4 +149,96 @@ export const uk: PartialTranslations = {
   clearHistory: 'Очистити історію',
   autoRedirectToQueue: 'Автоматично перенаправляти в чергу',
   autoRedirectToQueueDescription: 'Автоматично перемикатися на екран черги після початку завантаження',
+  // UpdateProgressModal
+  updatingYtDlp: 'Оновлення yt-dlp',
+  // SettingsModal - Deno
+  denoStatus: 'Статус Deno',
+  denoInstalled: 'Встановлено',
+  denoNotInstalled: 'Не встановлено',
+  denoUpdateAvailable: 'Доступне оновлення!',
+  denoInstall: 'Встановити',
+  denoInstalling: 'Встановлення...',
+  denoInstallingDeno: 'Встановлення Deno',
+  denoChecking: 'Перевірка...',
+  denoCheckUpdate: 'Перевірити оновлення',
+  denoExtracting: 'Розпакування...',
+  denoDownloading: 'Завантаження...',
+  denoDownloadStatus: 'Статус завантаження',
+  denoInstallComplete: 'Встановлення завершено!',
+  denoError: 'Помилка',
+  // SettingsModal - Queue buttons
+  clearQueue: 'Очистити чергу',
+  clearCache: 'Очистити кеш',
+  // SettingsModal - Proxy options
+  noProxyOption: 'Без проксі',
+  useSystemProxyOption: 'Використовувати системний проксі',
+  manualProxyOption: 'Ручний проксі',
+  // SettingsModal - Cookies options
+  noCookiesOption: 'Без кукі',
+  extractFromBrowserOption: 'Отримати з браузера',
+  useCookieFileOption: 'Використовувати файл кукі',
+  selectBrowserLabel: 'Виберіть браузер:',
+  clickFolderIconForCookieFile: 'Натисніть значок папки для вибору файлу кукі',
+  // SettingsModal - JS Runtime
+  useJavaScriptRuntime: 'Використовувати середовище JavaScript для YouTube та інших сайтів',
+  useJavaScriptRuntimeDescription: 'Увімкнути середовище JavaScript (Deno) для сайтів, які цього вимагають, особливо YouTube. Дозволяє отримати доступ до відеоформатів вищої якості.',
+  denoStatusSection: 'Статус Deno',
+  // SettingsModal - yt-dlp version
+  ytDlpVersion: 'Версія yt-dlp',
+  ytDlpCurrentVersion: 'Поточна версія',
+  ytDlpLatestVersion: 'Остання версія',
+  ytDlpUpdateAvailable: 'Доступна нова версія!',
+  // SettingsModal - App version
+  appVersionSection: 'Версія Go-DLP',
+  appCurrentVersion: 'Поточна версія',
+  appLatestVersion: 'Остання версія',
+  appUpdateAvailableMessage: 'Доступне оновлення',
+  // SelectionScreen - Filters
+  filterAll: 'Всі',
+  filterVideoAudio: 'Відео+Аудіо',
+  filterVideo: 'Відео',
+  filterAudio: 'Аудіо',
+  sortQuality: 'Найкраща якість',
+  sortSize: 'Найменший розмір',
+  selectBestQuality: 'Вибрати найкращу якість',
+  noFormatsMatchFilter: 'Немає форматів, що відповідають фільтру',
+  recommended: 'Рекомендовано',
+  selectedFormat: 'Вибрано',
+  noVideo: 'Немає відео',
+  noAudio: 'Немає аудіо',
+  // App.tsx - Tooltips
+  switchToLightMode: 'Перемкнути на світлу тему',
+  switchToDarkMode: 'Перемкнути на темну тему',
+  downloadQueueTooltip: 'Черга завантажень',
+  downloadHistoryTooltip: 'Історія завантажень',
+  settingsTooltip: 'Налаштування',
+  // PlaylistScreen
+  playlistTitle: 'Назва плейлисту',
+  playlistDescription: 'Опис плейлисту',
+  // QueueScreen
+  queueTitle: 'Черга завантажень',
+  queueDescriptionText: 'Управління поточними і запланованими завантаженнями',
+  calculating: 'Обчислення...',
+  // HistoryScreen
+  historyTitle: 'Історія завантажень',
+  historyDescriptionText: 'Перегляд ваших минулих завантажень',
+  // CompletionScreen
+  completionVideoTitle: 'Назва відео',
+  completionUploader: 'Автор',
+  // DownloadScreen
+  downloadScreenTitle: 'Завантаження медіа',
+  downloadScreenUploader: 'Автор',
+  // ConversionScreen
+  conversionScreenTitle: 'Перекодування відео',
+  conversionScreenDescription: 'Виберіть формат для перекодування відео',
+  conversionScreenSourceFile: 'Вихідний файл',
+  // SavePathScreen
+  savePathScreenTitle: 'Виберіть місце збереження',
+  savePathScreenDescription: 'Виберіть, куди зберегти відео. Ви можете вибрати папку або ввести свій шлях.',
+  savePathScreenVideoTitle: 'Назва відео',
+  savePathScreenCurrentSaveLocation: 'Поточне місце збереження',
+  savePathScreenOrEnterCustomPath: 'Або введіть свій шлях',
+  savePathScreenUseThisPath: 'Використовувати цей шлях',
+  savePathScreenStartDownload: 'Почати завантаження',
+  pasteFromClipboard: 'Вставити з буфера обміну',
 };

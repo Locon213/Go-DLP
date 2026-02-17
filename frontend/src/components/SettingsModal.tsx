@@ -267,7 +267,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 sx={{ flex: 1 }}
                 color="error"
               >
-                Clear Queue
+                {t.clearQueue}
               </Button>
               <Button
                 variant="outlined"
@@ -276,7 +276,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 sx={{ flex: 1 }}
                 color="warning"
               >
-                Clear Cache
+                {t.clearCache}
               </Button>
             </Box>
           </Box>
@@ -293,9 +293,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               value={proxyMode}
               onChange={(e) => setProxyMode(e.target.value as 'none' | 'system' | 'manual')}
             >
-              <FormControlLabel value="none" control={<Radio />} label="No Proxy" />
-              <FormControlLabel value="system" control={<Radio />} label="Use System Proxy" />
-              <FormControlLabel value="manual" control={<Radio />} label="Manual Proxy" />
+              <FormControlLabel value="none" control={<Radio />} label={t.noProxyOption} />
+              <FormControlLabel value="system" control={<Radio />} label={t.useSystemProxyOption} />
+              <FormControlLabel value="manual" control={<Radio />} label={t.manualProxyOption} />
             </RadioGroup>
 
             {proxyMode === 'manual' && (
@@ -323,15 +323,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               value={cookiesMode}
               onChange={(e) => setCookiesMode(e.target.value as 'none' | 'browser' | 'file')}
             >
-              <FormControlLabel value="none" control={<Radio />} label="No Cookies" />
-              <FormControlLabel value="browser" control={<Radio />} label="Extract from Browser" />
-              <FormControlLabel value="file" control={<Radio />} label="Use Cookie File" />
+              <FormControlLabel value="none" control={<Radio />} label={t.noCookiesOption} />
+              <FormControlLabel value="browser" control={<Radio />} label={t.extractFromBrowserOption} />
+              <FormControlLabel value="file" control={<Radio />} label={t.useCookieFileOption} />
             </RadioGroup>
 
             {cookiesMode === 'browser' && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Select Browser:
+                  {t.selectBrowserLabel}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Button
@@ -386,7 +386,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         <IconButton
                           onClick={selectCookiesFile}
                           edge="end"
-                          title="Browse file"
+                          title={t.clickFolderIconForCookieFile}
                         >
                           <FolderIcon />
                         </IconButton>
@@ -395,7 +395,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   }}
                 />
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  Click the folder icon to browse for cookie file
+                  {t.clickFolderIconForCookieFile}
                 </Typography>
               </Box>
             )}
@@ -403,9 +403,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* JS Runtime Settings */}
           <Typography variant="h6" gutterBottom sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TerminalIcon /> JavaScript Runtime (Deno)
+            <TerminalIcon /> {t.useJavaScriptRuntime}
           </Typography>
-          
+
           <Box sx={{ mb: 3 }}>
             <FormControlLabel
               control={
@@ -415,20 +415,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   color="primary"
                 />
               }
-              label="Use JavaScript Runtime for YouTube and other sites"
+              label={t.useJavaScriptRuntime}
             />
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-              Enable JavaScript runtime (Deno) for sites that require it, especially YouTube. Allows access to higher quality video formats.
+              {t.useJavaScriptRuntimeDescription}
             </Typography>
           </Box>
 
           {/* Deno Status Section */}
           <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
             <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              Deno Status: {denoInstalled ? (
-                <Typography component="span" color="success.main">Installed</Typography>
+              {t.denoStatus}: {denoInstalled ? (
+                <Typography component="span" color="success.main">{t.denoInstalled}</Typography>
               ) : (
-                <Typography component="span" color="error.main">Not Installed</Typography>
+                <Typography component="span" color="error.main">{t.denoNotInstalled}</Typography>
               )}
             </Typography>
             
@@ -441,7 +441,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             
             {currentDenoVersion && latestDenoVersion && currentDenoVersion !== latestDenoVersion && (
               <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
-                Update available! Current: {currentDenoVersion}, Latest: {latestDenoVersion}
+                {t.denoUpdateAvailable} {t.ytDlpCurrentVersion}: {currentDenoVersion}, {t.ytDlpLatestVersion}: {latestDenoVersion}
               </Alert>
             )}
 
@@ -451,9 +451,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Typography variant="body2" color="text.secondary" gutterBottom>
                   {denoDownloadStatus}
                 </Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={denoDownloadProgress} 
+                <LinearProgress
+                  variant="determinate"
+                  value={denoDownloadProgress}
                   sx={{ mt: 1 }}
                 />
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
@@ -470,9 +470,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 startIcon={isCheckingDeno ? <CircularProgress size={20} /> : <VisibilityIcon />}
                 sx={{ flex: 1 }}
               >
-                {isCheckingDeno ? 'Checking...' : t.checkUpdate}
+                {isCheckingDeno ? t.denoChecking : t.denoCheckUpdate}
               </Button>
-              
+
               {!denoInstalled ? (
                 <Button
                   variant="contained"
@@ -481,7 +481,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   startIcon={isInstallingDeno ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
                   sx={{ flex: 1 }}
                 >
-                  {isInstallingDeno ? 'Installing...' : 'Install'}
+                  {isInstallingDeno ? t.denoInstalling : t.denoInstall}
                 </Button>
               ) : (
                 <Button
@@ -499,19 +499,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* yt-dlp Version Section */}
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            yt-dlp {t.version}
+            {t.ytDlpVersion}
           </Typography>
 
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              {t.currentVersion}: {currentYtDlpVersion || 'Not checked'}
+              {t.ytDlpCurrentVersion}: {currentYtDlpVersion || '-'}
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              {t.latestVersion}: {latestYtDlpVersion || 'Not checked'}
+              {t.ytDlpLatestVersion}: {latestYtDlpVersion || '-'}
             </Typography>
             {currentYtDlpVersion && latestYtDlpVersion && currentYtDlpVersion !== latestYtDlpVersion && (
               <Alert severity="info" sx={{ mt: 1 }}>
-                New version available! Current: {currentYtDlpVersion}, Latest: {latestYtDlpVersion}
+                {t.ytDlpUpdateAvailable} {t.ytDlpCurrentVersion}: {currentYtDlpVersion}, {t.ytDlpLatestVersion}: {latestYtDlpVersion}
               </Alert>
             )}
           </Box>
@@ -539,19 +539,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* App Update Section */}
           <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
-            Go-DLP {t.version}
+            {t.appVersionSection}
           </Typography>
 
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              {t.currentVersion}: {currentAppVersion || '-'}
+              {t.appCurrentVersion}: {currentAppVersion || '-'}
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              {t.latestVersion}: {latestAppVersion || '-'}
+              {t.appLatestVersion}: {latestAppVersion || '-'}
             </Typography>
             {currentAppVersion && latestAppVersion && currentAppVersion !== latestAppVersion && (
               <Alert severity="info" sx={{ mt: 1 }}>
-                {t.updateAvailable}! {t.currentVersion}: {currentAppVersion}, {t.latestVersion}: {latestAppVersion}
+                {t.appUpdateAvailableMessage}! {t.appCurrentVersion}: {currentAppVersion}, {t.appLatestVersion}: {latestAppVersion}
               </Alert>
             )}
           </Box>
