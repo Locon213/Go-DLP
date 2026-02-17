@@ -241,4 +241,19 @@ export const ar: PartialTranslations = {
   savePathScreenUseThisPath: 'استخدام هذا المسار',
   savePathScreenStartDownload: 'بدء التحميل',
   pasteFromClipboard: 'لصق من الحافظة',
+
+  // Theme Settings
+  themeSection: 'المظهر',
+  themeStyle: 'موضوع اللون',
+  darkModeDescription: 'التبديل إلى المظهر الفاتح',
+  lightModeDescription: 'التبديل إلى المظهر الداكن',
+  themeDefault: 'أزرق افتراضي',
+  themeOcean: 'محيط',
+  themeForest: 'غابة',
+  themeSunset: 'غروب الشمس',
+  themeLavender: 'لافندر',
+  themeMidnight: 'منتصف الليل',
+  themeRose: 'وردة',
+  themeMonochrome: 'أحادي اللون',
+  language: 'اللغة',
 };

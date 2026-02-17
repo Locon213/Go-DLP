@@ -241,4 +241,19 @@ export const ko: PartialTranslations = {
   savePathScreenUseThisPath: '이 경로 사용',
   savePathScreenStartDownload: '다운로드 시작',
   pasteFromClipboard: '클립보드에서 붙여넣기',
+
+  // Theme Settings
+  themeSection: '외관',
+  themeStyle: '색상 테마',
+  darkModeDescription: '라이트 테마로 전환',
+  lightModeDescription: '다크 테마로 전환',
+  themeDefault: '기본 블루',
+  themeOcean: '오션',
+  themeForest: '포레스트',
+  themeSunset: '선셋',
+  themeLavender: '라벤더',
+  themeMidnight: '미드나이트',
+  themeRose: '로즈',
+  themeMonochrome: '모노크롬',
+  language: '언어',
 };

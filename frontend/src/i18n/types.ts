@@ -299,6 +299,21 @@ export interface Translations {
 
   // InputScreen
   pasteFromClipboard: string;
+
+  // Theme Settings
+  themeSection: string;
+  themeStyle: string;
+  darkModeDescription: string;
+  lightModeDescription: string;
+  themeDefault: string;
+  themeOcean: string;
+  themeForest: string;
+  themeSunset: string;
+  themeLavender: string;
+  themeMidnight: string;
+  themeRose: string;
+  themeMonochrome: string;
+  language: string;
 }
 
 // Частичные переводы - любой ключ может отсутствовать

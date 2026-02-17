@@ -260,4 +260,19 @@ export const ru: PartialTranslations = {
 
   // InputScreen
   pasteFromClipboard: 'Вставить из буфера обмена',
+
+  // Theme Settings
+  themeSection: 'Внешний вид',
+  themeStyle: 'Цветовая тема',
+  darkModeDescription: 'Переключиться на светлую тему',
+  lightModeDescription: 'Переключиться на темную тему',
+  themeDefault: 'Стандартный синий',
+  themeOcean: 'Океан',
+  themeForest: 'Лес',
+  themeSunset: 'Закат',
+  themeLavender: 'Лаванда',
+  themeMidnight: 'Полночь',
+  themeRose: 'Роза',
+  themeMonochrome: 'Монохром',
+  language: 'Язык',
 };

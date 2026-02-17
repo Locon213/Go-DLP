@@ -241,4 +241,19 @@ export const ja: PartialTranslations = {
   savePathScreenUseThisPath: 'このパスを使用',
   savePathScreenStartDownload: 'ダウンロード開始',
   pasteFromClipboard: 'クリップボードから貼り付け',
+
+  // Theme Settings
+  themeSection: '外観',
+  themeStyle: 'カラーテーマ',
+  darkModeDescription: 'ライトテーマに切り替え',
+  lightModeDescription: 'ダークテーマに切り替え',
+  themeDefault: 'デフォルトブルー',
+  themeOcean: 'オーシャン',
+  themeForest: 'フォレスト',
+  themeSunset: 'サンセット',
+  themeLavender: 'ラベンダー',
+  themeMidnight: 'ミッドナイト',
+  themeRose: 'ローズ',
+  themeMonochrome: 'モノクローム',
+  language: '言語',
 };

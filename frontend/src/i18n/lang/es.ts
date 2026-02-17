@@ -241,4 +241,19 @@ export const es: PartialTranslations = {
   savePathScreenUseThisPath: 'Usar esta ruta',
   savePathScreenStartDownload: 'Iniciar descarga',
   pasteFromClipboard: 'Pegar desde el portapapeles',
+
+  // Theme Settings
+  themeSection: 'Apariencia',
+  themeStyle: 'Tema de color',
+  darkModeDescription: 'Cambiar al tema claro',
+  lightModeDescription: 'Cambiar al tema oscuro',
+  themeDefault: 'Azul Predeterminado',
+  themeOcean: 'Océano',
+  themeForest: 'Bosque',
+  themeSunset: 'Puesta de Sol',
+  themeLavender: 'Lavanda',
+  themeMidnight: 'Medianoche',
+  themeRose: 'Rosa',
+  themeMonochrome: 'Monocromo',
+  language: 'Idioma',
 };

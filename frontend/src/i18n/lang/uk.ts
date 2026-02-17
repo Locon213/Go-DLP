@@ -241,4 +241,19 @@ export const uk: PartialTranslations = {
   savePathScreenUseThisPath: 'Використовувати цей шлях',
   savePathScreenStartDownload: 'Почати завантаження',
   pasteFromClipboard: 'Вставити з буфера обміну',
+
+  // Theme Settings
+  themeSection: 'Зовнішній вигляд',
+  themeStyle: 'Колірна тема',
+  darkModeDescription: 'Перемкнутися на світлу тему',
+  lightModeDescription: 'Перемкнутися на темну тему',
+  themeDefault: 'Стандартний синій',
+  themeOcean: 'Океан',
+  themeForest: 'Ліс',
+  themeSunset: 'Захід сонця',
+  themeLavender: 'Лаванда',
+  themeMidnight: 'Північ',
+  themeRose: 'Троянда',
+  themeMonochrome: 'Монохром',
+  language: 'Мова',
 };

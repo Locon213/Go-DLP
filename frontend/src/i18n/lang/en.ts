@@ -260,4 +260,19 @@ export const en: PartialTranslations = {
 
   // InputScreen
   pasteFromClipboard: 'Paste from clipboard',
+
+  // Theme Settings
+  themeSection: 'Appearance',
+  themeStyle: 'Color Theme',
+  darkModeDescription: 'Switch to light theme',
+  lightModeDescription: 'Switch to dark theme',
+  themeDefault: 'Default Blue',
+  themeOcean: 'Ocean',
+  themeForest: 'Forest',
+  themeSunset: 'Sunset',
+  themeLavender: 'Lavender',
+  themeMidnight: 'Midnight',
+  themeRose: 'Rose',
+  themeMonochrome: 'Monochrome',
+  language: 'Language',
 };

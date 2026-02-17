@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch, LinearProgress } from '@mui/material';
-import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon, Terminal as TerminalIcon } from '@mui/icons-material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Typography, Radio, RadioGroup, FormControlLabel, FormControl, TextField, InputAdornment, IconButton, Alert, CircularProgress, Switch, LinearProgress, Divider, Grid, Paper } from '@mui/material';
+import { Close as CloseIcon, Folder as FolderIcon, Visibility as VisibilityIcon, CloudDownload as CloudDownloadIcon, Language as LanguageIcon, Delete as DeleteIcon, CleaningServices as ClearCacheIcon, Update as UpdateIcon, Terminal as TerminalIcon, Palette as PaletteIcon, Brightness4 as DarkModeIcon, Brightness7 as LightModeIcon, Check as CheckIcon } from '@mui/icons-material';
 import LanguageSelector from './LanguageSelector';
 // Browser icons
 import ChromeIcon from '../assets/google-chrome.svg';
@@ -9,8 +9,10 @@ import EdgeIcon from '../assets/microsoft-edge.svg';
 import OperaIcon from '../assets/opera.svg';
 import type { LanguageCode } from '../i18n';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { GetDenoVersion, GetLatestDenoVersion, InstallDeno, UpdateDeno, IsDenoAvailable } from '../../wailsjs/go/main/App';
 import { EventsOn, EventsOff } from '../../wailsjs/runtime/runtime';
+import type { ThemeStyle } from '../theme';
 
 interface SettingsModalProps {
   showSettings: boolean;
@@ -47,6 +49,18 @@ interface SettingsModalProps {
   checkAppVersion: () => void;
 }
 
+// Theme style preview colors
+const themePreviewColors: Record<ThemeStyle, { primary: string; secondary: string; accent: string }> = {
+  default: { primary: '#1976d2', secondary: '#7c4dff', accent: '#00bcd4' },
+  ocean: { primary: '#0288d1', secondary: '#00796b', accent: '#26c6da' },
+  forest: { primary: '#2e7d32', secondary: '#558b2f', accent: '#8bc34a' },
+  sunset: { primary: '#e65100', secondary: '#f57c00', accent: '#ff9800' },
+  lavender: { primary: '#7b1fa2', secondary: '#9c27b0', accent: '#e040fb' },
+  midnight: { primary: '#283593', secondary: '#303f9f', accent: '#536dfe' },
+  rose: { primary: '#c2185b', secondary: '#d81b60', accent: '#ff4081' },
+  monochrome: { primary: '#424242', secondary: '#616161', accent: '#9e9e9e' },
+};
+
 const SettingsModal: React.FC<SettingsModalProps> = ({
   showSettings,
   setShowSettings,
@@ -82,6 +96,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   checkAppVersion,
 }) => {
   const { t } = useLanguage();
+  const { darkMode, toggleTheme, themeStyle, setThemeStyle, themeStyles, getThemeName } = useTheme();
   
   // Deno state
   const [denoInstalled, setDenoInstalled] = useState(false);
@@ -205,12 +220,105 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
+  // Theme style card component
+  const ThemeStyleCard: React.FC<{ style: ThemeStyle }> = ({ style }) => {
+    const colors = themePreviewColors[style];
+    const isSelected = themeStyle === style;
+    const themeName = getThemeName(style);
+    
+    return (
+      <Paper
+        elevation={0}
+        onClick={() => setThemeStyle(style)}
+        sx={{
+          p: 1.5,
+          cursor: 'pointer',
+          border: '2px solid',
+          borderColor: isSelected ? colors.primary : 'divider',
+          borderRadius: 3,
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          position: 'relative',
+          overflow: 'hidden',
+          '&:hover': {
+            borderColor: colors.primary,
+            transform: 'translateY(-2px)',
+            boxShadow: `0 4px 12px ${colors.primary}30`,
+          },
+        }}
+      >
+        {/* Color preview */}
+        <Box sx={{ display: 'flex', gap: 0.5, mb: 1 }}>
+          <Box
+            sx={{
+              width: '100%',
+              height: 24,
+              borderRadius: 1.5,
+              bgcolor: colors.primary,
+            }}
+          />
+          <Box
+            sx={{
+              width: '100%',
+              height: 24,
+              borderRadius: 1.5,
+              bgcolor: colors.secondary,
+            }}
+          />
+          <Box
+            sx={{
+              width: '100%',
+              height: 24,
+              borderRadius: 1.5,
+              bgcolor: colors.accent,
+            }}
+          />
+        </Box>
+        
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: isSelected ? 600 : 400,
+            color: isSelected ? colors.primary : 'text.primary',
+            textAlign: 'center',
+          }}
+        >
+          {themeName}
+        </Typography>
+        
+        {isSelected && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 4,
+              right: 4,
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              bgcolor: colors.primary,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <CheckIcon sx={{ fontSize: 14, color: 'white' }} />
+          </Box>
+        )}
+      </Paper>
+    );
+  };
+
   return (
     <Dialog
       open={showSettings}
       onClose={() => setShowSettings(false)}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          maxHeight: '90vh',
+        },
+      }}
     >
       <DialogTitle>
         {t.settings}
@@ -227,25 +335,86 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent dividers sx={{ px: 3 }}>
         <Box sx={{ py: 1 }}>
           {/* Language Settings */}
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <LanguageIcon /> {t.settings}
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <LanguageIcon /> {t.language}
           </Typography>
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 4 }}>
             <LanguageSelector
               language={language}
               onLanguageChange={setLanguage}
-              label={t.settings}
+              label={t.language}
             />
           </Box>
 
+          <Divider sx={{ my: 3 }} />
+
+          {/* Theme Settings */}
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+            <PaletteIcon /> {t.themeSection || 'Appearance'}
+          </Typography>
+          
+          {/* Dark Mode Toggle */}
+          <Box sx={{ mb: 3 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 2,
+                borderRadius: 3,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                bgcolor: 'background.paper',
+                border: '1px solid',
+                borderColor: 'divider',
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {darkMode ? (
+                  <DarkModeIcon sx={{ color: 'primary.main' }} />
+                ) : (
+                  <LightModeIcon sx={{ color: 'primary.main' }} />
+                )}
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                    {darkMode ? (t.darkMode || 'Dark Mode') : (t.lightMode || 'Light Mode')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {darkMode ? (t.darkModeDescription || 'Switch to light theme') : (t.lightModeDescription || 'Switch to dark theme')}
+                  </Typography>
+                </Box>
+              </Box>
+              <Switch
+                checked={darkMode}
+                onChange={toggleTheme}
+                color="primary"
+              />
+            </Paper>
+          </Box>
+
+          {/* Theme Style Selection */}
+          <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 2 }}>
+            {t.themeStyle || 'Color Theme'}
+          </Typography>
+          <Grid container spacing={2}>
+            {(Object.keys(themeStyles) as ThemeStyle[]).map((style) => (
+              <Grid size={{ xs: 6, sm: 4, md: 3 }} key={style}>
+                <ThemeStyleCard
+                  style={style}
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Divider sx={{ my: 3 }} />
+
           {/* Queue Settings */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             {t.downloadQueue}
           </Typography>
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 4 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -256,15 +425,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               }
               label={t.autoRedirectToQueue}
             />
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, mb: 2 }}>
               {t.autoRedirectToQueueDescription}
             </Typography>
-            <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+            <Box sx={{ display: 'flex', gap: 2 }}>
               <Button
                 variant="outlined"
                 onClick={clearQueue}
                 startIcon={<DeleteIcon />}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, borderRadius: 3 }}
                 color="error"
               >
                 {t.clearQueue}
@@ -273,7 +442,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 variant="outlined"
                 onClick={clearCache}
                 startIcon={<ClearCacheIcon />}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, borderRadius: 3 }}
                 color="warning"
               >
                 {t.clearCache}
@@ -281,12 +450,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </Box>
           </Box>
 
+          <Divider sx={{ my: 3 }} />
+
           {/* Proxy Settings */}
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
             {t.proxy}
           </Typography>
 
-          <FormControl component="fieldset" sx={{ mb: 3 }}>
+          <FormControl component="fieldset" sx={{ mb: 4 }}>
             <RadioGroup
               aria-label="proxy-mode"
               name="proxy-mode"
@@ -307,16 +478,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onChange={(e) => setProxyAddress(e.target.value)}
                 placeholder="Enter proxy address (e.g., http://proxy.example.com:8080)"
                 margin="normal"
+                sx={{ mt: 2 }}
               />
             )}
           </FormControl>
 
+          <Divider sx={{ my: 3 }} />
+
           {/* Cookies Settings */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
             {t.cookies}
           </Typography>
 
-          <FormControl component="fieldset" sx={{ mb: 3 }}>
+          <FormControl component="fieldset" sx={{ mb: 4 }}>
             <RadioGroup
               aria-label="cookies-mode"
               name="cookies-mode"
@@ -338,7 +512,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     variant={cookiesBrowser === 'chrome' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('chrome')}
                     startIcon={<img src={ChromeIcon} alt="Chrome" style={{ width: 20, height: 20 }} />}
-                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px', borderRadius: 3 }}
                   >
                     Chrome
                   </Button>
@@ -346,7 +520,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     variant={cookiesBrowser === 'firefox' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('firefox')}
                     startIcon={<img src={FirefoxIcon} alt="Firefox" style={{ width: 20, height: 20 }} />}
-                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px', borderRadius: 3 }}
                   >
                     Firefox
                   </Button>
@@ -354,7 +528,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     variant={cookiesBrowser === 'edge' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('edge')}
                     startIcon={<img src={EdgeIcon} alt="Edge" style={{ width: 20, height: 20 }} />}
-                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px', borderRadius: 3 }}
                   >
                     Edge
                   </Button>
@@ -362,7 +536,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                     variant={cookiesBrowser === 'opera' ? 'contained' : 'outlined'}
                     onClick={() => setCookiesBrowser('opera')}
                     startIcon={<img src={OperaIcon} alt="Opera" style={{ width: 20, height: 20 }} />}
-                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px' }}
+                    sx={{ flex: '1 1 calc(50% - 8px)', minWidth: '120px', borderRadius: 3 }}
                   >
                     Opera
                   </Button>
@@ -401,12 +575,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             )}
           </FormControl>
 
+          <Divider sx={{ my: 3 }} />
+
           {/* JS Runtime Settings */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
             <TerminalIcon /> {t.useJavaScriptRuntime}
           </Typography>
 
-          <Box sx={{ mb: 3 }}>
+          <Box sx={{ mb: 4 }}>
             <FormControlLabel
               control={
                 <Switch
@@ -423,7 +599,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           </Box>
 
           {/* Deno Status Section */}
-          <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 4,
+              p: 2.5,
+              borderRadius: 3,
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
             <Typography variant="subtitle2" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {t.denoStatus}: {denoInstalled ? (
                 <Typography component="span" color="success.main">{t.denoInstalled}</Typography>
@@ -440,7 +625,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             </Typography>
             
             {currentDenoVersion && latestDenoVersion && currentDenoVersion !== latestDenoVersion && (
-              <Alert severity="info" sx={{ mt: 1, mb: 1 }}>
+              <Alert severity="info" sx={{ mt: 1, mb: 1, borderRadius: 2 }}>
                 {t.denoUpdateAvailable} {t.ytDlpCurrentVersion}: {currentDenoVersion}, {t.ytDlpLatestVersion}: {latestDenoVersion}
               </Alert>
             )}
@@ -468,7 +653,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={checkDenoStatus}
                 disabled={isCheckingDeno || isInstallingDeno}
                 startIcon={isCheckingDeno ? <CircularProgress size={20} /> : <VisibilityIcon />}
-                sx={{ flex: 1 }}
+                sx={{ flex: 1, borderRadius: 3 }}
               >
                 {isCheckingDeno ? t.denoChecking : t.denoCheckUpdate}
               </Button>
@@ -479,7 +664,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   onClick={handleInstallDeno}
                   disabled={isInstallingDeno}
                   startIcon={isInstallingDeno ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
-                  sx={{ flex: 1 }}
+                  sx={{ flex: 1, borderRadius: 3 }}
                 >
                   {isInstallingDeno ? t.denoInstalling : t.denoInstall}
                 </Button>
@@ -489,20 +674,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                   onClick={handleUpdateDeno}
                   disabled={isInstallingDeno || !latestDenoVersion}
                   startIcon={isInstallingDeno ? <CircularProgress size={20} /> : <UpdateIcon />}
-                  sx={{ flex: 1 }}
+                  sx={{ flex: 1, borderRadius: 3 }}
                 >
                   {isInstallingDeno ? t.updating : t.update}
                 </Button>
               )}
             </Box>
-          </Box>
+          </Paper>
+
+          <Divider sx={{ my: 3 }} />
 
           {/* yt-dlp Version Section */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
             {t.ytDlpVersion}
           </Typography>
 
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 3 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {t.ytDlpCurrentVersion}: {currentYtDlpVersion || '-'}
             </Typography>
@@ -510,19 +697,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               {t.ytDlpLatestVersion}: {latestYtDlpVersion || '-'}
             </Typography>
             {currentYtDlpVersion && latestYtDlpVersion && currentYtDlpVersion !== latestYtDlpVersion && (
-              <Alert severity="info" sx={{ mt: 1 }}>
+              <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
                 {t.ytDlpUpdateAvailable} {t.ytDlpCurrentVersion}: {currentYtDlpVersion}, {t.ytDlpLatestVersion}: {latestYtDlpVersion}
               </Alert>
             )}
           </Box>
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+          <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
             <Button
               variant="outlined"
               onClick={checkYtDlpVersion}
               disabled={isCheckingVersion}
               startIcon={isCheckingVersion ? <CircularProgress size={20} /> : <VisibilityIcon />}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, borderRadius: 3 }}
             >
               {isCheckingVersion ? t.updating : t.checkUpdate}
             </Button>
@@ -531,18 +718,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               onClick={updateYtDlp}
               disabled={isUpdatingYtDlp || !latestYtDlpVersion}
               startIcon={isUpdatingYtDlp ? <CircularProgress size={20} /> : <CloudDownloadIcon />}
-              sx={{ flex: 1 }}
+              sx={{ flex: 1, borderRadius: 3 }}
             >
               {isUpdatingYtDlp ? t.updating : t.update}
             </Button>
           </Box>
 
+          <Divider sx={{ my: 3 }} />
+
           {/* App Update Section */}
-          <Typography variant="h6" gutterBottom sx={{ mt: 3 }}>
+          <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
             {t.appVersionSection}
           </Typography>
 
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: 3 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
               {t.appCurrentVersion}: {currentAppVersion || '-'}
             </Typography>
@@ -550,7 +739,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               {t.appLatestVersion}: {latestAppVersion || '-'}
             </Typography>
             {currentAppVersion && latestAppVersion && currentAppVersion !== latestAppVersion && (
-              <Alert severity="info" sx={{ mt: 1 }}>
+              <Alert severity="info" sx={{ mt: 1, borderRadius: 2 }}>
                 {t.appUpdateAvailableMessage}! {t.appCurrentVersion}: {currentAppVersion}, {t.appLatestVersion}: {latestAppVersion}
               </Alert>
             )}
@@ -562,14 +751,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             disabled={isCheckingAppVersion}
             startIcon={isCheckingAppVersion ? <CircularProgress size={20} /> : <UpdateIcon />}
             fullWidth
+            sx={{ borderRadius: 3 }}
           >
             {isCheckingAppVersion ? t.updating : t.checkUpdate}
           </Button>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setShowSettings(false)}>{t.cancel}</Button>
-        <Button variant="contained" onClick={saveSettings}>{t.save}</Button>
+      <DialogActions sx={{ px: 3, py: 2 }}>
+        <Button onClick={() => setShowSettings(false)} sx={{ borderRadius: 3, px: 3 }}>
+          {t.cancel}
+        </Button>
+        <Button variant="contained" onClick={saveSettings} sx={{ borderRadius: 3, px: 3 }}>
+          {t.save}
+        </Button>
       </DialogActions>
     </Dialog>
   );

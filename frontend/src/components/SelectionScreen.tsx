@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button, ToggleButtonGroup, ToggleButton } from '@mui/material';
-import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, Download as DownloadIcon, HighQuality as HighQualityIcon, Sort as SortIcon, Movie as MovieIcon, MusicNote as MusicNoteIcon, MergeType as MergeTypeIcon, ThumbUp } from '@mui/icons-material';
+import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button, ToggleButtonGroup, ToggleButton, Paper, alpha } from '@mui/material';
+import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, Download as DownloadIcon, HighQuality as HighQualityIcon, Sort as SortIcon, Movie as MovieIcon, MusicNote as MusicNoteIcon, MergeType as MergeTypeIcon, ThumbUp, CheckCircle } from '@mui/icons-material';
 import { VideoInfo, Format } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface SelectionScreenProps {
   videoInfo: VideoInfo;
@@ -27,6 +28,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
   formatFileSize
 }) => {
   const { t } = useLanguage();
+  const { themeStyles, themeStyle, darkMode } = useTheme();
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortType, setSortType] = useState<SortType>('quality');
 
@@ -125,300 +127,409 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
     return null;
   }, [videoInfo.formats]);
 
-  return (
-    <Box sx={{ spacing: 3, pb: 4 }}>
-      <Card sx={{ p: 2 }}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 5 }}>
-            <CardMedia
-              component="img"
-              image={videoInfo.thumbnail}
-              alt={videoInfo.title}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.onerror = null;
-                target.src = 'https://placehold.co/600x400/1e293b/64748b?text=No+Thumbnail';
-              }}
-              sx={{
-                borderRadius: 2,
-                maxHeight: 300,
-                objectFit: 'cover',
-                width: '100%'
-              }}
-            />
+  const themeConfig = themeStyles[themeStyle];
 
-            <Box sx={{ mt: 3, spacing: 2 }}>
-              <Typography variant="h5" component="div" sx={{
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: '-webkit-box',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical'
-              }}>
+  return (
+    <Box sx={{ pb: 4 }}>
+      <Card
+        elevation={0}
+        sx={{
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: 'divider',
+          overflow: 'hidden',
+        }}
+      >
+        <Grid container spacing={0}>
+          {/* Video Info Section */}
+          <Grid size={{ xs: 12, md: 5 }}>
+            <Box sx={{ position: 'relative' }}>
+              <CardMedia
+                component="img"
+                image={videoInfo.thumbnail}
+                alt={videoInfo.title}
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = 'https://placehold.co/600x400/1e293b/64748b?text=No+Thumbnail';
+                }}
+                sx={{
+                  height: 280,
+                  objectFit: 'cover',
+                  width: '100%',
+                }}
+              />
+              <Box
+                sx={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+                  p: 2,
+                }}
+              >
+                <Chip
+                  icon={<AccessTimeIcon sx={{ fontSize: 16 }} />}
+                  label={formatDuration(videoInfo.duration)}
+                  size="small"
+                  sx={{
+                    bgcolor: alpha(themeConfig.primary, 0.9),
+                    color: 'white',
+                    fontWeight: 500,
+                    '& .MuiChip-icon': { color: 'white' },
+                  }}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={{ p: 3 }}>
+              <Typography
+                variant="h5"
+                component="div"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  lineHeight: 1.3,
+                }}
+              >
                 {videoInfo.title}
               </Typography>
 
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
                 <Chip
-                  icon={<AccessTimeIcon />}
-                  label={formatDuration(videoInfo.duration)}
-                  variant="outlined"
-                  size="small"
-                />
-                <Chip
-                  icon={<PersonIcon />}
+                  icon={<PersonIcon sx={{ fontSize: 16 }} />}
                   label={videoInfo.uploader || 'Unknown'}
                   variant="outlined"
                   size="small"
+                  sx={{ borderRadius: 2 }}
                 />
               </Box>
 
               {videoInfo.description && (
-                <Box sx={{ mt: 2, maxHeight: 128, overflow: 'auto', p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{
-                    overflow: 'hidden',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: 'vertical'
-                  }}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: darkMode ? alpha('#fff', 0.05) : alpha('#000', 0.03),
+                    maxHeight: 100,
+                    overflow: 'auto',
+                  }}
+                >
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
                     {videoInfo.description}
                   </Typography>
-                </Box>
+                </Paper>
               )}
             </Box>
           </Grid>
 
+          {/* Format Selection Section */}
           <Grid size={{ xs: 12, md: 7 }}>
-            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-              <ViewListIcon sx={{ mr: 1, color: 'primary.main' }} />
-              {t.selectFormat}
-            </Typography>
-
-            {/* Compact Filters */}
-            <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
-              {/* Type Filter */}
-              <ToggleButtonGroup
-                value={filterType}
-                exclusive
-                onChange={(_, value) => value && setFilterType(value)}
-                size="small"
+            <Box sx={{ p: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <Typography
+                variant="h6"
+                gutterBottom
                 sx={{
-                  '& .MuiToggleButton-root': {
-                    px: 1.5,
-                    py: 0.5,
-                    fontSize: '0.75rem',
-                    borderRadius: 2,
-                    mr: 0.5,
-                    '&.Mui-selected': {
-                      bgcolor: 'primary.main',
-                      color: 'white',
-                      '&:hover': {
-                        bgcolor: 'primary.dark',
-                      }
-                    }
-                  }
+                  display: 'flex',
+                  alignItems: 'center',
+                  fontWeight: 600,
+                  mb: 2,
                 }}
               >
-                <ToggleButton value="all" sx={{ display: 'flex', gap: 0.5 }}>
-                  <ViewListIcon fontSize="small" />
-                  {t.filterAll}
-                </ToggleButton>
-                <ToggleButton value="both" sx={{ display: 'flex', gap: 0.5 }}>
-                  <MergeTypeIcon fontSize="small" />
-                  {t.filterVideoAudio}
-                </ToggleButton>
-                <ToggleButton value="video" sx={{ display: 'flex', gap: 0.5 }}>
-                  <MovieIcon fontSize="small" />
-                  {t.filterVideo}
-                </ToggleButton>
-                <ToggleButton value="audio" sx={{ display: 'flex', gap: 0.5 }}>
-                  <MusicNoteIcon fontSize="small" />
-                  {t.filterAudio}
-                </ToggleButton>
-              </ToggleButtonGroup>
+                <ViewListIcon sx={{ mr: 1, color: 'primary.main' }} />
+                {t.selectFormat}
+              </Typography>
 
-              {/* Sort Filter */}
-              <ToggleButtonGroup
-                value={sortType}
-                exclusive
-                onChange={(_, value) => value && setSortType(value)}
-                size="small"
-                sx={{
-                  '& .MuiToggleButton-root': {
-                    px: 1.5,
-                    py: 0.5,
-                    fontSize: '0.75rem',
-                    borderRadius: 2,
-                    '&.Mui-selected': {
-                      bgcolor: 'secondary.main',
-                      color: 'white',
-                      '&:hover': {
-                        bgcolor: 'secondary.dark',
-                      }
-                    }
-                  }
-                }}
-              >
-                <ToggleButton value="quality" sx={{ display: 'flex', gap: 0.5 }}>
-                  <HighQualityIcon fontSize="small" />
-                  {t.sortQuality}
-                </ToggleButton>
-                <ToggleButton value="size" sx={{ display: 'flex', gap: 0.5 }}>
-                  <SortIcon fontSize="small" />
-                  {t.sortSize}
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
-
-            {/* Quick Select Best Quality */}
-            {bestQualityFormat && (
-              <Box sx={{ mb: 2 }}>
-                <Button
-                  variant="outlined"
-                  color="success"
+              {/* Compact Filters */}
+              <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap', alignItems: 'center' }}>
+                {/* Type Filter */}
+                <ToggleButtonGroup
+                  value={filterType}
+                  exclusive
+                  onChange={(_, value) => value && setFilterType(value)}
                   size="small"
-                  startIcon={<ThumbUp />}
-                  onClick={() => setSelectedFormat(bestQualityFormat.format_id)}
-                  sx={{ borderRadius: 2 }}
-                >
-                  {t.selectBestQuality} ({bestQualityFormat.resolution})
-                </Button>
-              </Box>
-            )}
-
-            <Box sx={{
-              maxHeight: 400,
-              overflowY: 'auto',
-              pr: 1,
-              '&::-webkit-scrollbar': {
-                width: '8px',
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent',
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: 'rgba(0,0,0,0.2)',
-                borderRadius: '4px',
-              },
-              '&::-webkit-scrollbar-thumb:hover': {
-                background: 'rgba(0,0,0,0.3)',
-              }
-            }}>
-              <List>
-                {processedFormats.map((format, index) => (
-                  <ListItem
-                    key={`${format.format_id}-${index}`}
-                    onClick={() => setSelectedFormat(format.format_id)}
-                    sx={{
+                  sx={{
+                    '& .MuiToggleButton-root': {
+                      px: 1.5,
+                      py: 0.75,
+                      fontSize: '0.75rem',
                       borderRadius: 2,
-                      mb: 1,
-                      border: 1,
-                      borderColor: selectedFormat === format.format_id ? 'primary.main' : 'divider',
-                      bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'background.paper',
-                      '&:hover': {
-                        bgcolor: selectedFormat === format.format_id ? 'action.selected' : 'action.hover',
-                        cursor: 'pointer',
+                      mr: 0.5,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&.Mui-selected': {
+                        bgcolor: alpha(themeConfig.primary, 0.15),
+                        borderColor: themeConfig.primary,
+                        color: themeConfig.primary,
+                        '&:hover': {
+                          bgcolor: alpha(themeConfig.primary, 0.25),
+                        },
                       },
-                      cursor: 'pointer'
+                    },
+                  }}
+                >
+                  <ToggleButton value="all" sx={{ display: 'flex', gap: 0.5 }}>
+                    <ViewListIcon fontSize="small" />
+                    {t.filterAll}
+                  </ToggleButton>
+                  <ToggleButton value="both" sx={{ display: 'flex', gap: 0.5 }}>
+                    <MergeTypeIcon fontSize="small" />
+                    {t.filterVideoAudio}
+                  </ToggleButton>
+                  <ToggleButton value="video" sx={{ display: 'flex', gap: 0.5 }}>
+                    <MovieIcon fontSize="small" />
+                    {t.filterVideo}
+                  </ToggleButton>
+                  <ToggleButton value="audio" sx={{ display: 'flex', gap: 0.5 }}>
+                    <MusicNoteIcon fontSize="small" />
+                    {t.filterAudio}
+                  </ToggleButton>
+                </ToggleButtonGroup>
+
+                {/* Sort Filter */}
+                <ToggleButtonGroup
+                  value={sortType}
+                  exclusive
+                  onChange={(_, value) => value && setSortType(value)}
+                  size="small"
+                  sx={{
+                    '& .MuiToggleButton-root': {
+                      px: 1.5,
+                      py: 0.75,
+                      fontSize: '0.75rem',
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      '&.Mui-selected': {
+                        bgcolor: alpha(themeConfig.secondary, 0.15),
+                        borderColor: themeConfig.secondary,
+                        color: themeConfig.secondary,
+                        '&:hover': {
+                          bgcolor: alpha(themeConfig.secondary, 0.25),
+                        },
+                      },
+                    },
+                  }}
+                >
+                  <ToggleButton value="quality" sx={{ display: 'flex', gap: 0.5 }}>
+                    <HighQualityIcon fontSize="small" />
+                    {t.sortQuality}
+                  </ToggleButton>
+                  <ToggleButton value="size" sx={{ display: 'flex', gap: 0.5 }}>
+                    <SortIcon fontSize="small" />
+                    {t.sortSize}
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
+              {/* Quick Select Best Quality */}
+              {bestQualityFormat && (
+                <Box sx={{ mb: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="success"
+                    size="small"
+                    startIcon={<ThumbUp />}
+                    onClick={() => setSelectedFormat(bestQualityFormat.format_id)}
+                    sx={{
+                      borderRadius: 3,
+                      borderWidth: 2,
+                      '&:hover': { borderWidth: 2 },
                     }}
                   >
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          {format.resolution ? (
-                            <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                              <VideocamIcon fontSize="small" sx={{ mr: 0.5, color: 'success.main' }} />
-                              {format.resolution}
-                            </Box>
-                          ) : (
-                            <Box component="span" sx={{ display: 'flex', alignItems: 'center' }}>
-                              <AudiotrackIcon fontSize="small" sx={{ mr: 0.5, color: 'info.main' }} />
-                              {t.filterAudio} ONLY
-                            </Box>
-                          )}
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            {format.ext.toUpperCase()}
-                          </Typography>
-                          {/* Recommended badge */}
-                          {isRecommended(format) && (
-                            <Chip
-                              icon={<ThumbUp sx={{ fontSize: '0.875rem !important' }} />}
-                              label={t.recommended}
-                              size="small"
-                              color="success"
-                              variant="outlined"
-                              sx={{
-                                height: 20,
-                                fontSize: '0.65rem',
-                                '& .MuiChip-label': { px: 0.5 }
-                              }}
-                            />
-                          )}
-                          {selectedFormat === format.format_id && (
-                            <Chip
-                              label={t.selectedFormat}
-                              size="small"
-                              color="primary"
-                              sx={{ height: 20, fontSize: '0.65rem' }}
-                            />
-                          )}
-                        </Box>
-                      }
-                      secondary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
-                          <StorageIcon fontSize="small" sx={{ mr: 1 }} />
-                          <Typography variant="caption" color="text.secondary">
-                            {format.vcodec !== 'none' ? format.vcodec : t.noVideo} + {format.acodec !== 'none' ? format.acodec : t.noAudio}
-                          </Typography>
-                        </Box>
-                      }
-                    />
-                    <Box sx={{ textAlign: 'right' }}>
-                      <Typography variant="body2" color="primary" component="div">
-                        {format.filesizeHuman ||
-                         (formatFileSize(format.filesize || 0) !== 'Unknown'
-                           ? formatFileSize(format.filesize)
-                           : (format.filesizeApprox
-                             ? (typeof format.filesizeApprox === 'string'
-                                 ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B')
-                                     ? format.filesizeApprox
-                                     : '~' + formatFileSize(parseInt(format.filesizeApprox)))
-                                 : '~' + formatFileSize(format.filesizeApprox))
-                             : 'Unknown'))}
-                      </Typography>
-                    </Box>
-                  </ListItem>
-                ))}
-                {processedFormats.length === 0 && (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography color="text.secondary">
-                      {t.noFormatsMatchFilter}
-                    </Typography>
-                  </Box>
-                )}
-              </List>
-            </Box>
+                    {t.selectBestQuality} ({bestQualityFormat.resolution})
+                  </Button>
+                </Box>
+              )}
 
-          <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => setCurrentStep('input')}
-              sx={{ flex: 1 }}
-            >
-              {t.back}
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<DownloadIcon />}
-              onClick={() => setCurrentStep('savepath')}
-              disabled={!selectedFormat || isDownloading}
-              sx={{ flex: 1 }}
-            >
-              {isDownloading ? t.downloading : t.download}
-            </Button>
-          </Box>
+              {/* Format List */}
+              <Box
+                sx={{
+                  flex: 1,
+                  maxHeight: 380,
+                  overflowY: 'auto',
+                  pr: 1,
+                  '&::-webkit-scrollbar': { width: '6px' },
+                  '&::-webkit-scrollbar-track': { background: 'transparent' },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: alpha(darkMode ? '#fff' : '#000', 0.2),
+                    borderRadius: '3px',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: alpha(darkMode ? '#fff' : '#000', 0.3),
+                  },
+                }}
+              >
+                <List sx={{ p: 0 }}>
+                  {processedFormats.map((format, index) => {
+                    const isSelected = selectedFormat === format.format_id;
+                    const recommended = isRecommended(format);
+                    
+                    return (
+                      <ListItem
+                        key={`${format.format_id}-${index}`}
+                        onClick={() => setSelectedFormat(format.format_id)}
+                        sx={{
+                          borderRadius: 3,
+                          mb: 1,
+                          border: '1px solid',
+                          borderColor: isSelected ? themeConfig.primary : 'divider',
+                          bgcolor: isSelected
+                            ? alpha(themeConfig.primary, darkMode ? 0.15 : 0.08)
+                            : 'transparent',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          '&:hover': {
+                            bgcolor: isSelected
+                              ? alpha(themeConfig.primary, darkMode ? 0.2 : 0.12)
+                              : alpha(darkMode ? '#fff' : '#000', 0.04),
+                            cursor: 'pointer',
+                            transform: 'translateX(4px)',
+                          },
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                              {format.resolution ? (
+                                <Box component="span" sx={{ display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                  <VideocamIcon fontSize="small" sx={{ mr: 0.5, color: 'success.main' }} />
+                                  {format.resolution}
+                                </Box>
+                              ) : (
+                                <Box component="span" sx={{ display: 'flex', alignItems: 'center', fontWeight: 500 }}>
+                                  <AudiotrackIcon fontSize="small" sx={{ mr: 0.5, color: 'info.main' }} />
+                                  {t.filterAudio} ONLY
+                                </Box>
+                              )}
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  px: 1,
+                                  py: 0.25,
+                                  borderRadius: 1,
+                                  bgcolor: alpha(darkMode ? '#fff' : '#000', 0.1),
+                                  fontWeight: 600,
+                                }}
+                              >
+                                {format.ext.toUpperCase()}
+                              </Typography>
+                              {recommended && (
+                                <Chip
+                                  icon={<ThumbUp sx={{ fontSize: '0.75rem !important' }} />}
+                                  label={t.recommended}
+                                  size="small"
+                                  color="success"
+                                  variant="outlined"
+                                  sx={{
+                                    height: 22,
+                                    fontSize: '0.65rem',
+                                    borderRadius: 2,
+                                    '& .MuiChip-label': { px: 0.5 },
+                                  }}
+                                />
+                              )}
+                              {isSelected && (
+                                <Chip
+                                  icon={<CheckCircle sx={{ fontSize: '0.75rem !important' }} />}
+                                  label={t.selectedFormat}
+                                  size="small"
+                                  sx={{
+                                    height: 22,
+                                    fontSize: '0.65rem',
+                                    borderRadius: 2,
+                                    bgcolor: themeConfig.primary,
+                                    color: 'white',
+                                    '& .MuiChip-icon': { color: 'white' },
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          }
+                          secondary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                              <StorageIcon fontSize="small" sx={{ mr: 0.5, fontSize: 14 }} />
+                              <Typography variant="caption" color="text.secondary">
+                                {format.vcodec !== 'none' ? format.vcodec : t.noVideo} + {format.acodec !== 'none' ? format.acodec : t.noAudio}
+                              </Typography>
+                            </Box>
+                          }
+                        />
+                        <Box sx={{ textAlign: 'right', ml: 2 }}>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              color: themeConfig.primary,
+                            }}
+                          >
+                            {format.filesizeHuman ||
+                              (formatFileSize(format.filesize || 0) !== 'Unknown'
+                                ? formatFileSize(format.filesize)
+                                : (format.filesizeApprox
+                                  ? (typeof format.filesizeApprox === 'string'
+                                    ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B')
+                                      ? format.filesizeApprox
+                                      : '~' + formatFileSize(parseInt(format.filesizeApprox)))
+                                    : '~' + formatFileSize(format.filesizeApprox))
+                                  : 'Unknown'))}
+                          </Typography>
+                        </Box>
+                      </ListItem>
+                    );
+                  })}
+                  {processedFormats.length === 0 && (
+                    <Box sx={{ textAlign: 'center', py: 4 }}>
+                      <Typography color="text.secondary">{t.noFormatsMatchFilter}</Typography>
+                    </Box>
+                  )}
+                </List>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => setCurrentStep('input')}
+                  sx={{
+                    flex: 1,
+                    borderRadius: 3,
+                    borderWidth: 2,
+                    '&:hover': { borderWidth: 2 },
+                  }}
+                >
+                  {t.back}
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => setCurrentStep('savepath')}
+                  disabled={!selectedFormat || isDownloading}
+                  sx={{
+                    flex: 1,
+                    borderRadius: 3,
+                  }}
+                >
+                  {isDownloading ? t.downloading : t.download}
+                </Button>
+              </Box>
+            </Box>
           </Grid>
         </Grid>
       </Card>

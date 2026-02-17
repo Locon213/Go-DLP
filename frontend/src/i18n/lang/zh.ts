@@ -241,4 +241,19 @@ export const zh: PartialTranslations = {
   savePathScreenUseThisPath: '使用此路径',
   savePathScreenStartDownload: '开始下载',
   pasteFromClipboard: '从剪贴板粘贴',
+
+  // Theme Settings
+  themeSection: '外观',
+  themeStyle: '颜色主题',
+  darkModeDescription: '切换到浅色主题',
+  lightModeDescription: '切换到深色主题',
+  themeDefault: '默认蓝色',
+  themeOcean: '海洋',
+  themeForest: '森林',
+  themeSunset: '日落',
+  themeLavender: '薰衣草',
+  themeMidnight: '午夜',
+  themeRose: '玫瑰',
+  themeMonochrome: '单色',
+  language: '语言',
 };
