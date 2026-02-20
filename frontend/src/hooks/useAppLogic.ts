@@ -8,6 +8,14 @@ import { downloadQueueManager, QueueItem } from '../services/downloadQueue';
 import { downloadHistoryDB, DownloadHistoryItem } from '../services/downloadHistory';
 import { pendingDownloadsManager } from '../services/pendingDownloads';
 
+interface PlaylistEntry {
+  id: string;
+  title: string;
+  thumbnail: string;
+  url: string;
+  duration: number;
+}
+
 export const useAppLogic = () => {
   // Состояния для основного приложения
   const [url, setUrl] = useState<string>('');
@@ -23,6 +31,11 @@ export const useAppLogic = () => {
   const [playlistInfo, setPlaylistInfo] = useState<any>(null); // Will store playlist info
   const [selectedFormat, setSelectedFormat] = useState<string>('');
   const [selectedVideos, setSelectedVideos] = useState<string[]>([]); // IDs of selected videos in playlist
+  const [playlistVideoFlowIds, setPlaylistVideoFlowIds] = useState<string[]>([]);
+  const [playlistCurrentVideoIndex, setPlaylistCurrentVideoIndex] = useState<number>(0);
+  const [playlistSelectedFormats, setPlaylistSelectedFormats] = useState<Record<string, string>>({});
+  const [playlistVideoInfoCache, setPlaylistVideoInfoCache] = useState<Record<string, VideoInfo>>({});
+  const [isPlaylistVideoFlowActive, setIsPlaylistVideoFlowActive] = useState<boolean>(false);
   const [ffmpegWarning, setFfmpegWarning] = useState<string>('');
 
   // Состояния для настроек
@@ -128,10 +141,54 @@ export const useAppLogic = () => {
       }),
 
       subscribeToEvents('download-complete', async () => {
+        const isDirectDownload = currentStep === 'download' || isDownloading;
+        const cancelingId = downloadQueueManager.getCancelingId();
+        const activeDownloads = downloadQueueManager.getActiveDownloads();
+        const activeQueueItem = cancelingId
+          ? downloadQueueManager.getById(cancelingId)
+          : (activeDownloads.length > 0 ? activeDownloads[0] : undefined);
+
         setIsDownloading(false);
         setDownloadSize('Complete');
         setDownloadSpeed('0');
         setDownloadEta('00:00');
+
+        if (!isDirectDownload && activeQueueItem) {
+          downloadQueueManager.setStatus(activeQueueItem.id, 'completed');
+          downloadQueueManager.clearCancelingId();
+
+          try {
+            let completedOutputPath = activeQueueItem.outputPath;
+            try {
+              completedOutputPath = await apiService.getActualDownloadPath(activeQueueItem.title);
+            } catch (pathError) {
+              console.warn('Failed to resolve actual path for queue item, using template path:', pathError);
+            }
+
+            await downloadHistoryDB.addItem({
+              url: activeQueueItem.url,
+              title: activeQueueItem.title,
+              formatID: activeQueueItem.formatID,
+              outputPath: completedOutputPath,
+              status: 'completed',
+              fileSize: undefined,
+              duration: undefined,
+              downloadedAt: new Date(),
+              thumbnail: undefined,
+            });
+
+            const history = await downloadHistoryDB.getAllItems();
+            setDownloadHistory(history);
+          } catch (dbError) {
+            console.error('Failed to add completed download to history:', dbError);
+          }
+
+          return;
+        }
+        if (!isDirectDownload && !activeQueueItem) {
+          downloadQueueManager.clearCancelingId();
+          return;
+        }
 
         // Дополнительная проверка перед показом экрана завершения
         if (videoInfo) {
@@ -155,10 +212,10 @@ export const useAppLogic = () => {
               const activeDownloads = downloadQueueManager.getActiveDownloads();
               if (activeDownloads.length > 0) {
                 const activeItem = activeDownloads[0];
-                downloadQueueManager.removeFromQueue(activeItem.id);
+                downloadQueueManager.setStatus(activeItem.id, 'completed');
               }
 
-              // Очищаем pending downloads из localStorage
+              // Очищаем pending downloads из localStorage только для прямой загрузки
               pendingDownloadsManager.clearPendingDownloads();
 
               // Добавляем в историю загрузок
@@ -206,16 +263,52 @@ export const useAppLogic = () => {
       }),
 
       subscribeToEvents('download-error', async (error: string) => {
+        const isDirectDownload = currentStep === 'download' || isDownloading;
+        const cancelingId = downloadQueueManager.getCancelingId();
+        const activeDownloads = downloadQueueManager.getActiveDownloads();
+        const activeQueueItem = cancelingId
+          ? downloadQueueManager.getById(cancelingId)
+          : (activeDownloads.length > 0 ? activeDownloads[0] : undefined);
+
         setIsDownloading(false);
         setDownloadSize('Error');
         setDownloadSpeed('0');
         setDownloadEta('00:00');
 
+        if (!isDirectDownload && activeQueueItem) {
+          downloadQueueManager.setStatus(activeQueueItem.id, 'failed');
+          downloadQueueManager.clearCancelingId();
+
+          try {
+            await downloadHistoryDB.addItem({
+              url: activeQueueItem.url,
+              title: activeQueueItem.title,
+              formatID: activeQueueItem.formatID,
+              outputPath: activeQueueItem.outputPath,
+              status: 'failed',
+              fileSize: undefined,
+              duration: undefined,
+              downloadedAt: new Date(),
+              thumbnail: undefined,
+            });
+
+            const history = await downloadHistoryDB.getAllItems();
+            setDownloadHistory(history);
+          } catch (dbError) {
+            console.error('Failed to add failed download to history:', dbError);
+          }
+
+          return;
+        }
+        if (!isDirectDownload && !activeQueueItem) {
+          downloadQueueManager.clearCancelingId();
+          return;
+        }
+
         // Удаляем из очереди вместо установки статуса failed
-        const activeDownloads = downloadQueueManager.getActiveDownloads();
         if (activeDownloads.length > 0) {
           const activeItem = activeDownloads[0];
-          downloadQueueManager.removeFromQueue(activeItem.id);
+          downloadQueueManager.setStatus(activeItem.id, 'failed');
         }
 
         // Очищаем pending downloads из localStorage
@@ -252,17 +345,52 @@ export const useAppLogic = () => {
       }),
 
       subscribeToEvents('download-cancelled', async () => {
+        const isDirectDownload = currentStep === 'download' || isDownloading;
+        const cancelingId = downloadQueueManager.getCancelingId();
+        const activeDownloads = downloadQueueManager.getActiveDownloads();
+        const activeQueueItem = cancelingId
+          ? downloadQueueManager.getById(cancelingId)
+          : (activeDownloads.length > 0 ? activeDownloads[0] : undefined);
+
         setIsDownloading(false);
         setDownloadSize('Cancelled');
         setDownloadSpeed('0');
         setDownloadEta('00:00');
 
+        if (!isDirectDownload && activeQueueItem) {
+          downloadQueueManager.setStatus(activeQueueItem.id, 'cancelled');
+          downloadQueueManager.clearCancelingId();
+
+          try {
+            await downloadHistoryDB.addItem({
+              url: activeQueueItem.url,
+              title: activeQueueItem.title,
+              formatID: activeQueueItem.formatID,
+              outputPath: activeQueueItem.outputPath,
+              status: 'cancelled',
+              fileSize: undefined,
+              duration: undefined,
+              downloadedAt: new Date(),
+              thumbnail: undefined,
+            });
+
+            const history = await downloadHistoryDB.getAllItems();
+            setDownloadHistory(history);
+          } catch (dbError) {
+            console.error('Failed to add cancelled download to history:', dbError);
+          }
+
+          return;
+        }
+        if (!isDirectDownload && !activeQueueItem) {
+          downloadQueueManager.clearCancelingId();
+          return;
+        }
+
         // Обновляем статус в очереди загрузок
-        const activeDownloads = downloadQueueManager.getActiveDownloads();
         if (activeDownloads.length > 0) {
           const activeItem = activeDownloads[0];
-          // Удаляем из очереди вместо установки статуса cancelled
-          downloadQueueManager.removeFromQueue(activeItem.id);
+          downloadQueueManager.setStatus(activeItem.id, 'cancelled');
         }
 
         // Очищаем pending downloads из localStorage
@@ -411,6 +539,25 @@ export const useAppLogic = () => {
 
   const showSuccess = (message: string) => {
     setNotification({type: 'success', message});
+  };
+
+  const resolveActualOutputPath = async (path: string): Promise<string> => {
+    if (!path || !path.includes('.%(ext)s')) {
+      return path;
+    }
+
+    const templateName = path.split(/[\\/]/).pop() || '';
+    const templateTitle = templateName.replace(/\.%\(ext\)s$/, '');
+    if (!templateTitle) {
+      return path;
+    }
+
+    try {
+      return await apiService.getActualDownloadPath(templateTitle);
+    } catch (error) {
+      console.warn('Failed to resolve template output path, using original:', error);
+      return path;
+    }
   };
 
   // Функции для работы с настройками
@@ -562,6 +709,124 @@ export const useAppLogic = () => {
     }
   };
 
+  const resetPlaylistVideoFlow = useCallback(() => {
+    setIsPlaylistVideoFlowActive(false);
+    setPlaylistVideoFlowIds([]);
+    setPlaylistCurrentVideoIndex(0);
+    setPlaylistSelectedFormats({});
+    setPlaylistVideoInfoCache({});
+  }, []);
+
+  const getBestFormatID = useCallback((info: VideoInfo): string => {
+    const bestFormat = info.formats
+      .filter(format => {
+        return (format.resolution || (format.acodec !== 'none' && format.vcodec === 'none')) && format.format_id;
+      })
+      .sort((a, b) => {
+        if (b.resolution && a.resolution) {
+          const [aWidth, aHeight] = a.resolution.split('x').map(Number);
+          const [bWidth, bHeight] = b.resolution.split('x').map(Number);
+
+          if (bHeight !== aHeight) {
+            return bHeight - aHeight;
+          }
+
+          if (bWidth !== aWidth) {
+            return bWidth - aWidth;
+          }
+
+          if (b.filesize && a.filesize) {
+            return Number(b.filesize) - Number(a.filesize);
+          }
+        }
+
+        if (!a.resolution && b.resolution) return 1;
+        if (a.resolution && !b.resolution) return -1;
+
+        return 0;
+      })[0];
+
+    return bestFormat?.format_id || '';
+  }, []);
+
+  const resolvePlaylistEntryURL = useCallback((entry: PlaylistEntry): string => {
+    const entryURL = (entry.url || '').trim();
+    if (entryURL.startsWith('http://') || entryURL.startsWith('https://')) {
+      return entryURL;
+    }
+
+    if (entryURL.startsWith('//')) {
+      return `https:${entryURL}`;
+    }
+
+    if (entryURL.startsWith('/')) {
+      return `https://www.youtube.com${entryURL}`;
+    }
+
+    const entryID = (entry.id || '').trim();
+    if (entryID && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+      return `https://www.youtube.com/watch?v=${entryID}`;
+    }
+
+    return entryURL || entryID;
+  }, [url]);
+
+  const prefetchPlaylistVideoInfo = useCallback(async (videoIDs: string[], startIndex: number, count = 1) => {
+    if (!playlistInfo || videoIDs.length === 0) return;
+
+    const targets = videoIDs.slice(startIndex, startIndex + count);
+    const tasks = targets.map(async (videoID) => {
+      if (!videoID || playlistVideoInfoCache[videoID]) {
+        return;
+      }
+
+      const entry = playlistInfo.entries.find((item: PlaylistEntry) => item.id === videoID);
+      if (!entry) return;
+
+      try {
+        const entryURL = resolvePlaylistEntryURL(entry);
+        const result = await apiService.analyzeURL(entryURL);
+        const info = JSON.parse(result);
+        setPlaylistVideoInfoCache(prev => {
+          if (prev[videoID]) return prev;
+          return { ...prev, [videoID]: info };
+        });
+      } catch (error) {
+        console.warn('Prefetch playlist video failed:', error);
+      }
+    });
+
+    await Promise.all(tasks);
+  }, [playlistInfo, playlistVideoInfoCache, resolvePlaylistEntryURL]);
+
+  const loadPlaylistVideoForStep = useCallback(async (videoIDs: string[], stepIndex: number) => {
+    if (!playlistInfo || !videoIDs[stepIndex]) {
+      throw new Error('Playlist data is unavailable');
+    }
+
+    const videoID = videoIDs[stepIndex];
+    const entry = playlistInfo.entries.find((item: PlaylistEntry) => item.id === videoID);
+    if (!entry) {
+      throw new Error('Could not find selected video in playlist');
+    }
+
+    let info = playlistVideoInfoCache[videoID];
+    if (!info) {
+      const entryURL = resolvePlaylistEntryURL(entry);
+      const result = await apiService.analyzeURL(entryURL);
+      info = JSON.parse(result);
+      setPlaylistVideoInfoCache(prev => ({ ...prev, [videoID]: info }));
+    }
+
+    setVideoInfo(info);
+    setPlaylistCurrentVideoIndex(stepIndex);
+
+    const savedFormat = playlistSelectedFormats[videoID];
+    setSelectedFormat(savedFormat || '');
+
+    void prefetchPlaylistVideoInfo(videoIDs, stepIndex + 1, 2);
+  }, [playlistInfo, playlistVideoInfoCache, playlistSelectedFormats, getBestFormatID, resolvePlaylistEntryURL, prefetchPlaylistVideoInfo]);
+
   // Функция для анализа URL
   const handleAnalyze = async () => {
     if (!url.trim()) {
@@ -578,6 +843,7 @@ export const useAppLogic = () => {
 
         if (parsedPlaylistResult && parsedPlaylistResult.entries && parsedPlaylistResult.entries.length > 0) {
           // This is a playlist
+          resetPlaylistVideoFlow();
           setPlaylistInfo(parsedPlaylistResult);
           setCurrentStep('playlist');
           showSuccess('Playlist analyzed successfully!');
@@ -597,6 +863,7 @@ export const useAppLogic = () => {
       }
 
       setVideoInfo(parsedResult);
+      setSelectedFormat('');
       setCurrentStep('selection');
       showSuccess('Video analyzed successfully!');
     } catch (error) {
@@ -671,7 +938,7 @@ export const useAppLogic = () => {
               try {
                 // Download the entire playlist
                 const playlistTitle = parsedPlaylistResult.title || 'playlist';
-                const outputPath = await apiService.getDownloadPath(`${playlistTitle}/%(title)s.%(ext)s`);
+                const outputPath = await apiService.getDownloadPath(`${playlistTitle}_%(title)s`);
                 await apiService.downloadPlaylist(url, bestFormat.format_id, outputPath, 1, 0); // 0 means no end limit
                 showSuccess('Playlist download completed successfully!');
               } catch (error) {
@@ -818,7 +1085,8 @@ export const useAppLogic = () => {
   // Функция для открытия файла в проводнике
   const handleOpenInExplorer = async () => {
     try {
-      await apiService.openInExplorer(downloadPath);
+      const actualPath = await resolveActualOutputPath(downloadPath);
+      await apiService.openInExplorer(actualPath);
     } catch (error) {
       console.error('Error opening in explorer:', error);
       showError('Failed to open file location');
@@ -828,9 +1096,9 @@ export const useAppLogic = () => {
   // Функция для конвертации видео
   const handleConvertVideo = async (path?: string) => {
     try {
-      if (path) {
-        setDownloadPath(path);
-      }
+      const sourcePath = path || downloadPath;
+      const actualPath = await resolveActualOutputPath(sourcePath);
+      setDownloadPath(actualPath);
       setCurrentStep('conversion');
       // Don't show success message here - let the conversion events handle it
     } catch (error) {
@@ -841,6 +1109,7 @@ export const useAppLogic = () => {
 
   // Функция для возврата на главную
   const handleGoToHome = () => {
+    resetPlaylistVideoFlow();
     setCurrentStep('input');
     setUrl('');
     setVideoInfo(null);
@@ -918,75 +1187,125 @@ export const useAppLogic = () => {
       return;
     }
 
-    // Get the first selected video to determine the format
-    const firstSelectedVideo = playlistInfo.entries.find((entry: any) => entry.id === selectedVideos[0]);
-    if (!firstSelectedVideo) {
+    const selectedVideoIDs = playlistInfo.entries
+      .filter((entry: PlaylistEntry) => selectedVideos.includes(entry.id))
+      .map((entry: PlaylistEntry) => entry.id);
+
+    if (selectedVideoIDs.length === 0) {
       showError('Could not find selected video');
       return;
     }
 
     try {
-      const firstVideoInfo = JSON.parse(await apiService.analyzeURL(firstSelectedVideo.url));
-      setVideoInfo(firstVideoInfo);
+      setIsAnalyzing(true);
+      setIsPlaylistVideoFlowActive(true);
+      setPlaylistVideoFlowIds(selectedVideoIDs);
+      setPlaylistCurrentVideoIndex(0);
+      setPlaylistSelectedFormats({});
+      setPlaylistVideoInfoCache({});
+      setSelectedFormat('');
 
-      // Automatically select the best format
-      const bestFormat = firstVideoInfo.formats
-        .filter((format: any) => {
-          return (format.resolution || (format.acodec !== 'none' && format.vcodec === 'none')) && format.format_id;
-        })
-        .sort((a: any, b: any) => {
-          if (b.resolution && a.resolution) {
-            const [aWidth, aHeight] = a.resolution.split('x').map(Number);
-            const [bWidth, bHeight] = b.resolution.split('x').map(Number);
-
-            if (bHeight !== aHeight) {
-              return bHeight - aHeight;
-            }
-
-            if (bWidth !== aWidth) {
-              return bWidth - aWidth;
-            }
-
-            if (b.filesize && a.filesize) {
-              return Number(b.filesize) - Number(a.filesize);
-            }
-          }
-
-          if (!a.resolution && b.resolution) return 1;
-          if (a.resolution && !b.resolution) return -1;
-
-          return 0;
-        })[0];
-
-      if (!bestFormat) {
-        showError('No suitable format found for download');
-        return;
-      }
-
-      setSelectedFormat(bestFormat.format_id);
-
-      // Add each selected video to the download queue
-      for (const videoId of selectedVideos) {
-        const video = playlistInfo.entries.find((entry: any) => entry.id === videoId);
-        if (video) {
-          const outputPath = await apiService.getDownloadPath(`${playlistInfo.title || 'playlist'}/${video.title}.%(ext)s`);
-
-          downloadQueueManager.addToQueue({
-            url: video.url,
-            formatID: bestFormat.format_id,
-            outputPath: outputPath,
-            title: video.title,
-            priority: 'normal'
-          });
-        }
-      }
-
-      showSuccess(`Added ${selectedVideos.length} videos to download queue!`);
-      setCurrentStep('input'); // Return to input screen after adding to queue
+      await loadPlaylistVideoForStep(selectedVideoIDs, 0);
+      setCurrentStep('selection');
     } catch (error) {
       console.error('Error getting video info for format selection:', error);
       showError('Could not get video format information');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handlePlaylistVideoFlowPrevious = async () => {
+    if (!isPlaylistVideoFlowActive || playlistVideoFlowIds.length === 0) {
       return;
+    }
+
+    const currentVideoID = playlistVideoFlowIds[playlistCurrentVideoIndex];
+    if (currentVideoID && selectedFormat) {
+      setPlaylistSelectedFormats(prev => ({ ...prev, [currentVideoID]: selectedFormat }));
+    }
+
+    const previousIndex = playlistCurrentVideoIndex - 1;
+    if (previousIndex < 0) {
+      resetPlaylistVideoFlow();
+      setCurrentStep('playlist');
+      return;
+    }
+
+    try {
+      setIsAnalyzing(true);
+      await loadPlaylistVideoForStep(playlistVideoFlowIds, previousIndex);
+      setCurrentStep('selection');
+    } catch (error) {
+      console.error('Error loading previous playlist video:', error);
+      showError('Could not load previous playlist video');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handlePlaylistVideoFlowNextOrDownload = async () => {
+    if (!isPlaylistVideoFlowActive || playlistVideoFlowIds.length === 0) {
+      return;
+    }
+
+    if (!selectedFormat) {
+      showError('Please select a format first');
+      return;
+    }
+
+    const currentVideoID = playlistVideoFlowIds[playlistCurrentVideoIndex];
+    const updatedFormats: Record<string, string> = {
+      ...playlistSelectedFormats,
+      [currentVideoID]: selectedFormat,
+    };
+    setPlaylistSelectedFormats(updatedFormats);
+
+    const isLastVideo = playlistCurrentVideoIndex >= playlistVideoFlowIds.length - 1;
+    if (!isLastVideo) {
+      try {
+        setIsAnalyzing(true);
+        await loadPlaylistVideoForStep(playlistVideoFlowIds, playlistCurrentVideoIndex + 1);
+        setCurrentStep('selection');
+      } catch (error) {
+        console.error('Error loading next playlist video:', error);
+        showError('Could not load next playlist video');
+      } finally {
+        setIsAnalyzing(false);
+      }
+      return;
+    }
+
+    try {
+      for (const videoID of playlistVideoFlowIds) {
+        const playlistEntry = playlistInfo.entries.find((entry: PlaylistEntry) => entry.id === videoID);
+        const formatID = updatedFormats[videoID];
+        if (!playlistEntry || !formatID) {
+          continue;
+        }
+
+        const outputPath = await apiService.getDownloadPath(`${playlistInfo.title || 'playlist'} - ${playlistEntry.title}`);
+
+        downloadQueueManager.addToQueue({
+          url: resolvePlaylistEntryURL(playlistEntry),
+          formatID,
+          outputPath,
+          title: playlistEntry.title,
+          priority: 'normal',
+        });
+      }
+
+      showSuccess(`Added ${playlistVideoFlowIds.length} videos to download queue!`);
+      resetPlaylistVideoFlow();
+
+      if (autoRedirectToQueue) {
+        setCurrentStep('queue');
+      } else {
+        setCurrentStep('input');
+      }
+    } catch (error) {
+      console.error('Error queuing playlist videos:', error);
+      showError('Could not add playlist videos to queue');
     }
   };
 
@@ -1005,6 +1324,9 @@ export const useAppLogic = () => {
     playlistInfo, setPlaylistInfo,
     selectedFormat, setSelectedFormat,
     selectedVideos, setSelectedVideos,
+    isPlaylistVideoFlowActive,
+    playlistCurrentVideoIndex,
+    playlistVideoFlowTotal: playlistVideoFlowIds.length,
     ffmpegWarning, setFfmpegWarning,
     showSettings, setShowSettings,
     proxyMode, setProxyMode,
@@ -1045,6 +1367,8 @@ export const useAppLogic = () => {
     handleAnalyzeAndDownloadFast,
     handleDownload,
     handleDownloadSelectedPlaylistVideos,
+    handlePlaylistVideoFlowPrevious,
+    handlePlaylistVideoFlowNextOrDownload,
     handleCancelDownload,
     handleOpenInExplorer,
     handleConvertVideo,
@@ -1061,3 +1385,4 @@ export const useAppLogic = () => {
     formatFileSize
   };
 };
+

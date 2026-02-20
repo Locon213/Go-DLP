@@ -142,6 +142,7 @@ const InputScreen: React.FC<InputScreenProps> = ({
                   py: 2,
                   fontSize: '1.1rem',
                   borderRadius: 3,
+                  color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
                 }}
               >
                 {isAnalyzing ? t.analyzing : t.analyzeAndDownload}

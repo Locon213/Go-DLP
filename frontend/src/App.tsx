@@ -43,6 +43,9 @@ const App: React.FC = () => {
     playlistInfo,
     selectedFormat, setSelectedFormat,
     selectedVideos, setSelectedVideos,
+    isPlaylistVideoFlowActive,
+    playlistCurrentVideoIndex,
+    playlistVideoFlowTotal,
     ffmpegWarning,
     showSettings, setShowSettings,
     proxyMode, setProxyMode,
@@ -82,6 +85,8 @@ const App: React.FC = () => {
     handleAnalyzeAndDownloadFast,
     handleDownload,
     handleDownloadSelectedPlaylistVideos,
+    handlePlaylistVideoFlowPrevious,
+    handlePlaylistVideoFlowNextOrDownload,
     handleCancelDownload,
     handleOpenInExplorer,
     handleConvertVideo,
@@ -311,8 +316,16 @@ const App: React.FC = () => {
                 setSelectedFormat={setSelectedFormat}
                 setCurrentStep={setCurrentStep}
                 isDownloading={isDownloading}
+                isAnalyzing={isAnalyzing}
                 formatDuration={formatDuration}
                 formatFileSize={formatFileSize}
+                playlistWizard={isPlaylistVideoFlowActive ? {
+                  currentIndex: playlistCurrentVideoIndex,
+                  total: playlistVideoFlowTotal,
+                  isLast: playlistCurrentVideoIndex >= playlistVideoFlowTotal - 1,
+                  onPrevious: handlePlaylistVideoFlowPrevious,
+                  onNextOrDownload: handlePlaylistVideoFlowNextOrDownload,
+                } : undefined}
               />
             </Box>
           </Fade>
@@ -380,6 +393,7 @@ const App: React.FC = () => {
                 onBack={() => setCurrentStep('input')}
                 onDownloadSelected={handleDownloadSelectedPlaylistVideos}
                 isDownloading={isDownloading}
+                isProcessingSelection={isAnalyzing}
                 formatDuration={formatDuration}
               />
             </Box>

@@ -1,9 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button, ToggleButtonGroup, ToggleButton, Paper, alpha } from '@mui/material';
-import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, Download as DownloadIcon, HighQuality as HighQualityIcon, Sort as SortIcon, Movie as MovieIcon, MusicNote as MusicNoteIcon, MergeType as MergeTypeIcon, ThumbUp, CheckCircle } from '@mui/icons-material';
+import { Box, Card, CardMedia, Grid, Typography, Chip, List, ListItem, ListItemText, Button, ToggleButtonGroup, ToggleButton, Paper, alpha, CircularProgress } from '@mui/material';
+import { AccessTime as AccessTimeIcon, Person as PersonIcon, ViewList as ViewListIcon, Storage as StorageIcon, Videocam as VideocamIcon, Audiotrack as AudiotrackIcon, ArrowBack as ArrowBackIcon, ArrowForward as ArrowForwardIcon, Download as DownloadIcon, HighQuality as HighQualityIcon, Sort as SortIcon, Movie as MovieIcon, MusicNote as MusicNoteIcon, MergeType as MergeTypeIcon, ThumbUp, CheckCircle } from '@mui/icons-material';
 import { VideoInfo, Format } from '../types';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
+
+interface PlaylistWizardState {
+  currentIndex: number;
+  total: number;
+  isLast: boolean;
+  onPrevious: () => void;
+  onNextOrDownload: () => void;
+}
 
 interface SelectionScreenProps {
   videoInfo: VideoInfo;
@@ -11,8 +19,10 @@ interface SelectionScreenProps {
   setSelectedFormat: (formatId: string) => void;
   setCurrentStep: (step: 'input' | 'selection' | 'savepath') => void;
   isDownloading: boolean;
+  isAnalyzing: boolean;
   formatDuration: (seconds: number) => string;
   formatFileSize: (bytes: number | null | undefined) => string;
+  playlistWizard?: PlaylistWizardState;
 }
 
 type FilterType = 'all' | 'video' | 'audio' | 'both';
@@ -24,8 +34,10 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
   setSelectedFormat,
   setCurrentStep,
   isDownloading,
+  isAnalyzing,
   formatDuration,
-  formatFileSize
+  formatFileSize,
+  playlistWizard
 }) => {
   const { t } = useLanguage();
   const { themeStyles, themeStyle, darkMode } = useTheme();
@@ -502,33 +514,72 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
               </Box>
 
               {/* Action Buttons */}
-              <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<ArrowBackIcon />}
-                  onClick={() => setCurrentStep('input')}
-                  sx={{
-                    flex: 1,
-                    borderRadius: 3,
-                    borderWidth: 2,
-                    '&:hover': { borderWidth: 2 },
-                  }}
-                >
-                  {t.back}
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<DownloadIcon />}
-                  onClick={() => setCurrentStep('savepath')}
-                  disabled={!selectedFormat || isDownloading}
-                  sx={{
-                    flex: 1,
-                    borderRadius: 3,
-                  }}
-                >
-                  {isDownloading ? t.downloading : t.download}
-                </Button>
-              </Box>
+              {!playlistWizard ? (
+                <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={() => setCurrentStep('input')}
+                    sx={{
+                      flex: 1,
+                      borderRadius: 3,
+                      borderWidth: 2,
+                      '&:hover': { borderWidth: 2 },
+                    }}
+                  >
+                    {t.back}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadIcon />}
+                    onClick={() => setCurrentStep('savepath')}
+                    disabled={!selectedFormat || isDownloading || isAnalyzing}
+                    sx={{
+                      flex: 1,
+                      borderRadius: 3,
+                      color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
+                    }}
+                  >
+                    {isDownloading ? t.downloading : t.download}
+                  </Button>
+                </Box>
+              ) : (
+                <Box sx={{ display: 'flex', gap: 2, mt: 3, alignItems: 'center' }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ArrowBackIcon />}
+                    onClick={playlistWizard.onPrevious}
+                    sx={{
+                      minWidth: 130,
+                      borderRadius: 3,
+                      borderWidth: 2,
+                      '&:hover': { borderWidth: 2 },
+                    }}
+                  >
+                    {t.back}
+                  </Button>
+                  <Typography variant="body1" sx={{ fontWeight: 600, flex: 1, textAlign: 'center' }}>
+                    {`${t.videoIndex} ${playlistWizard.currentIndex + 1} / ${playlistWizard.total}`}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={isAnalyzing
+                      ? <CircularProgress size={20} sx={{ color: 'white' }} />
+                      : (playlistWizard.isLast ? <DownloadIcon /> : <ArrowForwardIcon />)}
+                    onClick={playlistWizard.onNextOrDownload}
+                    disabled={!selectedFormat || isDownloading || isAnalyzing}
+                    sx={{
+                      minWidth: 130,
+                      borderRadius: 3,
+                      color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
+                    }}
+                  >
+                    {isDownloading
+                      ? t.downloading
+                      : (isAnalyzing ? t.analyzing : (playlistWizard.isLast ? t.download : t.next))}
+                  </Button>
+                </Box>
+              )}
             </Box>
           </Grid>
         </Grid>

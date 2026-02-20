@@ -21,10 +21,11 @@ export interface QueueItem {
 class DownloadQueueManager {
   private queue: QueueItem[] = [];
   private activeDownloads: Set<string> = new Set();
-  private maxConcurrentDownloads: number = 2; // Максимум 2 одновременные загрузки для снижения нагрузки на YouTube
+  private maxConcurrentDownloads: number = 1; // Один активный процесс yt-dlp, чтобы отмена не затрагивала другие элементы очереди
   private rateLimitDelay: number = 2000; // Задержка между запросами (2 секунды) - для совместимости
   private lastDownloadTime: number = 0; // Время последней загрузки
   private minTimeBetweenDownloads: number = 2000; // Минимальное время между загрузками
+  private cancelingId: string | null = null;
 
   // Добавить элемент в очередь
   addToQueue(item: Omit<QueueItem, 'id' | 'status' | 'progress' | 'addedAt'>): QueueItem {
@@ -99,7 +100,9 @@ class DownloadQueueManager {
     if (item && (item.status === 'pending' || item.status === 'in-progress')) {
       // Попробовать отменить активную загрузку
       if (item.status === 'in-progress') {
+        this.cancelingId = id;
         apiService.cancelDownload();
+        return;
       }
       // Удаляем элемент из очереди вместо простого изменения статуса
       // Это предотвращает перезапуск отмененной загрузки
@@ -107,10 +110,23 @@ class DownloadQueueManager {
     }
   }
 
+  getCancelingId(): string | null {
+    return this.cancelingId;
+  }
+
+  clearCancelingId(): void {
+    this.cancelingId = null;
+  }
+
+  resumeQueue(): void {
+    this.processQueue();
+  }
+
   // Удалить элемент из очереди
   removeFromQueue(id: string): void {
     this.queue = this.queue.filter(item => item.id !== id);
     this.activeDownloads.delete(id);
+    this.processQueue(); // запуск следующих задач при освобождении слота
   }
 
   // Очистить завершенные загрузки

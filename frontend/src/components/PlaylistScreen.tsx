@@ -50,6 +50,7 @@ interface PlaylistScreenProps {
   onBack: () => void;
   onDownloadSelected: () => void;
   isDownloading: boolean;
+  isProcessingSelection: boolean;
   formatDuration: (seconds: number) => string;
 }
 
@@ -60,6 +61,7 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
   onBack,
   onDownloadSelected,
   isDownloading,
+  isProcessingSelection,
   formatDuration
 }) => {
   const { t } = useLanguage();
@@ -88,6 +90,20 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
   // Check if all videos are selected
   const allSelected = playlistInfo.entries.length > 0 &&
     playlistInfo.entries.every(entry => selectedVideos.includes(entry.id));
+
+  const extractYoutubeId = (entry: PlaylistEntry): string => {
+    if (entry.id && entry.id.length >= 8) return entry.id;
+    const url = entry.url || '';
+    const match = url.match(/[?&]v=([^&]+)/) || url.match(/youtu\.be\/([^?&]+)/) || url.match(/\/watch\/([^?&]+)/);
+    return match ? match[1] : '';
+  };
+
+  const getThumbnail = (entry: PlaylistEntry): string => {
+    if (entry.thumbnail) return entry.thumbnail;
+    const id = extractYoutubeId(entry);
+    if (id) return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+    return '';
+  };
 
   return (
     <Box sx={{ pb: 4 }}>
@@ -227,6 +243,7 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
           <List sx={{ p: 0 }}>
             {playlistInfo.entries.map((entry, index) => {
               const isSelected = selectedVideos.includes(entry.id);
+              const thumbnail = getThumbnail(entry);
               
               return (
                 <ListItem
@@ -250,7 +267,7 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
                   <ListItemAvatar>
                     <Avatar
                       variant="rounded"
-                      src={entry.thumbnail || undefined}
+                      src={thumbnail || undefined}
                       sx={{
                         width: 100,
                         height: 60,
@@ -259,7 +276,7 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
                         borderColor: 'divider',
                       }}
                     >
-                      {!entry.thumbnail && <PlayIcon sx={{ color: 'text.secondary' }} />}
+                      {!thumbnail && <PlayIcon sx={{ color: 'text.secondary' }} />}
                     </Avatar>
                   </ListItemAvatar>
 
@@ -335,16 +352,19 @@ const PlaylistScreen: React.FC<PlaylistScreenProps> = ({
               fullWidth
               variant="contained"
               size="large"
-              startIcon={isDownloading ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <DownloadIcon />}
+              startIcon={(isDownloading || isProcessingSelection) ? <CircularProgress size={20} sx={{ color: 'white' }} /> : <DownloadIcon />}
               onClick={onDownloadSelected}
-              disabled={selectedVideos.length === 0 || isDownloading}
+              disabled={selectedVideos.length === 0 || isDownloading || isProcessingSelection}
               sx={{
                 py: 2,
                 fontSize: '1.1rem',
                 borderRadius: 3,
+                color: (theme) => theme.palette.getContrastText(theme.palette.primary.main),
               }}
             >
-              {isDownloading ? t.downloading : `${t.downloadSelected} (${selectedVideos.length})`}
+              {isDownloading
+                ? t.downloading
+                : (isProcessingSelection ? t.analyzing : `${t.downloadSelected} (${selectedVideos.length})`)}
             </Button>
           </Grid>
         </Grid>
