@@ -29,9 +29,17 @@ jobs:
             platform: windows
             arch: amd64
             ext: .exe
+          - os: windows-latest
+            platform: windows
+            arch: arm64
+            ext: .exe
           - os: ubuntu-latest
             platform: linux
             arch: amd64
+            ext: ""
+          - os: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
             ext: ""
           - os: macos-15-intel
             platform: darwin
@@ -150,6 +158,67 @@ jobs:
             fi
           fi
 
+      - name: Create Linux Tarball
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          cd build/bin
+          BASE_NAME="Go-DLP_${{ inputs.version }}_linux_${{ matrix.arch }}"
+          TAR_NAME="Go-DLP_${{ inputs.version }}_linux_${{ matrix.arch }}.tar.gz"
+          if [ -f "$BASE_NAME" ]; then
+            chmod +x "$BASE_NAME"
+            tar -czf "$TAR_NAME" "$BASE_NAME"
+          else
+            echo "Error: Binary $BASE_NAME not found!"
+            exit 1
+          fi
+
+      - name: Create AppImage Package
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version }}"
+          ARCH="${{ matrix.arch }}"
+          case "$ARCH" in
+            amd64) APPIMAGE_ARCH="x86_64" ;;
+            arm64) APPIMAGE_ARCH="aarch64" ;;
+            *) echo "Unsupported arch for AppImage: $ARCH" && exit 1 ;;
+          esac
+          BINARY="Go-DLP_${VERSION}_linux_${ARCH}"
+          APPDIR="$PWD/Go-DLP.AppDir"
+          APPIMAGE_NAME="Go-DLP_${VERSION}_linux_${ARCH}.AppImage"
+
+          mkdir -p "$APPDIR/usr/bin"
+          mkdir -p "$APPDIR/usr/share/applications"
+          mkdir -p "$APPDIR/usr/share/icons/hicolor/256x256/apps"
+
+          cp "build/bin/$BINARY" "$APPDIR/usr/bin/Go-DLP"
+          chmod +x "$APPDIR/usr/bin/Go-DLP"
+          cp build/appicon.png "$APPDIR/go-dlp.png"
+          cp build/appicon.png "$APPDIR/usr/share/icons/hicolor/256x256/apps/go-dlp.png"
+
+          cat > "$APPDIR/go-dlp.desktop" <<EOF
+          [Desktop Entry]
+          Name=Go-DLP
+          Exec=Go-DLP
+          Icon=go-dlp
+          Terminal=false
+          Type=Application
+          Categories=Network;Video;
+          EOF
+          cp "$APPDIR/go-dlp.desktop" "$APPDIR/usr/share/applications/go-dlp.desktop"
+
+          cat > "$APPDIR/AppRun" <<EOF
+          #!/bin/sh
+          HERE="\$(dirname "\$(readlink -f "\$0")")"
+          exec "\$HERE/usr/bin/Go-DLP" "\$@"
+          EOF
+          chmod +x "$APPDIR/AppRun"
+
+          wget -q "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-${APPIMAGE_ARCH}.AppImage" -O appimagetool
+          chmod +x appimagetool
+          ARCH="$APPIMAGE_ARCH" ./appimagetool --appimage-extract-and-run "$APPDIR" "build/bin/$APPIMAGE_NAME"
+
       - name: Create Debian Package
         if: matrix.platform == 'linux'
         shell: bash
@@ -190,13 +259,70 @@ jobs:
           dpkg-deb --build "$DEB_DIR"
           mv "${DEB_DIR}.deb" build/bin/
 
+      - name: Create RPM Package
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
+          VERSION="${{ inputs.version }}"
+          ARCH="${{ matrix.arch }}"
+          case "$ARCH" in
+            amd64) RPM_ARCH="x86_64" ;;
+            arm64) RPM_ARCH="aarch64" ;;
+            *) echo "Unsupported arch for RPM: $ARCH" && exit 1 ;;
+          esac
+          BINARY="Go-DLP_${VERSION}_linux_${ARCH}"
+          RPM_ROOT="$PWD/rpm-build"
+          mkdir -p "$RPM_ROOT"/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/bin"
+          mkdir -p "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/share/applications"
+          mkdir -p "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/share/icons/hicolor/256x256/apps"
+          cp "build/bin/$BINARY" "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/bin/Go-DLP"
+          chmod 755 "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/bin/Go-DLP"
+          cp build/appicon.png "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/share/icons/hicolor/256x256/apps/go-dlp.png"
+          cat > "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}/usr/share/applications/go-dlp.desktop" <<EOF
+          [Desktop Entry]
+          Name=Go-DLP
+          Exec=/usr/bin/Go-DLP
+          Icon=go-dlp
+          Terminal=false
+          Type=Application
+          Categories=Network;Video;
+          EOF
+          cat > "$RPM_ROOT/SPECS/go-dlp.spec" <<EOF
+          Name:           go-dlp
+          Version:        ${VERSION}
+          Release:        1%{?dist}
+          Summary:        Modern yt-dlp Desktop Client
+          License:        GPL-3.0
+          BuildArch:      ${RPM_ARCH}
+          
+          %description
+          Modern yt-dlp Desktop Client.
+          
+          %files
+          /usr/bin/Go-DLP
+          /usr/share/applications/go-dlp.desktop
+          /usr/share/icons/hicolor/256x256/apps/go-dlp.png
+          EOF
+          rpmbuild \
+            --define "_topdir $RPM_ROOT" \
+            --define "_build_name_fmt %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm" \
+            --buildroot "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}" \
+            -bb "$RPM_ROOT/SPECS/go-dlp.spec"
+          cp "$RPM_ROOT"/RPMS/*/*.rpm build/bin/
+
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-${{ matrix.platform }}-${{ matrix.arch }}
           path: |
             build/bin/*.zip
+            build/bin/*.tar.gz
+            build/bin/*.AppImage
             build/bin/*.deb
+            build/bin/*.rpm
 
   publish:
     name: Publish Release
@@ -224,10 +350,11 @@ jobs:
           name: Release v${{ inputs.version }}
           draft: false
           prerelease: ${{ inputs.prerelease }}
+          generate_release_notes: true
           files: |
             release-dist/*.zip
+            release-dist/*.tar.gz
+            release-dist/*.AppImage
             release-dist/*.deb
+            release-dist/*.rpm
             release-dist/checksums.txt
-          body: |
-            ## Go-DLP v${{ inputs.version }}
-            Automated release for version ${{ inputs.version }}.
