@@ -311,7 +311,12 @@ jobs:
             --define "_build_name_fmt %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm" \
             --buildroot "$RPM_ROOT/BUILDROOT/go-dlp-${VERSION}-1.${RPM_ARCH}" \
             -bb "$RPM_ROOT/SPECS/go-dlp.spec"
-          cp "$RPM_ROOT"/RPMS/*/*.rpm build/bin/
+          RPM_FILE="$(find "$RPM_ROOT/RPMS" -type f -name '*.rpm' | head -n 1)"
+          if [ -z "$RPM_FILE" ]; then
+            echo "Error: RPM package not found in $RPM_ROOT/RPMS"
+            exit 1
+          fi
+          cp "$RPM_FILE" build/bin/
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
