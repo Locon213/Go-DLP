@@ -6,8 +6,9 @@ export interface Format {
   ext: string;
   resolution?: string;
   filesize?: number | null;
-  filesizeApprox?: string | number;
-  filesizeHuman?: string; // Human-readable file size
+  filesize_approx?: string | number;
+  filesize_human?: string; // Human-readable file size
+  tbr?: number | null;
   vcodec?: string;
   acodec?: string;
   url: string;

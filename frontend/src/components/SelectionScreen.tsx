@@ -64,13 +64,50 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
   // Helper function to get file size in bytes
   const getFileSizeBytes = (format: Format): number => {
     if (format.filesize) return Number(format.filesize);
-    if (format.filesizeApprox) {
-      if (typeof format.filesizeApprox === 'string') {
-        return parseInt(format.filesizeApprox);
+    if (format.filesize_approx) {
+      if (typeof format.filesize_approx === 'string') {
+        return parseInt(format.filesize_approx);
       }
-      return format.filesizeApprox;
+      return format.filesize_approx;
+    }
+    if (format.tbr && videoInfo.duration > 0) {
+      return (Number(format.tbr) * 1000 / 8) * videoInfo.duration;
     }
     return 0;
+  };
+
+  // Human-readable label with fallbacks:
+  // filesize_human -> filesize -> filesize_approx -> tbr * duration
+  const getFileSizeLabel = (format: Format): string => {
+    if (format.filesize_human) return format.filesize_human;
+
+    if (format.filesize) {
+      const exact = formatFileSize(Number(format.filesize));
+      if (exact !== 'Unknown') return exact;
+    }
+
+    if (format.filesize_approx) {
+      if (typeof format.filesize_approx === 'string') {
+        if (format.filesize_approx.includes('iB') || format.filesize_approx.includes('B')) {
+          return format.filesize_approx;
+        }
+        const approxParsed = parseInt(format.filesize_approx);
+        if (!Number.isNaN(approxParsed) && approxParsed > 0) {
+          return '~' + formatFileSize(approxParsed);
+        }
+      } else if (format.filesize_approx > 0) {
+        return '~' + formatFileSize(Number(format.filesize_approx));
+      }
+    }
+
+    if (format.tbr && videoInfo.duration > 0) {
+      const estimatedBytes = (Number(format.tbr) * 1000 / 8) * videoInfo.duration;
+      if (estimatedBytes > 0) {
+        return '~' + formatFileSize(estimatedBytes);
+      }
+    }
+
+    return 'Unknown';
   };
 
   // Check if format is recommended (720p+ with both audio and video)
@@ -490,16 +527,7 @@ const SelectionScreen: React.FC<SelectionScreenProps> = ({
                               color: themeConfig.primary,
                             }}
                           >
-                            {format.filesizeHuman ||
-                              (formatFileSize(format.filesize || 0) !== 'Unknown'
-                                ? formatFileSize(format.filesize)
-                                : (format.filesizeApprox
-                                  ? (typeof format.filesizeApprox === 'string'
-                                    ? (format.filesizeApprox.includes('iB') || format.filesizeApprox.includes('B')
-                                      ? format.filesizeApprox
-                                      : '~' + formatFileSize(parseInt(format.filesizeApprox)))
-                                    : '~' + formatFileSize(format.filesizeApprox))
-                                  : 'Unknown'))}
+                            {getFileSizeLabel(format)}
                           </Typography>
                         </Box>
                       </ListItem>
