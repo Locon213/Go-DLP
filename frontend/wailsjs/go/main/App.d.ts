@@ -23,6 +23,8 @@ export function DownloadVideo(arg1:string,arg2:string,arg3:string):Promise<void>
 
 export function GetActualDownloadPath(arg1:string):Promise<string>;
 
+export function GetClipboardText():Promise<string>;
+
 export function GetCurrentVersion():Promise<string>;
 
 export function GetDenoVersion():Promise<string>;
@@ -63,9 +65,17 @@ export function IsNodeAvailable():Promise<boolean>;
 
 export function OpenInExplorer(arg1:string):Promise<void>;
 
+export function PauseDownload():Promise<void>;
+
+export function ProcessDroppedFiles(arg1:Array<string>):Promise<string>;
+
+export function ReadLinksFromFile(arg1:string):Promise<string>;
+
 export function SelectCookiesFile():Promise<string>;
 
 export function SelectDownloadDirectory():Promise<string>;
+
+export function SelectTextFile():Promise<string>;
 
 export function SetDownloadDirectory(arg1:string):Promise<void>;
 

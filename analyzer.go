@@ -664,7 +664,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 	ytDlpPath := filepath.Join("./bin", a.getYtDlpBinaryName())
 
 	// Build command arguments for playlist download
-	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--ignore-errors"}
+	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--continue", "--part", "--ignore-errors"}
 
 	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
 	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
@@ -840,19 +840,6 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 					}
 				}
 
-				// Also check for 100% completion in case the pattern is slightly different
-				if strings.Contains(output, "[download]") && strings.Contains(output, "100%") {
-					progressTracker.mu.Lock()
-					if progressTracker.previousProgress != 100 {
-						progressTracker.previousProgress = 100
-						progressTracker.mu.Unlock()
-						wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
-							"progress": 100,
-						})
-					} else {
-						progressTracker.mu.Unlock()
-					}
-				}
 			}
 
 			if err == io.EOF {
@@ -897,7 +884,7 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 					downloadMutex.Unlock()
 
 					// Try downloading without cookies
-					argsWithoutCookies := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--ignore-errors"}
+					argsWithoutCookies := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--continue", "--part", "--ignore-errors"}
 
 					// Add playlist range if specified
 					if startItem > 0 {
@@ -1019,18 +1006,6 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 									}
 								}
 
-								if strings.Contains(output, "[download]") && strings.Contains(output, "100%") {
-									progressTracker.mu.Lock()
-									if progressTracker.previousProgress != 100 {
-										progressTracker.previousProgress = 100
-										progressTracker.mu.Unlock()
-										wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
-											"progress": 100,
-										})
-									} else {
-										progressTracker.mu.Unlock()
-									}
-								}
 							}
 
 							if err == io.EOF {
@@ -1115,4 +1090,146 @@ func (a *App) downloadPlaylistInternal(url, formatID, outputPath string, startIt
 	}()
 
 	return nil
+}
+
+// getClipboardTextInternal returns the current text from clipboard
+func (a *App) getClipboardTextInternal() (string, error) {
+	text, err := wailsRuntime.ClipboardGetText(a.ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get clipboard text: %v", err)
+	}
+	return text, nil
+}
+
+// readLinksFromFileInternal reads all URLs from a text file (one per line)
+func (a *App) readLinksFromFileInternal(filePath string) (string, error) {
+	// Check if file exists
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return "", fmt.Errorf("file does not exist: %s", filePath)
+	}
+
+	// Read file content
+	content, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read file: %v", err)
+	}
+
+	// Parse URLs from content
+	lines := strings.Split(string(content), "\n")
+	var urls []string
+	urlRegex := regexp.MustCompile(`https?://[^\s"']+$`)
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue // Skip empty lines and comments
+		}
+
+		// Try to extract URL from the line
+		matches := urlRegex.FindString(line)
+		if matches != "" {
+			urls = append(urls, matches)
+		} else if strings.Contains(line, "http://") || strings.Contains(line, "https://") {
+			// Line contains URL, add it as-is
+			urls = append(urls, line)
+		}
+	}
+
+	if len(urls) == 0 {
+		return "", fmt.Errorf("no URLs found in file")
+	}
+
+	// Return as JSON array
+	result, err := json.Marshal(urls)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal URLs: %v", err)
+	}
+
+	return string(result), nil
+}
+
+// processDroppedFilesInternal processes files dropped via drag-and-drop
+func (a *App) processDroppedFilesInternal(filePaths []string) (string, error) {
+	type DroppedItem struct {
+		Type  string `json:"type"`  // "file" or "url"
+		Value string `json:"value"` // file path or URL
+	}
+
+	var items []DroppedItem
+	urlRegex := regexp.MustCompile(`^https?://`)
+
+	for _, path := range filePaths {
+		// Check if it's a URL
+		if urlRegex.MatchString(path) {
+			items = append(items, DroppedItem{
+				Type:  "url",
+				Value: path,
+			})
+			continue
+		}
+
+		// Check if file exists
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			wailsRuntime.LogInfof(a.ctx, "Dropped file does not exist: %s", path)
+			continue
+		}
+
+		// Check file extension
+		ext := strings.ToLower(filepath.Ext(path))
+		if ext == ".txt" {
+			// Read URLs from text file
+			linksJSON, err := a.readLinksFromFileInternal(path)
+			if err == nil {
+				var fileURLs []string
+				if err := json.Unmarshal([]byte(linksJSON), &fileURLs); err == nil {
+					for _, url := range fileURLs {
+						items = append(items, DroppedItem{
+							Type:  "url",
+							Value: url,
+						})
+					}
+				}
+			} else {
+				// If reading URLs fails, add as file path
+				items = append(items, DroppedItem{
+					Type:  "file",
+					Value: path,
+				})
+			}
+		} else {
+			// Add other files as-is
+			items = append(items, DroppedItem{
+				Type:  "file",
+				Value: path,
+			})
+		}
+	}
+
+	if len(items) == 0 {
+		return "", fmt.Errorf("no valid files or URLs found")
+	}
+
+	result, err := json.Marshal(items)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal dropped items: %v", err)
+	}
+
+	return string(result), nil
+}
+
+// selectTextFileInternal opens a file dialog to select a text file
+func (a *App) selectTextFileInternal() (string, error) {
+	filePath, err := wailsRuntime.OpenFileDialog(a.ctx, wailsRuntime.OpenDialogOptions{
+		Title: "Выберите TXT файл со ссылками",
+		Filters: []wailsRuntime.FileFilter{
+			{
+				DisplayName: "Text Files (*.txt)",
+				Pattern:     "*.txt",
+			},
+		},
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to open file dialog: %v", err)
+	}
+	return filePath, nil
 }

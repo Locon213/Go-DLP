@@ -25,6 +25,7 @@ var (
 	downloadMutex       sync.Mutex
 	downloadCache       map[string]string // Cache for download paths
 	downloadCancelChan  chan struct{}     // Channel for graceful cancellation
+	downloadStopReason  string            // "cancel" or "pause" for the next cancellation event
 	completedDownloads  map[string]bool   // Track completed downloads to prevent duplicates
 	completionEmitted   bool              // Track if completion event was already emitted
 	completionEmittedMu sync.Mutex        // Mutex to protect completionEmitted
@@ -34,6 +35,7 @@ var (
 func init() {
 	downloadCache = make(map[string]string)
 	completedDownloads = make(map[string]bool)
+	downloadStopReason = ""
 	completionEmitted = false
 }
 
@@ -65,12 +67,13 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 
 	// Initialize cancel channel for this download
 	downloadCancelChan = make(chan struct{})
+	downloadStopReason = ""
 
 	// Reset completion flag for this download
 	completionEmitted = false
 
 	// Build command arguments based on settings
-	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress"}
+	args := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--continue", "--part"}
 
 	// Add JS runtime if enabled or if it's a YouTube URL (which requires it)
 	if a.settings.UseJSRuntime || a.isYouTubeURL(url) {
@@ -179,116 +182,118 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 	reProgressMain := regexp.MustCompile(`\[download\]\s+([\d\.]+)%\s+of\s+([~≈]?\s*[\d\.]+\s*[kKmMgGtTpP]?i?B).*?at\s+([\d\.]+\s*[kKmMgGtTpP]?i?B/s|unknown)\s+ETA\s+([\d:]+|unknown)`)
 	reProgressSimple := regexp.MustCompile(`\[download\][^0-9]*([\d\.]+)\s*%`)
 
+	// Shared progress parser state for stdout/stderr chunks.
+	var (
+		progressStateMu     sync.Mutex
+		lastProgress        float64 = 0
+		lastSize            string  = "--"
+		lastSpeed           string  = "--"
+		lastEta             string  = "--"
+		lastEmittedProgress         = -1
+		lastEmittedSize     string
+		lastEmittedSpeed    string
+		lastEmittedEta      string
+		stdoutTail          string
+		stderrTail          string
+	)
+
+	processProgressLine := func(line string) {
+		if !strings.Contains(line, "[download]") {
+			return
+		}
+
+		var currentProgress float64 = -1
+		if matches := reProgressMain.FindStringSubmatch(line); len(matches) >= 5 {
+			if p, errParse := strconv.ParseFloat(matches[1], 64); errParse == nil {
+				currentProgress = p
+				if matches[2] != "unknown" {
+					lastSize = strings.Join(strings.Fields(matches[2]), " ")
+				}
+				if matches[3] != "unknown" {
+					lastSpeed = strings.TrimSpace(matches[3])
+				}
+				if matches[4] != "unknown" {
+					lastEta = strings.TrimSpace(matches[4])
+				}
+			}
+		} else if matchesSimple := reProgressSimple.FindStringSubmatch(line); len(matchesSimple) > 1 {
+			if p, errParse := strconv.ParseFloat(matchesSimple[1], 64); errParse == nil {
+				currentProgress = p
+			}
+		}
+
+		if currentProgress < 0 {
+			return
+		}
+
+		if currentProgress < 1 && lastProgress > 90 {
+			lastProgress = 0
+		}
+		if currentProgress >= lastProgress {
+			lastProgress = currentProgress
+		}
+
+		progressInt := int(lastProgress)
+		shouldEmit := progressInt != lastEmittedProgress ||
+			lastSize != lastEmittedSize ||
+			lastSpeed != lastEmittedSpeed ||
+			lastEta != lastEmittedEta
+		if !shouldEmit {
+			return
+		}
+
+		lastEmittedProgress = progressInt
+		lastEmittedSize = lastSize
+		lastEmittedSpeed = lastSpeed
+		lastEmittedEta = lastEta
+
+		progressTracker.mu.Lock()
+		progressTracker.previousProgress = progressInt
+		progressTracker.mu.Unlock()
+
+		wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
+			"progress": progressInt,
+			"size":     lastSize,
+			"speed":    lastSpeed,
+			"eta":      lastEta,
+		})
+	}
+
+	processProgressChunk := func(chunk string, fromStderr bool) {
+		progressStateMu.Lock()
+		if fromStderr {
+			chunk = stderrTail + chunk
+		} else {
+			chunk = stdoutTail + chunk
+		}
+		lines := strings.Split(chunk, "\n")
+		if len(lines) == 0 {
+			progressStateMu.Unlock()
+			return
+		}
+		if fromStderr {
+			stderrTail = lines[len(lines)-1]
+		} else {
+			stdoutTail = lines[len(lines)-1]
+		}
+
+		for _, line := range lines[:len(lines)-1] {
+			processProgressLine(line)
+		}
+		progressStateMu.Unlock()
+	}
+
 	// Read stdout and stderr in real-time to get progress and errors
 	go func() {
 		buffer := make([]byte, 1024)
-
-		// UPDATED: Store last known values to avoid "Calculating..."
-		// Initialize with dashes instead of "Calculating..."
-		var (
-			lastProgress float64 = 0
-			lastSize     string  = "--"
-			lastSpeed    string  = "--"
-			lastEta      string  = "--"
-			trackerMu    sync.Mutex
-		)
-
 		for {
 			n, err := stdout.Read(buffer)
 			if n > 0 {
-				output := string(buffer[:n])
-
-				// Log the raw output for debugging
-				if strings.Contains(output, "[download]") {
-					wailsRuntime.LogInfof(a.ctx, "Raw download output: %s", output)
-				}
-
-				// Try main regex first
-				matches := reProgressMain.FindStringSubmatch(output)
-
-				var currentProgress float64 = -1
-
-				trackerMu.Lock()
-
-				if len(matches) >= 5 {
-					// Parse data
-					p, errParse := strconv.ParseFloat(matches[1], 64)
-					if errParse == nil {
-						currentProgress = p
-
-						// Update metadata only if valid
-						if matches[2] != "unknown" {
-							// Clean up extra spaces in size
-							lastSize = strings.Join(strings.Fields(matches[2]), " ")
-						}
-						if matches[3] != "unknown" {
-							lastSpeed = matches[3]
-						}
-						if matches[4] != "unknown" {
-							lastEta = matches[4]
-						}
-					}
-				} else {
-					// Fallback: try to find at least percentage
-					matchesSimple := reProgressSimple.FindStringSubmatch(output)
-					if len(matchesSimple) > 1 {
-						p, errParse := strconv.ParseFloat(matchesSimple[1], 64)
-						if errParse == nil {
-							currentProgress = p
-						}
-					}
-				}
-
-				// UI UPDATE LOGIC
-				if currentProgress >= 0 {
-					// PROTECTION FROM BACKWARD JUMPS (70% -> 68%)
-					// If new progress is less than previous, use old value
-
-					// Exception: if we started new download (progress < 1), reset
-					if currentProgress < 1 && lastProgress > 90 {
-						lastProgress = 0
-					}
-
-					if currentProgress < lastProgress {
-						// Progress dropped - use old visually
-						currentProgress = lastProgress
-					} else {
-						lastProgress = currentProgress
-					}
-
-					// Emit event with last known data
-					progressTracker.mu.Lock()
-					if int(lastProgress) != progressTracker.previousProgress {
-						progressTracker.previousProgress = int(lastProgress)
-						progressTracker.mu.Unlock()
-
-						wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
-							"progress": int(lastProgress),
-							"size":     lastSize,
-							"speed":    lastSpeed,
-							"eta":      lastEta,
-						})
-					} else {
-						progressTracker.mu.Unlock()
-					}
-				}
-
-				// Check for 100%
-				if strings.Contains(output, "100%") && currentProgress >= 99.9 {
-					if lastProgress < 100 {
-						lastProgress = 100
-						wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
-							"progress": 100,
-							"size":     lastSize,
-							"speed":    "Done",
-							"eta":      "00:00",
-						})
-					}
-				}
-				trackerMu.Unlock()
+				processProgressChunk(string(buffer[:n]), false)
 			}
 
 			if err == io.EOF {
+				processProgressChunk("\n", false)
 				break
 			}
 
@@ -307,6 +312,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 		for {
 			n, err := stderr.Read(buffer)
 			if n > 0 {
+				processProgressChunk(string(buffer[:n]), true)
 				stderrContent.Write(buffer[:n])
 				stderrStr := stderrContent.String()
 
@@ -330,7 +336,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 					downloadMutex.Unlock()
 
 					// Try downloading without cookies
-					argsWithoutCookies := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress"}
+					argsWithoutCookies := []string{url, "-f", formatID, "-o", outputPath, "--newline", "--progress", "--continue", "--part"}
 
 					// Add proxy settings if enabled (but no cookies)
 					if a.settings.ProxyMode == "manual" && a.settings.ProxyAddress != "" {
@@ -447,18 +453,6 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 									}
 								}
 
-								// Check for 100%
-								if strings.Contains(output, "100%") && currentProgress >= 99.9 {
-									if lastProgress < 100 {
-										lastProgress = 100
-										wailsRuntime.EventsEmit(a.ctx, "download-progress", map[string]interface{}{
-											"progress": 100,
-											"size":     lastSize,
-											"speed":    "Done",
-											"eta":      "00:00",
-										})
-									}
-								}
 								retryMu.Unlock()
 							}
 
@@ -596,6 +590,7 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 			}
 
 			if err == io.EOF {
+				processProgressChunk("\n", true)
 				break
 			}
 
@@ -733,9 +728,20 @@ func (a *App) downloadVideoInternal(url, formatID, outputPath string) error {
 
 // cancelDownloadInternal cancels the current download gracefully
 func (a *App) cancelDownloadInternal() error {
+	return a.stopDownloadInternal("cancel")
+}
+
+// pauseDownloadInternal pauses the current download gracefully
+func (a *App) pauseDownloadInternal() error {
+	return a.stopDownloadInternal("pause")
+}
+
+func (a *App) stopDownloadInternal(reason string) error {
 	downloadMutex.Lock()
 
 	if currentDownloadCmd != nil {
+		downloadStopReason = reason
+
 		// Signal cancellation through channel first
 		if downloadCancelChan != nil {
 			close(downloadCancelChan)
@@ -753,8 +759,8 @@ func (a *App) cancelDownloadInternal() error {
 			}
 		}
 		currentDownloadCmd = nil
-		wailsRuntime.LogInfof(a.ctx, "Download cancelled successfully")
-		emitDownloadEvent(a.ctx, "download-cancelled")
+		wailsRuntime.LogInfof(a.ctx, "Download stopped successfully, reason: %s", reason)
+		emitDownloadEvent(a.ctx, "download-cancelled", map[string]string{"reason": reason})
 		downloadMutex.Unlock()
 		return nil
 	}

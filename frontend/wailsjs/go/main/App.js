@@ -46,6 +46,10 @@ export function GetActualDownloadPath(arg1) {
   return window['go']['main']['App']['GetActualDownloadPath'](arg1);
 }
 
+export function GetClipboardText() {
+  return window['go']['main']['App']['GetClipboardText']();
+}
+
 export function GetCurrentVersion() {
   return window['go']['main']['App']['GetCurrentVersion']();
 }
@@ -126,12 +130,28 @@ export function OpenInExplorer(arg1) {
   return window['go']['main']['App']['OpenInExplorer'](arg1);
 }
 
+export function PauseDownload() {
+  return window['go']['main']['App']['PauseDownload']();
+}
+
+export function ProcessDroppedFiles(arg1) {
+  return window['go']['main']['App']['ProcessDroppedFiles'](arg1);
+}
+
+export function ReadLinksFromFile(arg1) {
+  return window['go']['main']['App']['ReadLinksFromFile'](arg1);
+}
+
 export function SelectCookiesFile() {
   return window['go']['main']['App']['SelectCookiesFile']();
 }
 
 export function SelectDownloadDirectory() {
   return window['go']['main']['App']['SelectDownloadDirectory']();
+}
+
+export function SelectTextFile() {
+  return window['go']['main']['App']['SelectTextFile']();
 }
 
 export function SetDownloadDirectory(arg1) {

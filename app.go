@@ -81,6 +81,13 @@ func (a *App) CancelDownload() error {
 	return a.cancelDownloadInternal()
 }
 
+// PauseDownload pauses the current download gracefully
+//
+//export PauseDownload
+func (a *App) PauseDownload() error {
+	return a.pauseDownloadInternal()
+}
+
 // GetDownloadPath returns a suggested download path
 //
 //export GetDownloadPath
@@ -343,4 +350,33 @@ func (a *App) UpdateJSRuntimeType(runtimeType string) error {
 //export SelectCookiesFile
 func (a *App) SelectCookiesFile() (string, error) {
 	return a.selectCookiesFileInternal()
+}
+
+// GetClipboardText returns the current text from clipboard
+//
+//export GetClipboardText
+func (a *App) GetClipboardText() (string, error) {
+	return a.getClipboardTextInternal()
+}
+
+// ReadLinksFromFile reads all URLs from a text file (one per line)
+//
+//export ReadLinksFromFile
+func (a *App) ReadLinksFromFile(filePath string) (string, error) {
+	return a.readLinksFromFileInternal(filePath)
+}
+
+// ProcessDroppedFiles processes files dropped via drag-and-drop
+// Returns JSON array of file paths and extracted URLs
+//
+//export ProcessDroppedFiles
+func (a *App) ProcessDroppedFiles(filePaths []string) (string, error) {
+	return a.processDroppedFilesInternal(filePaths)
+}
+
+// SelectTextFile opens a file dialog to select a text file
+//
+//export SelectTextFile
+func (a *App) SelectTextFile() (string, error) {
+	return a.selectTextFileInternal()
 }

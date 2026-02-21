@@ -299,6 +299,8 @@ export interface Translations {
 
   // InputScreen
   pasteFromClipboard: string;
+  dragAndDropHint: string;
+  clipboardAutoPasted: string;
 
   // Theme Settings
   themeSection: string;

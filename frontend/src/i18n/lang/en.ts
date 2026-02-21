@@ -260,6 +260,8 @@ export const en: PartialTranslations = {
 
   // InputScreen
   pasteFromClipboard: 'Paste from clipboard',
+  dragAndDropHint: 'Drag and drop links or TXT files with links here',
+  clipboardAutoPasted: 'Link automatically pasted from clipboard',
 
   // Theme Settings
   themeSection: 'Appearance',

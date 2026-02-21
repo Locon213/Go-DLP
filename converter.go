@@ -257,28 +257,9 @@ func (a *App) CancelConversion() error {
 
 // openInExplorerInternal opens the file explorer at the specified path
 func (a *App) openInExplorerInternal(path string) error {
-	var cmd *exec.Cmd
-
-	switch runtime.GOOS {
-	case "windows":
-		cmd = exec.Command("explorer", "/select,"+path)
-	case "darwin":
-		cmd = exec.Command("open", "-R", path)
-	case "linux":
-		// Try different file managers
-		fileManagers := []string{"nautilus", "dolphin", "thunar", "pcmanfm", "caja"}
-		for _, fm := range fileManagers {
-			if _, err := exec.LookPath(fm); err == nil {
-				cmd = exec.Command(fm, path)
-				break
-			}
-		}
-		// Fallback to xdg-open
-		if cmd == nil {
-			cmd = exec.Command("xdg-open", filepath.Dir(path))
-		}
-	default:
-		return fmt.Errorf("unsupported operating system: %s", runtime.GOOS)
+	cmd, err := buildOpenInExplorerCommand(path)
+	if err != nil {
+		return err
 	}
 
 	if err := cmd.Start(); err != nil {
@@ -287,6 +268,47 @@ func (a *App) openInExplorerInternal(path string) error {
 
 	wailsRuntime.LogInfof(a.ctx, "Opened explorer at: %s", path)
 	return nil
+}
+
+func buildOpenInExplorerCommand(path string) (*exec.Cmd, error) {
+	return buildOpenInExplorerCommandForOS(runtime.GOOS, path)
+}
+
+func buildOpenInExplorerCommandForOS(goos, path string) (*exec.Cmd, error) {
+	if strings.TrimSpace(path) == "" {
+		return nil, fmt.Errorf("path cannot be empty")
+	}
+
+	normalized := filepath.Clean(path)
+	targetDir := normalized
+	if strings.Contains(normalized, ".%(ext)s") {
+		targetDir = filepath.Dir(normalized)
+	} else if info, err := os.Stat(normalized); err == nil {
+		if !info.IsDir() {
+			targetDir = filepath.Dir(normalized)
+		}
+	} else if os.IsNotExist(err) {
+		targetDir = filepath.Dir(normalized)
+	}
+
+	switch goos {
+	case "windows":
+		return exec.Command("explorer", targetDir), nil
+	case "darwin":
+		return exec.Command("open", targetDir), nil
+	case "linux":
+		// Try different file managers
+		fileManagers := []string{"nautilus", "dolphin", "thunar", "pcmanfm", "caja"}
+		for _, fm := range fileManagers {
+			if _, err := exec.LookPath(fm); err == nil {
+				return exec.Command(fm, targetDir), nil
+			}
+		}
+		// Fallback to xdg-open
+		return exec.Command("xdg-open", targetDir), nil
+	default:
+		return nil, fmt.Errorf("unsupported operating system: %s", goos)
+	}
 }
 
 // GetExecutableExtension returns the executable extension for the current OS

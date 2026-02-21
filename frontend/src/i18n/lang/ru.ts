@@ -260,6 +260,8 @@ export const ru: PartialTranslations = {
 
   // InputScreen
   pasteFromClipboard: 'Вставить из буфера обмена',
+  dragAndDropHint: 'Перетащите сюда ссылки или TXT файлы со ссылками',
+  clipboardAutoPasted: 'Ссылка автоматически вставлена из буфера обмена',
 
   // Theme Settings
   themeSection: 'Внешний вид',

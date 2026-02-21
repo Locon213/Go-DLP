@@ -16,6 +16,8 @@ import {
 } from '@mui/material';
 import {
   Cancel as CancelIcon,
+  Pause as PauseIcon,
+  PlayArrow as PlayArrowIcon,
   Download as DownloadIcon,
   Done as DoneIcon,
   FolderOpen as FolderOpenIcon,
@@ -33,7 +35,7 @@ interface QueueItem {
   id: string;
   url: string;
   title: string;
-  status: 'pending' | 'in-progress' | 'completed' | 'failed' | 'cancelled';
+  status: 'pending' | 'in-progress' | 'paused' | 'completed' | 'failed' | 'cancelled';
   progress: number;
   priority: 'low' | 'normal' | 'high';
   addedAt: Date;
@@ -46,6 +48,8 @@ interface QueueItem {
 interface QueueScreenProps {
   queueItems: QueueItem[];
   onCancelDownload: (id: string) => void;
+  onPauseDownload: (id: string) => void;
+  onResumeDownload: (id: string) => void;
   onClearCompleted: () => void;
   onGoToHome: () => void;
   onOpenInExplorer?: (path: string) => void;
@@ -55,6 +59,8 @@ interface QueueScreenProps {
 const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
   queueItems,
   onCancelDownload,
+  onPauseDownload,
+  onResumeDownload,
   onClearCompleted,
   onGoToHome,
   onOpenInExplorer,
@@ -67,6 +73,7 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
   // Group items by status
   const pendingItems = queueItems.filter(item => item.status === 'pending');
   const inProgressItems = queueItems.filter(item => item.status === 'in-progress');
+  const pausedItems = queueItems.filter(item => item.status === 'paused');
   const completedItems = queueItems.filter(item => item.status === 'completed' || item.status === 'failed' || item.status === 'cancelled');
 
   // Status chip style helper
@@ -74,6 +81,7 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
     const statusConfig: Record<string, { color: string; bgcolor: string; label: string }> = {
       pending: { color: '#757575', bgcolor: alpha('#757575', 0.15), label: t.pending },
       'in-progress': { color: themeConfig.primary, bgcolor: alpha(themeConfig.primary, 0.15), label: t.inProgress },
+      paused: { color: '#ff9800', bgcolor: alpha('#ff9800', 0.15), label: 'Paused' },
       completed: { color: '#4caf50', bgcolor: alpha('#4caf50', 0.15), label: t.completed },
       failed: { color: '#f44336', bgcolor: alpha('#f44336', 0.15), label: t.failed },
       cancelled: { color: '#ff9800', bgcolor: alpha('#ff9800', 0.15), label: t.cancelled },
@@ -335,6 +343,19 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
                         }
                       />
                       <IconButton
+                        onClick={() => onPauseDownload(item.id)}
+                        sx={{
+                          borderRadius: 2,
+                          color: '#ff9800',
+                          '&:hover': {
+                            bgcolor: alpha('#ff9800', 0.1),
+                          },
+                        }}
+                        title="Pause"
+                      >
+                        <PauseIcon />
+                      </IconButton>
+                      <IconButton
                         onClick={() => onCancelDownload(item.id)}
                         sx={{
                           borderRadius: 2,
@@ -401,6 +422,19 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
                       />
                       <DownloadIcon color="disabled" sx={{ mr: 1 }} />
                       <IconButton
+                        onClick={() => onPauseDownload(item.id)}
+                        sx={{
+                          borderRadius: 2,
+                          color: '#ff9800',
+                          '&:hover': {
+                            bgcolor: alpha('#ff9800', 0.1),
+                          },
+                        }}
+                        title="Pause"
+                      >
+                        <PauseIcon />
+                      </IconButton>
+                      <IconButton
                         onClick={() => onCancelDownload(item.id)}
                         sx={{
                           borderRadius: 2,
@@ -409,6 +443,82 @@ const QueueScreen: React.FC<QueueScreenProps> = React.memo(({
                             bgcolor: alpha('#f44336', 0.1),
                           },
                         }}
+                      >
+                        <CancelIcon />
+                      </IconButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </Box>
+            )}
+
+            {/* Paused Items */}
+            {pausedItems.length > 0 && (
+              <Box sx={{ mb: 4 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    mb: 2,
+                    color: '#ff9800',
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <PauseIcon />
+                  Paused Downloads
+                </Typography>
+                <List sx={{ p: 0 }}>
+                  {pausedItems.map((item) => (
+                    <ListItem
+                      key={item.id}
+                      sx={{
+                        mb: 1.5,
+                        borderRadius: 3,
+                        border: '1px solid',
+                        borderColor: alpha('#ff9800', 0.3),
+                        bgcolor: alpha('#ff9800', 0.05),
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                            {item.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                            <Typography variant="caption" color="text.secondary">
+                              Download paused
+                            </Typography>
+                            {getStatusChip(item.status)}
+                          </Box>
+                        }
+                      />
+                      <IconButton
+                        onClick={() => onResumeDownload(item.id)}
+                        sx={{
+                          borderRadius: 2,
+                          color: themeConfig.primary,
+                          '&:hover': {
+                            bgcolor: alpha(themeConfig.primary, 0.1),
+                          },
+                        }}
+                        title="Resume"
+                      >
+                        <PlayArrowIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => onCancelDownload(item.id)}
+                        sx={{
+                          borderRadius: 2,
+                          color: 'error.main',
+                          '&:hover': {
+                            bgcolor: alpha('#f44336', 0.1),
+                          },
+                        }}
+                        title="Cancel"
                       >
                         <CancelIcon />
                       </IconButton>

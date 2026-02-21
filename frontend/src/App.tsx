@@ -83,6 +83,7 @@ const App: React.FC = () => {
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,
+    handleUrlsFromFiles,
     handleDownload,
     handleDownloadSelectedPlaylistVideos,
     handlePlaylistVideoFlowPrevious,
@@ -92,6 +93,8 @@ const App: React.FC = () => {
     handleConvertVideo,
     handleGoToHome,
     handleCancelQueueItem,
+    handlePauseQueueItem,
+    handleResumeQueueItem,
     handleClearCompleted,
     handleDeleteHistoryItem,
     handleClearHistory,
@@ -193,7 +196,7 @@ const App: React.FC = () => {
                   }}
                 >
                   <Badge
-                    badgeContent={queueItems.filter(item => item.status === 'pending' || item.status === 'in-progress').length}
+                    badgeContent={queueItems.filter(item => item.status === 'pending' || item.status === 'in-progress' || item.status === 'paused').length}
                     color="primary"
                     max={99}
                   >
@@ -303,6 +306,7 @@ const App: React.FC = () => {
                 isAnalyzing={isAnalyzing}
                 handleAnalyze={handleAnalyze}
                 handleAnalyzeAndDownloadFast={handleAnalyzeAndDownloadFast}
+                onUrlsFromFiles={handleUrlsFromFiles}
               />
             </Box>
           </Fade>
@@ -405,6 +409,8 @@ const App: React.FC = () => {
               <QueueScreen
                 queueItems={queueItems}
                 onCancelDownload={handleCancelQueueItem}
+                onPauseDownload={handlePauseQueueItem}
+                onResumeDownload={handleResumeQueueItem}
                 onClearCompleted={handleClearCompleted}
                 onGoToHome={handleGoToHome}
                 onOpenInExplorer={handleOpenInExplorer}

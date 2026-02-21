@@ -156,6 +156,7 @@ export const useAppLogic = () => {
         if (!isDirectDownload && activeQueueItem) {
           downloadQueueManager.setStatus(activeQueueItem.id, 'completed');
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
 
           try {
             let completedOutputPath = activeQueueItem.outputPath;
@@ -187,6 +188,7 @@ export const useAppLogic = () => {
         }
         if (!isDirectDownload && !activeQueueItem) {
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
           return;
         }
 
@@ -278,6 +280,7 @@ export const useAppLogic = () => {
         if (!isDirectDownload && activeQueueItem) {
           downloadQueueManager.setStatus(activeQueueItem.id, 'failed');
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
 
           try {
             await downloadHistoryDB.addItem({
@@ -302,6 +305,7 @@ export const useAppLogic = () => {
         }
         if (!isDirectDownload && !activeQueueItem) {
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
           return;
         }
 
@@ -344,9 +348,10 @@ export const useAppLogic = () => {
         showError(`Download Error: ${error}`);
       }),
 
-      subscribeToEvents('download-cancelled', async () => {
+      subscribeToEvents('download-cancelled', async (data: any) => {
         const isDirectDownload = currentStep === 'download' || isDownloading;
         const cancelingId = downloadQueueManager.getCancelingId();
+        const cancelIntent = (typeof data === 'object' && data?.reason ? String(data.reason) : null) || downloadQueueManager.getCancelIntent();
         const activeDownloads = downloadQueueManager.getActiveDownloads();
         const activeQueueItem = cancelingId
           ? downloadQueueManager.getById(cancelingId)
@@ -358,8 +363,17 @@ export const useAppLogic = () => {
         setDownloadEta('00:00');
 
         if (!isDirectDownload && activeQueueItem) {
+          if (cancelIntent === 'pause') {
+            downloadQueueManager.setStatus(activeQueueItem.id, 'paused');
+            downloadQueueManager.clearCancelingId();
+            downloadQueueManager.clearCancelIntent();
+            showSuccess('Download paused');
+            return;
+          }
+
           downloadQueueManager.setStatus(activeQueueItem.id, 'cancelled');
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
 
           try {
             await downloadHistoryDB.addItem({
@@ -384,6 +398,7 @@ export const useAppLogic = () => {
         }
         if (!isDirectDownload && !activeQueueItem) {
           downloadQueueManager.clearCancelingId();
+          downloadQueueManager.clearCancelIntent();
           return;
         }
 
@@ -392,6 +407,7 @@ export const useAppLogic = () => {
           const activeItem = activeDownloads[0];
           downloadQueueManager.setStatus(activeItem.id, 'cancelled');
         }
+        downloadQueueManager.clearCancelIntent();
 
         // Очищаем pending downloads из localStorage
         pendingDownloadsManager.clearPendingDownloads();
@@ -818,6 +834,21 @@ export const useAppLogic = () => {
       setPlaylistVideoInfoCache(prev => ({ ...prev, [videoID]: info }));
     }
 
+    if (playlistInfo?.id === 'file_import' && info?.title) {
+      setPlaylistInfo((prev: any) => {
+        if (!prev || !Array.isArray(prev.entries)) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          entries: prev.entries.map((item: PlaylistEntry) =>
+            item.id === videoID ? { ...item, title: info!.title } : item
+          ),
+        };
+      });
+    }
+
     setVideoInfo(info);
     setPlaylistCurrentVideoIndex(stepIndex);
 
@@ -874,6 +905,75 @@ export const useAppLogic = () => {
       setIsAnalyzing(false);
     }
   };
+
+  // Функция для обработки URL из файлов (режим множественной загрузки как плейлист)
+  const handleUrlsFromFiles = useCallback(async (urls: string[]) => {
+    if (urls.length === 0) {
+      showError('No URLs found in file');
+      return;
+    }
+
+    try {
+      setIsAnalyzing(true);
+      
+      // Активируем режим потока видео (как в плейлистах)
+      setIsPlaylistVideoFlowActive(true);
+      setPlaylistVideoFlowIds(urls.map((_, i) => `file_url_${i}`));
+      setPlaylistCurrentVideoIndex(0);
+      setPlaylistSelectedFormats({});
+      setPlaylistVideoInfoCache({});
+      setSelectedFormat('');
+      
+      // Создаем временный playlistInfo для хранения URL
+      const firstTitle = 'Video 1';
+
+      const mockPlaylistInfo = {
+        id: 'file_import',
+        title: 'Imported URLs',
+        description: `Loaded ${urls.length} URLs from file`,
+        entry_count: urls.length,
+        entries: urls.map((url, index) => ({
+          id: `file_url_${index}`,
+          title: index === 0 ? firstTitle : `Video ${index + 1}`,
+          thumbnail: '',
+          url: url,
+          duration: 0,
+        })),
+      };
+      setPlaylistInfo(mockPlaylistInfo);
+      
+      // Анализируем первый URL
+      const result = await apiService.analyzeURL(urls[0]);
+      const parsedResult: VideoInfo = JSON.parse(result);
+
+      if (!parsedResult || !parsedResult.title) {
+        throw new Error('Invalid video information received');
+      }
+
+      setPlaylistInfo((prev: any) => {
+        if (!prev || !Array.isArray(prev.entries)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          entries: prev.entries.map((item: PlaylistEntry, index: number) =>
+            index === 0 ? { ...item, title: parsedResult.title } : item
+          ),
+        };
+      });
+
+      setVideoInfo(parsedResult);
+      setCurrentStep('selection');
+      showSuccess(`Loaded ${urls.length} URLs. Select format for the first video.`);
+    } catch (error) {
+      console.error('Error loading URLs from file:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      showError(`Failed to load URLs: ${errorMessage}`);
+      setCurrentStep('input');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, []);
 
   // Функция для быстрого анализа и загрузки
   const handleAnalyzeAndDownloadFast = async () => {
@@ -1076,6 +1176,16 @@ export const useAppLogic = () => {
     showSuccess('Download cancelled from queue!');
   };
 
+  const handlePauseQueueItem = (id: string) => {
+    downloadQueueManager.pauseDownload(id);
+    showSuccess('Download pause requested');
+  };
+
+  const handleResumeQueueItem = (id: string) => {
+    downloadQueueManager.resumeDownload(id);
+    showSuccess('Download resumed');
+  };
+
   // Функция для очистки завершенных загрузок из очереди
   const handleClearCompleted = () => {
     downloadQueueManager.clearCompleted();
@@ -1083,9 +1193,10 @@ export const useAppLogic = () => {
   };
 
   // Функция для открытия файла в проводнике
-  const handleOpenInExplorer = async () => {
+  const handleOpenInExplorer = async (path?: string) => {
     try {
-      const actualPath = await resolveActualOutputPath(downloadPath);
+      const sourcePath = path || downloadPath;
+      const actualPath = await resolveActualOutputPath(sourcePath);
       await apiService.openInExplorer(actualPath);
     } catch (error) {
       console.error('Error opening in explorer:', error);
@@ -1227,8 +1338,14 @@ export const useAppLogic = () => {
 
     const previousIndex = playlistCurrentVideoIndex - 1;
     if (previousIndex < 0) {
-      resetPlaylistVideoFlow();
-      setCurrentStep('playlist');
+      // Если это режим загрузки из файлов, возвращаемся на главный экран
+      if (playlistInfo && playlistInfo.id === 'file_import') {
+        resetPlaylistVideoFlow();
+        setCurrentStep('input');
+      } else {
+        resetPlaylistVideoFlow();
+        setCurrentStep('playlist');
+      }
       return;
     }
 
@@ -1276,7 +1393,45 @@ export const useAppLogic = () => {
       return;
     }
 
+    // Последнее видео - начинаем загрузку всех
     try {
+      // Режим загрузки из файлов
+      if (playlistInfo && playlistInfo.id === 'file_import') {
+        for (let i = 0; i < playlistVideoFlowIds.length; i++) {
+          const videoID = playlistVideoFlowIds[i];
+          const formatID = updatedFormats[videoID];
+          const entry = playlistInfo.entries.find((entry: PlaylistEntry) => entry.id === videoID);
+          
+          if (!entry || !formatID) {
+            continue;
+          }
+
+          const queueTitle = entry.title && !/^URL\s+\d+$/i.test(entry.title)
+            ? entry.title
+            : `Video ${i + 1}`;
+          const outputPath = await apiService.getDownloadPath(queueTitle);
+
+          downloadQueueManager.addToQueue({
+            url: entry.url,
+            formatID,
+            outputPath,
+            title: queueTitle,
+            priority: 'normal',
+          });
+        }
+
+        showSuccess(`Added ${playlistVideoFlowIds.length} URLs to download queue!`);
+        resetPlaylistVideoFlow();
+
+        if (autoRedirectToQueue) {
+          setCurrentStep('queue');
+        } else {
+          setCurrentStep('input');
+        }
+        return;
+      }
+
+      // Обычный режим плейлиста
       for (const videoID of playlistVideoFlowIds) {
         const playlistEntry = playlistInfo.entries.find((entry: PlaylistEntry) => entry.id === videoID);
         const formatID = updatedFormats[videoID];
@@ -1304,8 +1459,8 @@ export const useAppLogic = () => {
         setCurrentStep('input');
       }
     } catch (error) {
-      console.error('Error queuing playlist videos:', error);
-      showError('Could not add playlist videos to queue');
+      console.error('Error queuing videos:', error);
+      showError('Could not add videos to queue');
     }
   };
 
@@ -1365,6 +1520,7 @@ export const useAppLogic = () => {
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,
+    handleUrlsFromFiles,
     handleDownload,
     handleDownloadSelectedPlaylistVideos,
     handlePlaylistVideoFlowPrevious,
@@ -1374,6 +1530,8 @@ export const useAppLogic = () => {
     handleConvertVideo,
     handleGoToHome,
     handleCancelQueueItem,
+    handlePauseQueueItem,
+    handleResumeQueueItem,
     handleClearCompleted,
     handleDeleteHistoryItem,
     handleClearHistory,
@@ -1385,4 +1543,3 @@ export const useAppLogic = () => {
     formatFileSize
   };
 };
-

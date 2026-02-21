@@ -241,6 +241,8 @@ export const uk: PartialTranslations = {
   savePathScreenUseThisPath: 'Використовувати цей шлях',
   savePathScreenStartDownload: 'Почати завантаження',
   pasteFromClipboard: 'Вставити з буфера обміну',
+  dragAndDropHint: 'Перетягніть сюди посилання або TXT файли з посиланнями',
+  clipboardAutoPasted: 'Посилання автоматично вставлено з буфера обміну',
 
   // Theme Settings
   themeSection: 'Зовнішній вигляд',

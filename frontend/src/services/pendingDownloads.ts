@@ -23,7 +23,7 @@ class PendingDownloadsManager {
   // Сохранить незавершенные загрузки
   savePendingDownloads(): void {
     const pendingItems = downloadQueueManager.getAll().filter(item =>
-      item.status === 'pending' || item.status === 'in-progress'
+      item.status === 'pending' || item.status === 'in-progress' || item.status === 'paused'
     );
 
     // Если нет незавершенных загрузок, очищаем localStorage
@@ -70,14 +70,18 @@ class PendingDownloadsManager {
     
     for (const item of pending) {
       // Добавляем в очередь только те, которые не были завершены
-      if (item.status === 'pending' || item.status === 'in-progress') {
-        downloadQueueManager.addToQueue({
+      if (item.status === 'pending' || item.status === 'in-progress' || item.status === 'paused') {
+        const queueItem = downloadQueueManager.addToQueue({
           url: item.url,
           formatID: item.formatID,
           outputPath: item.outputPath,
           title: item.title,
           priority: item.priority || 'normal'
         });
+
+        if (item.status === 'paused') {
+          downloadQueueManager.pauseDownload(queueItem.id);
+        }
       }
     }
     
