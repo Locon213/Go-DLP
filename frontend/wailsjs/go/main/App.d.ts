@@ -5,6 +5,8 @@ export function AnalyzePlaylist(arg1:string):Promise<string>;
 
 export function AnalyzeURL(arg1:string):Promise<string>;
 
+export function ApplyAppUpdate():Promise<void>;
+
 export function AutoSaveSettings():Promise<void>;
 
 export function CancelConversion():Promise<void>;

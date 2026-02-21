@@ -348,6 +348,11 @@ jobs:
           cd release-dist
           sha256sum * > checksums.txt
 
+      - name: Generate Custom Release Notes
+        shell: bash
+        run: |
+          bash .github/scripts/generate_release_notes.sh "${{ inputs.version }}" release_notes.md
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -355,7 +360,7 @@ jobs:
           name: Release v${{ inputs.version }}
           draft: false
           prerelease: ${{ inputs.prerelease }}
-          generate_release_notes: true
+          body_path: release_notes.md
           files: |
             release-dist/*.zip
             release-dist/*.tar.gz

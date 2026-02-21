@@ -67,6 +67,9 @@ export const useAppLogic = () => {
   const [releaseNotes, setReleaseNotes] = useState<string>('');
   const [downloadUrl, setDownloadUrl] = useState<string>('');
   const [isCheckingAppVersion, setIsCheckingAppVersion] = useState<boolean>(false);
+  const [isApplyingAppUpdate, setIsApplyingAppUpdate] = useState<boolean>(false);
+  const [appUpdateProgress, setAppUpdateProgress] = useState<number>(0);
+  const [appUpdateStatus, setAppUpdateStatus] = useState<string>('');
 
   // Состояние для пути загрузки
   const [downloadPath, setDownloadPath] = useState<string>('');
@@ -480,6 +483,32 @@ export const useAppLogic = () => {
       }),
 
       // Обработчики событий конвертации
+
+      subscribeToEvents('app-update-start', () => {
+        setIsApplyingAppUpdate(true);
+        setAppUpdateProgress(0);
+        setAppUpdateStatus('Starting update...');
+      }),
+
+      subscribeToEvents('app-update-progress', (data: any) => {
+        const percentage = typeof data?.percentage === 'number' ? data.percentage : 0;
+        const status = typeof data?.status === 'string' ? data.status : 'downloading';
+        setAppUpdateProgress(percentage);
+        setAppUpdateStatus(status === 'extracting' ? 'Extracting update package...' : 'Downloading update...');
+      }),
+
+      subscribeToEvents('app-update-complete', (data: any) => {
+        setIsApplyingAppUpdate(false);
+        setAppUpdateProgress(100);
+        setAppUpdateStatus(data?.message || 'Update installed.');
+        showSuccess(data?.message || 'Update installed.');
+      }),
+
+      subscribeToEvents('app-update-error', (error: string) => {
+        setIsApplyingAppUpdate(false);
+        setAppUpdateStatus(`Update failed: ${error}`);
+        showError(`Update failed: ${error}`);
+      }),
       subscribeToEvents('conversion-progress', (data: any) => {
         if (typeof data === 'object' && data.progress !== undefined) {
           // Progress event received from backend
@@ -708,6 +737,21 @@ export const useAppLogic = () => {
   };
 
   // Функция для выбора файла с куками
+
+  const applyAppUpdate = async () => {
+    setIsApplyingAppUpdate(true);
+    setAppUpdateProgress(0);
+    setAppUpdateStatus('Preparing update...');
+    try {
+      await apiService.applyAppUpdate();
+    } catch (error) {
+      console.error('Failed to apply app update:', error);
+      const message = error instanceof Error ? error.message : 'Failed to install update';
+      setIsApplyingAppUpdate(false);
+      setAppUpdateStatus(`Update failed: ${message}`);
+      showError(message);
+    }
+  };
   const selectCookiesFile = async () => {
     try {
       // Use backend method to open file dialog
@@ -1505,6 +1549,9 @@ export const useAppLogic = () => {
     releaseNotes,
     downloadUrl,
     isCheckingAppVersion,
+    isApplyingAppUpdate,
+    appUpdateProgress,
+    appUpdateStatus,
     queueItems, setQueueItems,
     downloadHistory, setDownloadHistory,
     notification, setNotification,
@@ -1517,6 +1564,7 @@ export const useAppLogic = () => {
     updateYtDlp,
     checkAppVersion,
     openAppUpdateModal,
+    applyAppUpdate,
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,

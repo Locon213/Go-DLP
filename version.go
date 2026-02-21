@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 )
 
@@ -50,7 +51,15 @@ type ReleaseInfo struct {
 
 // getLatestReleaseInfo fetches the latest release info from GitHub
 func getLatestReleaseInfo() (*ReleaseInfo, error) {
-	resp, err := http.Get("https://api.github.com/repos/Locon213/Go-DLP/releases/latest")
+	req, err := http.NewRequest(http.MethodGet, "https://api.github.com/repos/Locon213/Go-DLP/releases/latest", nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("User-Agent", "Go-DLP-Updater")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch latest release: %w", err)
 	}
@@ -119,7 +128,7 @@ func ShouldUpdate() (bool, string, error) {
 	}
 
 	latestVersion := strings.TrimPrefix(release.TagName, "v")
-	if latestVersion != currentVersion {
+	if isVersionNewer(currentVersion, latestVersion) {
 		return true, latestVersion, nil
 	}
 
@@ -202,4 +211,76 @@ func SaveVersionToFile(filename string) error {
 }`, version, commit, date, runtime.GOOS, runtime.GOARCH)
 
 	return os.WriteFile(filename, []byte(data), 0644)
+}
+
+func isVersionNewer(current, latest string) bool {
+	if current == "" || latest == "" {
+		return false
+	}
+
+	currentParts := parseVersionParts(current)
+	latestParts := parseVersionParts(latest)
+
+	maxLen := len(currentParts)
+	if len(latestParts) > maxLen {
+		maxLen = len(latestParts)
+	}
+
+	for i := 0; i < maxLen; i++ {
+		curPart := 0
+		latPart := 0
+
+		if i < len(currentParts) {
+			curPart = currentParts[i]
+		}
+		if i < len(latestParts) {
+			latPart = latestParts[i]
+		}
+
+		if latPart > curPart {
+			return true
+		}
+		if latPart < curPart {
+			return false
+		}
+	}
+
+	return false
+}
+
+func parseVersionParts(v string) []int {
+	trimmed := strings.TrimPrefix(strings.TrimSpace(v), "v")
+	if trimmed == "" {
+		return []int{0}
+	}
+
+	segments := strings.Split(trimmed, ".")
+	parts := make([]int, 0, len(segments))
+	for _, segment := range segments {
+		digits := extractLeadingDigits(segment)
+		if digits == "" {
+			parts = append(parts, 0)
+			continue
+		}
+
+		num, err := strconv.Atoi(digits)
+		if err != nil {
+			parts = append(parts, 0)
+			continue
+		}
+		parts = append(parts, num)
+	}
+
+	return parts
+}
+
+func extractLeadingDigits(s string) string {
+	var b strings.Builder
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			break
+		}
+		b.WriteRune(r)
+	}
+	return b.String()
 }

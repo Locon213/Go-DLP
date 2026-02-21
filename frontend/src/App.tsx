@@ -69,6 +69,9 @@ const App: React.FC = () => {
     releaseNotes,
     downloadUrl,
     isCheckingAppVersion,
+    isApplyingAppUpdate,
+    appUpdateProgress,
+    appUpdateStatus,
     notification, setNotification,
     downloadPath,
     queueItems,
@@ -80,6 +83,7 @@ const App: React.FC = () => {
     checkYtDlpVersion,
     updateYtDlp,
     checkAppVersion,
+    applyAppUpdate,
     selectCookiesFile,
     handleAnalyze,
     handleAnalyzeAndDownloadFast,
@@ -508,6 +512,10 @@ const App: React.FC = () => {
           latestVersion={latestAppVersion}
           releaseNotes={releaseNotes}
           downloadUrl={downloadUrl}
+          isApplying={isApplyingAppUpdate}
+          updateProgress={appUpdateProgress}
+          updateStatus={appUpdateStatus}
+          onApplyUpdate={applyAppUpdate}
           onClose={() => setShowAppUpdateModal(false)}
         />
       </Container>

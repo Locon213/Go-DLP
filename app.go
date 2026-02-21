@@ -235,6 +235,13 @@ func (a *App) GetReleaseNotes() (string, error) {
 	return GetReleaseNotes()
 }
 
+// ApplyAppUpdate downloads and installs the latest app update
+//
+//export ApplyAppUpdate
+func (a *App) ApplyAppUpdate() error {
+	return a.applyAppUpdate()
+}
+
 // UpdateJSRuntimeSetting updates the JS runtime setting
 //
 //export UpdateJSRuntimeSetting

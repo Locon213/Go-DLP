@@ -8,6 +8,7 @@ import {
   Typography,
   Box,
   Chip,
+  LinearProgress,
 } from '@mui/material';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -17,6 +18,10 @@ interface AppUpdateModalProps {
   latestVersion: string;
   releaseNotes: string;
   downloadUrl: string;
+  isApplying: boolean;
+  updateProgress: number;
+  updateStatus: string;
+  onApplyUpdate: () => void;
   onClose: () => void;
 }
 
@@ -26,10 +31,15 @@ const AppUpdateModal: React.FC<AppUpdateModalProps> = ({
   latestVersion,
   releaseNotes,
   downloadUrl,
+  isApplying,
+  updateProgress,
+  updateStatus,
+  onApplyUpdate,
   onClose,
 }) => {
   const { t } = useLanguage();
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const releaseLines = releaseNotes.split('\n').map((line) => line.trimEnd());
 
   useEffect(() => {
     if (latestVersion && currentVersion) {
@@ -98,17 +108,30 @@ const AppUpdateModal: React.FC<AppUpdateModalProps> = ({
                       overflow: 'auto',
                     }}
                   >
-                    <Typography 
-                      variant="body2" 
-                      component="pre"
-                      sx={{ 
-                        fontSize: '0.875rem',
-                        whiteSpace: 'pre-wrap',
-                        wordWrap: 'break-word',
-                      }}
-                    >
-                      {releaseNotes}
-                    </Typography>
+                    {releaseLines.map((line, idx) => {
+                      if (!line.trim()) {
+                        return <Box key={idx} sx={{ height: 8 }} />;
+                      }
+                      if (line.startsWith('## ')) {
+                        return (
+                          <Typography key={idx} variant="subtitle2" sx={{ fontWeight: 700, mt: 1 }}>
+                            {line.replace(/^##\s+/, '')}
+                          </Typography>
+                        );
+                      }
+                      if (line.startsWith('- ')) {
+                        return (
+                          <Typography key={idx} variant="body2" sx={{ pl: 1 }}>
+                            • {line.replace(/^-+\s+/, '')}
+                          </Typography>
+                        );
+                      }
+                      return (
+                        <Typography key={idx} variant="body2" color="text.secondary">
+                          {line.replace(/^#\s+/, '')}
+                        </Typography>
+                      );
+                    })}
                   </Box>
                 </Box>
               )}
@@ -118,11 +141,39 @@ const AppUpdateModal: React.FC<AppUpdateModalProps> = ({
                 color="primary"
                 fullWidth
                 size="large"
-                href={downloadUrl}
-                target="_blank"
+                onClick={onApplyUpdate}
+                disabled={isApplying}
               >
-                {t.downloadUpdate}
+                {isApplying ? `${t.updating}...` : t.downloadUpdate}
               </Button>
+
+              {isApplying && (
+                <Box sx={{ mt: 2 }}>
+                  <LinearProgress variant="determinate" value={Math.min(100, Math.max(0, updateProgress))} />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    {updateStatus || 'Updating...'}
+                  </Typography>
+                </Box>
+              )}
+
+              {!isApplying && updateStatus && (
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+                  {updateStatus}
+                </Typography>
+              )}
+
+              {downloadUrl && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  fullWidth
+                  href={downloadUrl}
+                  target="_blank"
+                  sx={{ mt: 1 }}
+                >
+                  Open Release Page
+                </Button>
+              )}
             </>
           ) : (
             <>

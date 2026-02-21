@@ -63,3 +63,22 @@ func TestGetBuildInfo(t *testing.T) {
 		t.Error("Build info should contain 'Version:'")
 	}
 }
+
+func TestIsVersionNewer(t *testing.T) {
+	tests := []struct {
+		current string
+		latest  string
+		expect  bool
+	}{
+		{current: "1.1.0", latest: "1.2.0", expect: true},
+		{current: "1.10.0", latest: "1.9.9", expect: false},
+		{current: "1.1.0", latest: "v1.1.1", expect: true},
+		{current: "1.1.0", latest: "1.1.0", expect: false},
+	}
+
+	for _, tt := range tests {
+		if got := isVersionNewer(tt.current, tt.latest); got != tt.expect {
+			t.Fatalf("isVersionNewer(%q, %q) = %v, want %v", tt.current, tt.latest, got, tt.expect)
+		}
+	}
+}

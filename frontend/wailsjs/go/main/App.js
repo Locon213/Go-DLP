@@ -10,6 +10,10 @@ export function AnalyzeURL(arg1) {
   return window['go']['main']['App']['AnalyzeURL'](arg1);
 }
 
+export function ApplyAppUpdate() {
+  return window['go']['main']['App']['ApplyAppUpdate']();
+}
+
 export function AutoSaveSettings() {
   return window['go']['main']['App']['AutoSaveSettings']();
 }

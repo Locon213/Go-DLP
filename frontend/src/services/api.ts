@@ -1,7 +1,7 @@
 ﻿// РЎРµСЂРІРёСЃ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ API Wails
 
 import { EventsOn } from '../../wailsjs/runtime/runtime';
-import { AnalyzeURL, DownloadVideo, GetDownloadPath, GetActualDownloadPath, GetDownloadDirectory, SetDownloadDirectory, SelectDownloadDirectory, GetSettings, GetYtDlpVersion, GetLatestYtDlpVersion, UpdateYtDlp, ValidateCookiesFile, CancelDownload, OpenInExplorer, ConvertVideo, AnalyzePlaylist, GetPlaylistItems, DownloadPlaylist, GetClipboardText, ReadLinksFromFile, ProcessDroppedFiles, SelectTextFile } from '../../wailsjs/go/main/App';
+import { AnalyzeURL, DownloadVideo, GetDownloadPath, GetActualDownloadPath, GetDownloadDirectory, SetDownloadDirectory, SelectDownloadDirectory, GetSettings, GetYtDlpVersion, GetLatestYtDlpVersion, UpdateYtDlp, ValidateCookiesFile, CancelDownload, OpenInExplorer, ConvertVideo, AnalyzePlaylist, GetPlaylistItems, DownloadPlaylist, GetClipboardText, ReadLinksFromFile, ProcessDroppedFiles, SelectTextFile, ApplyAppUpdate } from '../../wailsjs/go/main/App';
 
 
 // РўРёРїС‹ РґР»СЏ СЃРѕР±С‹С‚РёР№
@@ -34,7 +34,14 @@ export type YtDlpUpdateEventHandlers = {
   'yt-dlp-update-error': (error: string) => void;
 };
 
-export type AppEventHandlers = SetupEventHandlers & DownloadEventHandlers & ConversionEventHandlers & YtDlpUpdateEventHandlers;
+export type NativeAppUpdateEventHandlers = {
+  'app-update-start': () => void;
+  'app-update-progress': (data: { downloaded: number; total: number; percentage: number; status: string }) => void;
+  'app-update-complete': (data: { message?: string }) => void;
+  'app-update-error': (error: string) => void;
+};
+
+export type AppEventHandlers = SetupEventHandlers & DownloadEventHandlers & ConversionEventHandlers & YtDlpUpdateEventHandlers & NativeAppUpdateEventHandlers;
 
 // Р¤СѓРЅРєС†РёРё API
 export const apiService = {
@@ -195,6 +202,10 @@ export const apiService = {
     } catch {
       return '';
     }
+  },
+
+  applyAppUpdate: async (): Promise<void> => {
+    return await ApplyAppUpdate();
   },
 
   // РћР±РЅРѕРІР»РµРЅРёРµ РЅР°СЃС‚СЂРѕР№РєРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ JS runtime
